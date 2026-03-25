@@ -141,7 +141,7 @@
   }
 
   .logo-img {
-    height: 44px;
+    height: 64px;
     width: auto;
     display: block;
     object-fit: contain;
@@ -195,10 +195,15 @@
             <input type="text" id="d_nombre" placeholder="Juan">
             <div class="autobadge" id="ab_nombre">✦ Auto-llenado</div>
           </div>
-          <div class="fg c2">
-            <label>Apellidos</label>
-            <input type="text" id="d_apellidos" placeholder="García López">
-            <div class="autobadge" id="ab_apellidos">✦ Auto-llenado</div>
+          <div class="fg">
+            <label>Apellido paterno</label>
+            <input type="text" id="d_ap_pat" placeholder="García">
+            <div class="autobadge" id="ab_ap_pat">✦ Auto-llenado</div>
+          </div>
+          <div class="fg">
+            <label>Apellido materno</label>
+            <input type="text" id="d_ap_mat" placeholder="López">
+            <div class="autobadge" id="ab_ap_mat">✦ Auto-llenado</div>
           </div>
           <div class="fg c2">
             <label>NSS — Número de Seguridad Social</label>
@@ -208,14 +213,49 @@
           <div class="fg c2">
             <label>CURP</label>
             <input type="text" id="d_curp" placeholder="GARL900101HDFRCN01" maxlength="18" oninput="this.value=this.value.toUpperCase()">
+            <div class="autobadge" id="ab_curp">✦ Auto-llenado</div>
           </div>
           <div class="fg c2">
             <label>RFC con homoclave</label>
             <input type="text" id="d_rfc" placeholder="GARL900101AB1" maxlength="13" oninput="this.value=this.value.toUpperCase()">
           </div>
           <div class="fg c2">
-            <label>Ciudad / Localidad de la vivienda</label>
-            <input type="text" id="d_ciudad" placeholder="Ciudad de México">
+            <label>Estado de la vivienda</label>
+            <select id="d_ciudad">
+              <option value="">— Selecciona tu estado —</option>
+              <option>Aguascalientes</option>
+              <option>Baja California</option>
+              <option>Baja California Sur</option>
+              <option>Campeche</option>
+              <option>Chiapas</option>
+              <option>Chihuahua</option>
+              <option>Ciudad de México</option>
+              <option>Coahuila</option>
+              <option>Colima</option>
+              <option>Durango</option>
+              <option>Estado de México</option>
+              <option>Guanajuato</option>
+              <option>Guerrero</option>
+              <option>Hidalgo</option>
+              <option>Jalisco</option>
+              <option>Michoacán</option>
+              <option>Morelos</option>
+              <option>Nayarit</option>
+              <option>Nuevo León</option>
+              <option>Oaxaca</option>
+              <option>Puebla</option>
+              <option>Querétaro</option>
+              <option>Quintana Roo</option>
+              <option>San Luis Potosí</option>
+              <option>Sinaloa</option>
+              <option>Sonora</option>
+              <option>Tabasco</option>
+              <option>Tamaulipas</option>
+              <option>Tlaxcala</option>
+              <option>Veracruz</option>
+              <option>Yucatán</option>
+              <option>Zacatecas</option>
+            </select>
           </div>
           <div class="fg c2">
             <label>WhatsApp</label>
@@ -393,18 +433,36 @@
 
     <!-- GENERADOR -->
     <div class="gen-card">
-      <h3>📄 Genera tus documentos oficiales pre-llenados</h3>
-      <p>Se generan con los datos del paso 1. Imprímelos, fírmalos de puño y letra y súbelos en la sección de arriba.</p>
-      <button class="gen-btn" onclick="genCarta()">
+      <h3>📄 Descarga tus documentos oficiales</h3>
+      <p>Generados automáticamente con tus datos. <strong>Imprímelos, fírmalos de puño y letra</strong> y súbelos en la sección de arriba.</p>
+
+      <div class="gen-datos-preview" id="genPreview" style="display:none">
+        <div class="gdp-row"><span class="gdp-label">Nombre</span><span class="gdp-val" id="prev_nombre">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">NSS</span><span class="gdp-val" id="prev_nss">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">CURP</span><span class="gdp-val" id="prev_curp">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">Fecha</span><span class="gdp-val" id="prev_fecha">—</span></div>
+      </div>
+
+      <button class="gen-btn" onclick="genCartaConPreview()">
         <span class="gi">📝</span>
-        <div><strong>Declaratoria Bajo Protesta de Decir Verdad</strong><span>Formato oficial CRED.1037.00/01 — PDF listo para imprimir</span></div>
+        <div>
+          <strong>Declaratoria Bajo Protesta de Decir Verdad</strong>
+          <span>Formato oficial CRED.1037.00/01 — PDF listo para imprimir y firmar</span>
+        </div>
         <span class="ga">↓</span>
       </button>
-      <button class="gen-btn" onclick="genPres()">
+      <button class="gen-btn" onclick="genPresConPreview()">
         <span class="gi">🧾</span>
-        <div><strong>Presupuesto Inicial de la Mejora</strong><span>Formato oficial Infonavit — PDF listo para imprimir</span></div>
+        <div>
+          <strong>Presupuesto Inicial de la Mejora</strong>
+          <span>Formato oficial Infonavit — PDF listo para imprimir y firmar</span>
+        </div>
         <span class="ga">↓</span>
       </button>
+
+      <div class="gen-aviso">
+        ⚠️ Si algún dato está vacío, llénalo en "Tus datos personales" antes de descargar.
+      </div>
     </div>
 
   </div>
@@ -432,8 +490,9 @@
     <div class="side-card">
       <div class="side-head">💬 ¿Necesitas ayuda?</div>
       <div style="padding:16px 18px">
-        <p style="font-size:13px;color:var(--gris-medio);line-height:1.5;margin-bottom:14px">Tu asesor Credifika revisa tu expediente y te avisa si falta algo antes de enviarlo al Infonavit.</p>
-        <a id="btnWa" href="https://wa.me/5215521893011" target="_blank" class="btn-wa">💬 Hablar con mi asesor</a>
+       <button id="btnSiguiente" onclick="irAConsentimiento()" disabled style="width:100%;background:#1B3D6B;color:#fff;border:none;padding:15px;border-radius:50px;font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;margin-bottom:10px;display:block;text-align:center;opacity:0.4;transition:opacity 0.2s,background 0.2s;">📋 Continuar — Acuerdo de servicio →</button>
+       <div id="btnSiguienteHint" style="text-align:center;font-size:12px;color:var(--gris-medio);margin-bottom:8px;margin-top:-4px;">Completa tus datos y sube los 8 documentos obligatorios para continuar</div>
+       <a id="btnWa" href="https://wa.me/5215521893011" target="_blank" class="btn-wa">💬 Hablar con mi asesor</a>
       </div>
       <div class="side-nota">🔒 Tus documentos son confidenciales y solo los ve el equipo Credifika.</div>
     </div>
@@ -446,14 +505,23 @@
   const p = new URLSearchParams(window.location.search);
   let s = {};
   try { s = JSON.parse(localStorage.getItem('credifika_precal') || '{}'); } catch(e) {}
-  [['nombre','d_nombre','ab_nombre'], ['apellidos','d_apellidos','ab_apellidos'],
-   ['nss','d_nss','ab_nss'], ['telefono','d_telefono','ab_telefono'], ['email','d_email','ab_email']
+  [
+    ['nombre',   'd_nombre',   'ab_nombre'],
+    ['ap_pat',   'd_ap_pat',   'ab_ap_pat'],
+    ['ap_mat',   'd_ap_mat',   'ab_ap_mat'],
+    ['nss',      'd_nss',      'ab_nss'],
+    ['curp',     'd_curp',     'ab_curp'],
+    ['telefono', 'd_telefono', 'ab_telefono'],
+    ['email',    'd_email',    'ab_email'],
   ].forEach(([key, inputId, badgeId]) => {
     const val = p.get(key) || s[key];
     if (!val) return;
     const el = document.getElementById(inputId);
-    if (el) { el.value = val; document.getElementById(badgeId).style.display = 'block'; }
+    const badge = document.getElementById(badgeId);
+    if (el) { el.value = val; if (badge) badge.style.display = 'block'; }
   });
+  // Actualizar preview de datos con lo que se auto-llenó
+  setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
 })();
 
 // ── UPLOAD ───────────────────────────────────────────────
@@ -487,16 +555,24 @@ function refresh() {
     el.textContent = uploaded[id] ? '✓' : '—';
     el.style.color = uploaded[id] ? 'var(--azul)' : 'var(--gris-medio)';
   });
-  const n = document.getElementById('d_nombre').value || '';
+  const nombre_raw = document.getElementById('d_nombre').value || '';
+  const ap_pat_wa  = document.getElementById('d_ap_pat').value || '';
+  const ap_mat_wa  = document.getElementById('d_ap_mat').value || '';
+  const n = [nombre_raw, ap_pat_wa, ap_mat_wa].filter(Boolean).join(' ');
   const nss = document.getElementById('d_nss').value || '';
   const msg = encodeURIComponent(`Hola Credifika, soy ${n}${nss?' (NSS: '+nss+')':''}, llevo ${done} de ${total} documentos listos. ¿Me pueden apoyar?`);
   document.getElementById('btnWa').href = `https://wa.me/5215521893011?text=${msg}`;
 }
 
 // ── PDF HELPERS ─────────────────────────────────────────
+function genCartaConPreview() { actualizarPreview(); genCarta(); }
+function genPresConPreview()  { actualizarPreview(); genPres();  }
+
 function datos() {
   const n = document.getElementById('d_nombre').value    || '___________________';
-  const a = document.getElementById('d_apellidos').value || '___________________';
+  const ap_pat = document.getElementById('d_ap_pat').value || '';
+  const ap_mat = document.getElementById('d_ap_mat').value || '';
+  const a = [ap_pat, ap_mat].filter(Boolean).join(' ') || '___________________';
   return {
     nombre: n, apellidos: a,
     nombreCompleto: (n+' '+a).trim(),
@@ -505,6 +581,22 @@ function datos() {
     rfc:    document.getElementById('d_rfc').value    || '___________',
     ciudad: document.getElementById('d_ciudad').value || '___________________',
   };
+}
+function actualizarPreview() {
+  const d = datos();
+  const M = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const hoy = new Date();
+  function sv(id, val) {
+    const el = document.getElementById(id); if (!el) return;
+    const empty = !val || val.includes('___');
+    el.textContent = empty ? 'Sin llenar' : val;
+    el.className = empty ? 'gdp-val vacio' : 'gdp-val';
+  }
+  sv('prev_nombre', d.nombreCompleto);
+  sv('prev_nss',    d.nss);
+  sv('prev_curp',   d.curp);
+  const pf = document.getElementById('prev_fecha');
+  if (pf) pf.textContent = `${hoy.getDate()} de ${M[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 }
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 function hoyStr() { const d=new Date(); return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`; }
@@ -596,7 +688,7 @@ function genPres() {
   pdf.text('MONTO TOTAL SOLICITADO',L+3,178); pdf.text('$___________',L+155,178);
   hr(pdf,183);
   pdf.setFont('helvetica','normal'); pdf.setTextColor(60); pdf.setFontSize(9.5);
-  const decl=`El suscrito, ${d.nombreCompleto}, con NSS ${d.nss}, manifiesta que el presente presupuesto refleja fielmente las mejoras a realizarse en la vivienda ubicada en ${d.ciudad}, y que los recursos del crédito Mejoravit serán destinados exclusivamente a los conceptos aquí descritos.`;
+  const decl=`El suscrito, ${d.nombreCompleto}, con NSS ${d.nss}, manifiesta que el presente presupuesto refleja fielmente las mejoras a realizarse en la vivienda en el estado de ${d.ciudad}, y que los recursos del crédito Mejoravit serán destinados exclusivamente a los conceptos aquí descritos.`;
   const ls=pdf.splitTextToSize(decl,W); pdf.text(ls,L,191);
   let y2=191+ls.length*5.5+14;
   hr(pdf,y2); pdf.setFontSize(10); pdf.setTextColor(30);
@@ -606,6 +698,90 @@ function genPres() {
   pdf.setFontSize(8); pdf.setTextColor(160);
   pdf.text('Generado por Credifika. Requiere firma original antes de su presentación al Infonavit.',107.5,272,{align:'center'});
   pdf.save(`presupuesto-inicial-${d.apellidos||'mejoravit'}.pdf`);
+}
+
+// ── LISTENERS PREVIEW ───────────────────────────────────
+['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', actualizarPreview);
+    el.addEventListener('input', verificarListo);
+  }
+});
+
+// ── VERIFICAR SI PUEDE CONTINUAR ────────────────────────
+function verificarListo() {
+  var campos = ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'];
+  var camposOk = campos.every(function(id) {
+    var el = document.getElementById(id);
+    return el && el.value.trim().length > 0;
+  });
+  var docsOk = OBLIG.every(function(id) { return !!uploaded[id]; });
+  var btn  = document.getElementById('btnSiguiente');
+  var hint = document.getElementById('btnSiguienteHint');
+  if (!btn) return;
+
+  var listo = camposOk && docsOk;
+  btn.disabled = !listo;
+  btn.style.opacity  = listo ? '1'   : '0.4';
+  btn.style.cursor   = listo ? 'pointer' : 'not-allowed';
+
+  if (listo) {
+    hint.textContent = '✓ Todo listo — puedes continuar';
+    hint.style.color = 'var(--verde, #1A7A4A)';
+  } else {
+    var faltanCampos = campos.filter(function(id) {
+      var el = document.getElementById(id); return !el || !el.value.trim();
+    });
+    var faltanDocs = OBLIG.filter(function(id) { return !uploaded[id]; });
+    var msgs = [];
+    if (faltanCampos.length) msgs.push('Faltan ' + faltanCampos.length + ' dato(s) personales');
+    if (faltanDocs.length)   msgs.push(faltanDocs.length + ' documento(s) obligatorio(s) pendiente(s)');
+    hint.textContent = msgs.join(' · ');
+    hint.style.color = 'var(--gris-medio)';
+  }
+}
+
+
+// ── VERIFICAR SI PUEDE CONTINUAR ────────────────────────
+function verificarListo() {
+  var campos = ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'];
+  var camposOk = campos.every(function(id) {
+    var el = document.getElementById(id);
+    return el && el.value.trim().length > 0;
+  });
+  var docsOk = OBLIG.every(function(id) { return !!uploaded[id]; });
+  var btn  = document.getElementById('btnSiguiente');
+  var hint = document.getElementById('btnSiguienteHint');
+  if (!btn) return;
+  var listo = camposOk && docsOk;
+  btn.disabled = !listo;
+  btn.style.opacity = listo ? '1' : '0.4';
+  btn.style.cursor  = listo ? 'pointer' : 'not-allowed';
+  if (listo) {
+    hint.textContent = '✓ Todo listo — puedes continuar';
+    hint.style.color = '#1A7A4A';
+  } else {
+    var faltanCampos = campos.filter(function(id) { var el=document.getElementById(id); return !el||!el.value.trim(); });
+    var faltanDocs   = OBLIG.filter(function(id) { return !uploaded[id]; });
+    var msgs = [];
+    if (faltanCampos.length) msgs.push('Faltan ' + faltanCampos.length + ' dato(s) personales');
+    if (faltanDocs.length)   msgs.push(faltanDocs.length + ' documento(s) obligatorio(s) pendiente(s)');
+    hint.textContent = msgs.join(' · ');
+    hint.style.color = '#4A4A4A';
+  }
+}
+
+// ── IR A CONSENTIMIENTO ──────────────────────────────────
+function irAConsentimiento() {
+  var nombre   = document.getElementById('d_nombre').value.trim();
+  var ap_pat   = document.getElementById('d_ap_pat').value.trim();
+  var ap_mat   = document.getElementById('d_ap_mat').value.trim();
+  var nss      = document.getElementById('d_nss').value.trim();
+  var curp_val = document.getElementById('d_curp').value.trim();
+  var tel      = document.getElementById('d_telefono').value.trim();
+  var params   = new URLSearchParams({ nombre: nombre, ap_pat: ap_pat, ap_mat: ap_mat, nss: nss, curp: curp_val, telefono: tel });
+  window.location.href = 'credifika-consentimiento.html?' + params.toString();
 }
 </script>
 </body>

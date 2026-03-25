@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credifika — Acuerdo de servicio</title>
+<style>
+  :root {
+    --azul: #1B3D6B; --azul-claro: #1E5298; --azul-bg: #EAF0FA; --azul-hover: #142D52;
+    --naranja: #E8622A; --naranja-claro: #FDF0EA;
+    --verde: #1A7A4A; --verde-bg: #EAF7EF;
+    --gris-oscuro: #1A1A1A; --gris-medio: #4A4A4A; --gris-suave: #F5F5F2;
+    --blanco: #FAFAF8; --borde: #E0E0D8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--gris-suave); color: var(--gris-oscuro); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--azul); padding: 24px 5% 32px; color: #fff; }
+  .logo-img { height: 64px; width: auto; display: block; object-fit: contain; filter: brightness(0) invert(1); margin-bottom: 20px; cursor: pointer; }
+  .header h1 { font-size: clamp(22px, 4vw, 36px); font-weight: 700; line-height: 1.1; letter-spacing: -0.3px; }
+  .header h1 em { font-style: italic; color: #7EB5E5; }
+  .header p { font-size: 14px; opacity: 0.8; margin-top: 8px; font-weight: 300; max-width: 520px; line-height: 1.6; }
+
+  /* PASO INDICATOR */
+  .paso-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.15); border-radius: 50px;
+    padding: 6px 14px; font-size: 12px; font-weight: 500; color: #fff;
+    margin-bottom: 18px;
+  }
+  .paso-pill span { background: #fff; color: var(--azul); border-radius: 50px; padding: 1px 8px; font-size: 11px; }
+
+  /* MAIN */
+  .main { max-width: 760px; margin: 0 auto; padding: 28px 5% 80px; }
+
+  /* CARD */
+  .card { background: #fff; border: 1px solid var(--borde); border-radius: 18px; overflow: hidden; margin-bottom: 16px; }
+  .card-header { padding: 18px 28px 14px; border-bottom: 1px solid var(--borde); }
+  .card-header h2 { font-size: 15px; font-weight: 600; }
+  .card-header p { font-size: 13px; color: var(--gris-medio); margin-top: 3px; line-height: 1.5; }
+  .card-body { padding: 24px 28px; }
+
+  /* CLIENTE INFO */
+  .cliente-row {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--azul-bg); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 20px;
+  }
+  .cliente-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--azul); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; flex-shrink: 0;
+  }
+  .cliente-datos { flex: 1; }
+  .cliente-nombre { font-size: 15px; font-weight: 600; color: var(--azul); }
+  .cliente-nss { font-size: 12px; color: var(--gris-medio); margin-top: 2px; }
+
+  /* EXPLICACIÓN DEL COBRO */
+  .cobro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .cobro-item {
+    border: 1px solid var(--borde); border-radius: 12px;
+    padding: 16px; background: var(--blanco);
+  }
+  .cobro-num {
+    font-size: 28px; font-weight: 700; color: var(--azul);
+    letter-spacing: -0.5px; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .cobro-label { font-size: 12px; color: var(--gris-medio); line-height: 1.4; }
+  .cobro-ejemplo {
+    background: var(--naranja-claro); border: 1px solid #f0c4a8;
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+    font-size: 13px; color: #7A3010; line-height: 1.6;
+  }
+  .cobro-ejemplo strong { font-weight: 600; }
+
+  /* MECANISMO DE COBRO */
+  .paso-list { display: flex; flex-direction: column; gap: 12px; }
+  .paso-item { display: flex; gap: 14px; align-items: flex-start; }
+  .paso-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--azul); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+  }
+  .paso-text { font-size: 14px; line-height: 1.6; color: var(--gris-oscuro); }
+  .paso-text strong { font-weight: 600; }
+
+  /* CONDICIONES */
+  .condicion-list { display: flex; flex-direction: column; gap: 10px; }
+  .condicion-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 14px; line-height: 1.6;
+  }
+  .condicion-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--verde-bg); color: var(--verde);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* SEPARADOR */
+  .sep { border: none; border-top: 1px solid var(--borde); margin: 20px 0; }
+
+  /* CHECKBOX CONSENTIMIENTO */
+  .consent-box {
+    background: #fff; border: 2px solid var(--borde);
+    border-radius: 16px; padding: 24px 28px;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .consent-box.activo { border-color: var(--azul); background: var(--azul-bg); }
+
+  .consent-label {
+    display: flex; align-items: flex-start; gap: 14px;
+    cursor: pointer;
+  }
+  .consent-check-wrap {
+    width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;
+    border: 2px solid var(--borde); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; background: #fff;
+  }
+  .consent-box.activo .consent-check-wrap {
+    background: var(--azul); border-color: var(--azul);
+  }
+  .consent-check-wrap svg { display: none; }
+  .consent-box.activo .consent-check-wrap svg { display: block; }
+  .consent-input { display: none; }
+  .consent-text { font-size: 14px; line-height: 1.7; color: var(--gris-oscuro); }
+  .consent-text strong { font-weight: 600; color: var(--azul); }
+
+  /* FIRMA DIGITAL */
+  .firma-section { margin-top: 20px; display: none; }
+  .firma-section.visible { display: block; }
+  .firma-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg label { font-size: 12px; font-weight: 600; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.04em; }
+  .fg input {
+    padding: 11px 14px; border: 1px solid var(--borde); border-radius: 10px;
+    font-size: 14px; font-family: inherit; color: var(--gris-oscuro);
+    background: var(--blanco); outline: none; transition: border-color 0.2s;
+  }
+  .fg input:focus { border-color: var(--azul); }
+  .fg input[readonly] { background: var(--azul-bg); color: var(--azul); font-weight: 500; cursor: default; }
+
+  /* NOTA LEGAL */
+  .nota-legal {
+    font-size: 11px; color: var(--gris-medio); line-height: 1.6;
+    background: var(--blanco); border: 1px solid var(--borde);
+    border-radius: 10px; padding: 14px 16px; margin-top: 12px;
+  }
+
+  /* BOTONES */
+  .btn-continuar {
+    width: 100%; background: var(--azul); color: #fff;
+    border: none; padding: 16px; border-radius: 50px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.2s, transform 0.1s;
+    margin-bottom: 10px; opacity: 0.4; pointer-events: none;
+  }
+  .btn-continuar.activo { opacity: 1; pointer-events: auto; }
+  .btn-continuar.activo:hover { background: var(--azul-hover); transform: translateY(-1px); }
+
+  .btn-wa {
+    width: 100%; background: #25D366; color: #fff;
+    border: none; padding: 15px; border-radius: 50px;
+    font-size: 15px; font-weight: 500; cursor: pointer;
+    font-family: inherit; display: none; align-items: center;
+    justify-content: center; gap: 8px; text-decoration: none;
+    transition: background 0.2s; margin-bottom: 10px;
+  }
+  .btn-wa.visible { display: flex; }
+  .btn-wa:hover { background: #1da952; }
+
+  .btn-volver {
+    width: 100%; background: transparent; color: var(--gris-medio);
+    border: none; padding: 12px; font-size: 14px; cursor: pointer;
+    font-family: inherit; transition: color 0.2s;
+  }
+  .btn-volver:hover { color: var(--azul); }
+
+  /* CONFIRMADO */
+  #confirmado { display: none; }
+  .confirmed-card {
+    background: var(--verde-bg); border: 1.5px solid #5bc88a;
+    border-radius: 18px; padding: 32px 28px; text-align: center;
+    margin-bottom: 16px;
+  }
+  .confirmed-icon { font-size: 48px; margin-bottom: 12px; }
+  .confirmed-title { font-size: 24px; font-weight: 700; color: var(--verde); margin-bottom: 8px; letter-spacing: -0.3px; }
+  .confirmed-sub { font-size: 14px; color: #1A5A34; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+  .confirmed-datos {
+    background: #fff; border-radius: 12px; padding: 16px 20px;
+    margin: 16px 0; text-align: left; font-size: 13px; line-height: 1.8;
+  }
+  .confirmed-datos span { color: var(--gris-medio); }
+  .confirmed-datos strong { color: var(--gris-oscuro); }
+
+  @media (max-width: 520px) {
+    .cobro-grid { grid-template-columns: 1fr; }
+    .firma-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://static.wixstatic.com/media/4e80a9_da80905d3a444d4a98acfec1fe5ba85d~mv2.png/v1/fill/w_432,h_350,al_c,q_85,enc_avif,quality_auto/credifika_logo_highres%202.png"
+       alt="Credifika" class="logo-img" onclick="window.location.href='index.html'" title="Ir al inicio">
+  <div class="paso-pill"><span>Paso 3</span> Acuerdo de servicio</div>
+  <h1>Antes de continuar,<br>conoce los <em>términos del servicio</em></h1>
+  <p>Credifika gestiona tu crédito Mejoravit de principio a fin. Aquí te explicamos de forma clara cómo y cuándo cobramos por nuestro servicio.</p>
+</div>
+
+<div class="main">
+
+  <div id="formulario">
+
+    <!-- DATOS DEL CLIENTE -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Tus datos</h2>
+        <p>Confirma que estos datos son correctos antes de continuar</p>
+      </div>
+      <div class="card-body">
+        <div class="cliente-row">
+          <div class="cliente-avatar" id="avatarLetra">?</div>
+          <div class="cliente-datos">
+            <div class="cliente-nombre" id="clienteNombre">—</div>
+            <div class="cliente-nss" id="clienteNss">NSS: —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CÓMO COBRAMOS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>¿Cuánto cobra Credifika?</h2>
+        <p>Comisión única por la gestión completa del crédito Mejoravit</p>
+      </div>
+      <div class="card-body">
+
+        <div class="cobro-grid">
+          <div class="cobro-item">
+            <div class="cobro-num">20%</div>
+            <div class="cobro-label">del monto total<br>del crédito aprobado</div>
+          </div>
+          <div class="cobro-item">
+            <div class="cobro-num">$0</div>
+            <div class="cobro-label">costo por adelantado<br>solo pagas si te aprueban</div>
+          </div>
+        </div>
+
+        <div class="cobro-ejemplo">
+          <strong>Ejemplo:</strong> Si Infonavit aprueba un crédito de $169,000 pesos, la comisión de Credifika sería de <strong>$33,800 pesos</strong>. Tú recibirías <strong>$135,200 pesos</strong> en tu cuenta bancaria para la remodelación.
+        </div>
+
+        <hr class="sep">
+
+        <p style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--gris-oscuro)">¿Cómo se hace el cobro?</p>
+
+        <div class="paso-list">
+          <div class="paso-item">
+            <div class="paso-num">1</div>
+            <div class="paso-text">Infonavit aprueba tu crédito y <strong>deposita el 100% del monto en tu cuenta bancaria</strong> — la misma donde recibes tu nómina o la que registraste en tu expediente.</div>
+          </div>
+          <div class="paso-item">
+            <div class="paso-num">2</div>
+            <div class="paso-text">Una vez recibido el crédito, <strong>Credifika realiza un cargo domiciliado por el 20%</strong> acordado a esa misma cuenta.</div>
+          </div>
+          <div class="paso-item">
+            <div class="paso-num">3</div>
+            <div class="paso-text">Para formalizar este acuerdo, te enviaremos un <strong>pagaré y contrato de servicios</strong> con el monto exacto una vez que Infonavit confirme la aprobación. Deberás firmarlo e imprimir una fotografía sosteniéndolo.</div>
+          </div>
+          <div class="paso-item">
+            <div class="paso-num">4</div>
+            <div class="paso-text">El monto neto restante (<strong>80% del crédito</strong>) es tuyo para invertirlo en la remodelación de tu vivienda.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- QUÉ INCLUYE -->
+    <div class="card">
+      <div class="card-header">
+        <h2>¿Qué incluye el servicio?</h2>
+        <p>Todo lo que Credifika gestiona por ti sin costo adicional</p>
+      </div>
+      <div class="card-body">
+        <div class="condicion-list">
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Revisión y validación de tu expediente completo ante Infonavit</span></div>
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Gestión del trámite ante Infonavit de principio a fin, sin que tengas que ir a ninguna oficina</span></div>
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Asesoría personalizada durante todo el proceso por WhatsApp</span></div>
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Generación de los documentos oficiales pre-llenados (Carta Bajo Protesta y Presupuesto Inicial)</span></div>
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Seguimiento hasta que el crédito sea depositado en tu cuenta</span></div>
+          <div class="condicion-item"><div class="condicion-check">✓</div><span>Sin cobro si el crédito no es aprobado — solo pagas si hay resultado</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSENTIMIENTO -->
+    <div class="consent-box" id="consentBox">
+      <label class="consent-label" onclick="toggleConsent()">
+        <div class="consent-check-wrap">
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+            <path d="M1.5 5L5 8.5L11.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="consent-text">
+          He leído y comprendido los términos del servicio de Credifika. Acepto que, en caso de que mi crédito Mejoravit sea aprobado por Infonavit, <strong>Credifika realizará un cargo del 20% del monto aprobado</strong> a la cuenta bancaria donde reciba el depósito. Entiendo que no hay costo alguno si el crédito no es aprobado.
+        </div>
+      </label>
+
+      <div class="firma-section" id="firmaSection">
+        <hr class="sep">
+        <p style="font-size:13px;color:var(--gris-medio);margin-bottom:14px">Confirma tu identidad para registrar tu consentimiento</p>
+        <div class="firma-grid">
+          <div class="fg">
+            <label>Nombre completo</label>
+            <input type="text" id="f_nombre" readonly placeholder="—">
+          </div>
+          <div class="fg">
+            <label>NSS</label>
+            <input type="text" id="f_nss" readonly placeholder="—">
+          </div>
+          <div class="fg">
+            <label>Fecha</label>
+            <input type="text" id="f_fecha" readonly placeholder="—">
+          </div>
+          <div class="fg">
+            <label>Hora</label>
+            <input type="text" id="f_hora" readonly placeholder="—">
+          </div>
+        </div>
+        <div class="nota-legal">
+          Este consentimiento queda registrado digitalmente con tu nombre, NSS, fecha y hora. El contrato físico con el monto exacto te será enviado una vez que Infonavit confirme la aprobación de tu crédito.
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-continuar" id="btnContinuar" onclick="confirmar()">
+      Confirmar y continuar con mi asesor →
+    </button>
+    <button class="btn-volver" onclick="window.location.href='credifika-expediente.html'">
+      ← Regresar al expediente
+    </button>
+
+  </div>
+
+  <!-- PANTALLA CONFIRMADO -->
+  <div id="confirmado">
+    <div class="confirmed-card">
+      <div class="confirmed-icon">🎉</div>
+      <div class="confirmed-title">¡Todo listo!</div>
+      <div class="confirmed-sub">Tu consentimiento quedó registrado. Un asesor Credifika te contactará por WhatsApp para coordinar los siguientes pasos.</div>
+      <div class="confirmed-datos" id="confirmedDatos"></div>
+    </div>
+
+    <a id="btnWa" href="https://wa.me/5215521893011" target="_blank" class="btn-wa visible">
+      💬 Hablar con mi asesor ahora
+    </a>
+    <button class="btn-volver" onclick="window.location.href='index.html'">
+      Volver al inicio
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ── AUTO-FILL DESDE URL ──────────────────────────────────
+const p = new URLSearchParams(window.location.search);
+const nombre   = [p.get('nombre'), p.get('ap_pat'), p.get('ap_mat')].filter(Boolean).join(' ') || '';
+const nss      = p.get('nss')      || '';
+const curp     = p.get('curp')     || '';
+const telefono = p.get('telefono') || '';
+
+// Mostrar datos en header
+if (nombre) {
+  document.getElementById('clienteNombre').textContent = nombre;
+  document.getElementById('avatarLetra').textContent = nombre.charAt(0).toUpperCase();
+}
+document.getElementById('clienteNss').textContent = nss ? 'NSS: ' + nss : 'NSS: no disponible';
+
+// Rellenar firma
+document.getElementById('f_nombre').value = nombre || '—';
+document.getElementById('f_nss').value    = nss    || '—';
+const ahora = new Date();
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+document.getElementById('f_fecha').value = `${ahora.getDate()} de ${MESES[ahora.getMonth()]} de ${ahora.getFullYear()}`;
+document.getElementById('f_hora').value  = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+
+// ── TOGGLE CONSENTIMIENTO ────────────────────────────────
+let consentido = false;
+function toggleConsent() {
+  consentido = !consentido;
+  const box   = document.getElementById('consentBox');
+  const firma = document.getElementById('firmaSection');
+  const btn   = document.getElementById('btnContinuar');
+  box.classList.toggle('activo', consentido);
+  firma.classList.toggle('visible', consentido);
+  btn.classList.toggle('activo', consentido);
+}
+
+// ── CONFIRMAR ────────────────────────────────────────────
+function confirmar() {
+  if (!consentido) return;
+
+  document.getElementById('formulario').style.display = 'none';
+  document.getElementById('confirmado').style.display  = 'block';
+
+  // Datos de confirmación
+  const fecha = document.getElementById('f_fecha').value;
+  const hora  = document.getElementById('f_hora').value;
+  document.getElementById('confirmedDatos').innerHTML = `
+    <span>Nombre:</span> <strong>${nombre || '—'}</strong><br>
+    <span>NSS:</span> <strong>${nss || '—'}</strong><br>
+    <span>Porcentaje acordado:</span> <strong>20% del crédito aprobado</strong><br>
+    <span>Consentimiento registrado:</span> <strong>${fecha} · ${hora}</strong>
+  `;
+
+  // WhatsApp con contexto completo
+  const msg = encodeURIComponent(
+    `Hola Credifika, soy ${nombre || 'cliente'}${nss ? ' (NSS: '+nss+')' : ''}. ` +
+    `Acabo de completar mi expediente y acepté los términos del servicio (20% del crédito aprobado) ` +
+    `el ${fecha} a las ${hora}. ¿Cuáles son los siguientes pasos?`
+  );
+  document.getElementById('btnWa').href = `https://wa.me/5215521893011?text=${msg}`;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
