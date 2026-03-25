@@ -1,543 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Credifika — Tu expediente Mejoravit</title>
-<!-- System font stack matching original Credifika site -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-  :root {
-    --azul: #1B3D6B; --azul-claro: #1E5298; --azul-claro-bg: #EAF0FA; --azul-hover: #142D52;
-    --gris-oscuro: #1A1A1A; --gris-medio: #5A5A5A; --gris-suave: #F4F4F1; --blanco: #FAFAF8; --borde: #E2E2DA;
+// ── SUPABASE CONFIG ──────────────────────────────────────
+const SUPA_URL  = 'https://ntcekfevzqfpdpkeviug.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50Y2VrZmV2enFmcGRwa2V2aXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDQ4NTYsImV4cCI6MjA5MDAyMDg1Nn0.sTp2ReSlNvHwgC7nlw8QIZvInoyOd1LIKp-lGWw7ZzA';
+const BUCKET    = 'expedientes';
+
+async function subirASupabase(file, clienteId, docId) {
+  const ruta = clienteId + '/' + docId + '_' + file.name;
+  const res = await fetch(
+    SUPA_URL + '/storage/v1/object/' + BUCKET + '/' + ruta,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': file.type || 'application/octet-stream',
+        'x-upsert': 'true'
+      },
+      body: file
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('Supabase upload error:', err);
+    return false;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--gris-suave); color: var(--gris-oscuro); min-height: 100vh; }
-
-  /* HEADER */
-  .header { background: var(--azul); color: #fff; padding: 28px 5% 36px; }
-  .logo { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; letter-spacing: -0.5px; font-size: 20px; color: #fff; display: block; margin-bottom: 18px; }
-  .logo span { color: #7EB5E5; }
-  .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .header-text h1 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; letter-spacing: -0.5px; font-size: clamp(24px, 4vw, 38px); line-height: 1.1; letter-spacing: -0.5px; }
-  .header-text h1 em { font-style: italic; color: #7EB5E5; }
-  .header-text p { font-size: 14px; opacity: 0.8; margin-top: 8px; font-weight: 300; max-width: 440px; line-height: 1.6; }
-  .header-progress { background: rgba(255,255,255,0.12); border-radius: 16px; padding: 18px 22px; min-width: 190px; }
-  .hp-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; opacity: 0.7; margin-bottom: 4px; }
-  .hp-pct { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; letter-spacing: -0.5px; font-size: 40px; color: #7EB5E5; line-height: 1; letter-spacing: -0.2px; }
-  .hp-sub { font-size: 12px; opacity: 0.7; margin-top: 4px; }
-  .hp-bar-bg { background: rgba(255,255,255,0.2); border-radius: 3px; height: 4px; margin-top: 12px; }
-  .hp-bar-fill { background: #7EB5E5; height: 4px; border-radius: 3px; transition: width 0.5s ease; width: 0%; }
-
-  /* PAGE */
-  .page { max-width: 1120px; margin: 0 auto; padding: 28px 5% 64px; display: grid; grid-template-columns: 1fr 270px; gap: 20px; align-items: start; }
-
-  /* CARD */
-  .card { background: #fff; border: 1px solid var(--borde); border-radius: 18px; overflow: hidden; margin-bottom: 16px; }
-  .card-header { padding: 18px 28px 14px; border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 12px; }
-  .card-num { width: 26px; height: 26px; background: var(--azul-claro-bg); color: var(--azul); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
-  .card-header h2 { font-size: 15px; font-weight: 500; }
-  .card-header p { font-size: 12px; color: var(--gris-medio); margin-top: 2px; }
-  .card-body { padding: 24px 28px; }
-
-  /* FORM */
-  .fg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .fg { display: flex; flex-direction: column; gap: 5px; }
-  .fg.c2 { grid-column: span 2; }
-  .fg label { font-size: 11px; font-weight: 500; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.05em; }
-  .fg input {
-    padding: 11px 14px; border: 1px solid var(--borde); border-radius: 10px;
-    font-size: 14px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: var(--gris-oscuro);
-    background: var(--blanco); outline: none; transition: border-color 0.2s;
-  }
-  .fg input:focus { border-color: var(--azul); }
-  .fg input::placeholder { color: #bbb; }
-  .autobadge { font-size: 10px; color: var(--azul); background: var(--azul-claro-bg); padding: 2px 8px; border-radius: 4px; width: fit-content; display: none; }
-
-  /* SECTION LABEL */
-  .sec-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gris-medio); padding: 11px 28px; background: var(--gris-suave); border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde); }
-
-  /* DOC ROW */
-  .doc-row { display: flex; align-items: center; gap: 16px; padding: 15px 28px; border-bottom: 1px solid var(--borde); transition: background 0.15s; }
-  .doc-row:last-child { border-bottom: none; }
-  .doc-row.done { background: #F1FAF5; }
-  .doc-check {
-    width: 22px; height: 22px; border: 1.5px solid var(--borde); border-radius: 6px;
-    flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-  }
-  .doc-row.done .doc-check { background: var(--azul); border-color: var(--azul); }
-  .check-svg { display: none; }
-  .doc-row.done .check-svg { display: block; }
-  .doc-info { flex: 1; }
-  .doc-name { font-size: 14px; font-weight: 500; line-height: 1.3; }
-  .doc-row.done .doc-name { color: var(--azul-claro); }
-  .doc-desc { font-size: 12px; color: var(--gris-medio); margin-top: 3px; line-height: 1.45; }
-  .doc-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 50px; margin-top: 5px; display: inline-block; }
-  .t-req  { background: #FDF0EA; color: #B84A17; }
-  .t-opt  { background: #EEF0FE; color: #4840B4; }
-  .t-post { background: #F3F0FE; color: #5A4AB4; }
-
-  /* UPLOAD */
-  .upload-col { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; min-width: 120px; }
-  input[type=file] { display: none; }
-  .btn-up {
-    display: flex; align-items: center; gap: 6px; padding: 8px 14px;
-    border: 1.5px solid var(--borde); border-radius: 8px; background: #fff;
-    font-size: 12px; font-weight: 500; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: var(--gris-oscuro); cursor: pointer; white-space: nowrap; transition: all 0.2s;
-  }
-  .btn-up:hover { border-color: var(--azul); color: var(--azul); }
-  .btn-up.done { border-color: var(--azul); background: var(--azul-claro-bg); color: var(--azul); }
-  .fname { font-size: 10px; color: var(--azul); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
-  .fname.show { display: block; }
-
-  /* GEN CARD */
-  .gen-card { background: var(--azul-claro-bg); border: 1.5px solid #7EB5E5; border-radius: 18px; padding: 22px 28px; margin-bottom: 16px; }
-  .gen-card h3 { font-size: 14px; font-weight: 500; color: var(--azul); margin-bottom: 4px; }
-  .gen-card p { font-size: 12px; color: var(--gris-medio); line-height: 1.5; margin-bottom: 14px; }
-  .gen-btn {
-    display: flex; align-items: center; gap: 12px; padding: 13px 16px;
-    background: #fff; border: 1px solid #7EB5E5; border-radius: 12px;
-    cursor: pointer; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align: left;
-    transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 10px; width: 100%;
-  }
-  .gen-btn:last-child { margin-bottom: 0; }
-  .gen-btn:hover { border-color: var(--azul); box-shadow: 0 2px 12px rgba(27,61,107,0.1); }
-  .gen-btn .gi { font-size: 20px; flex-shrink: 0; }
-  .gen-btn strong { display: block; font-size: 13px; font-weight: 500; color: var(--gris-oscuro); }
-  .gen-btn span { font-size: 11px; color: var(--gris-medio); }
-  .gen-btn .ga { margin-left: auto; color: var(--azul); font-size: 16px; }
-
-  /* SIDEBAR */
-  .sidebar { position: sticky; top: 20px; display: flex; flex-direction: column; gap: 14px; }
-  .side-card { background: #fff; border: 1px solid var(--borde); border-radius: 18px; overflow: hidden; }
-  .side-head { padding: 14px 18px; border-bottom: 1px solid var(--borde); font-size: 13px; font-weight: 500; }
-  .prog-body { padding: 14px 18px; }
-  .prog-sec { font-size: 10px; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 6px; }
-  .prog-sec:first-child { margin-top: 0; }
-  .prog-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--borde); font-size: 12px; }
-  .prog-row:last-child { border-bottom: none; }
-  .prog-val { font-weight: 500; }
-  .btn-wa {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 13px; background: #25D366; color: #fff; border: none;
-    border-radius: 50px; font-size: 14px; font-weight: 500; cursor: pointer;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; text-decoration: none; transition: background 0.2s;
-  }
-  .btn-wa:hover { background: #1da952; }
-  .side-nota { font-size: 11px; color: var(--gris-medio); line-height: 1.5; padding: 12px 18px; border-top: 1px solid var(--borde); }
-
-  @media (max-width: 860px) {
-    .page { grid-template-columns: 1fr; }
-    .sidebar { position: static; }
-    .fg-grid { grid-template-columns: 1fr 1fr; }
-    .fg.c2 { grid-column: 1 / -1; }
-    .header-progress { display: none; }
-  }
-  @media (max-width: 500px) {
-    .fg-grid { grid-template-columns: 1fr; }
-    .doc-row { flex-wrap: wrap; }
-    .upload-col { align-items: flex-start; }
-  }
-
-  .logo-img {
-    height: 64px;
-    width: auto;
-    display: block;
-    object-fit: contain;
-  }
-  .nav-logo-wrap {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-  }
-  .nav-logo-wrap--white .logo-img {
-    filter: brightness(0) invert(1);
-  }
-
-  .logo-img--white { filter: brightness(0) invert(1); }
-</style>
-</head>
-<body>
-
-<div class="header">
-  <img src="https://static.wixstatic.com/media/4e80a9_da80905d3a444d4a98acfec1fe5ba85d~mv2.png/v1/fill/w_432,h_350,al_c,q_85,enc_avif,quality_auto/credifika_logo_highres%202.png" alt="Credifika" class="logo-img logo-img--white" onclick="window.location.href='index.html'" style="cursor:pointer" title="Ir al inicio">
-  <div class="header-row">
-    <div class="header-text">
-      <h1>Arma tu expediente<br><em>Mejoravit</em></h1>
-      <p>Ya estás preaprobado. Completa tus datos, sube los documentos y generamos los formatos oficiales automáticamente.</p>
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px;margin-top:10px;font-size:12px;color:rgba(255,255,255,0.85);">💾 Tu progreso se guarda automáticamente — puedes cerrar y continuar después</div>
-    </div>
-    <div class="header-progress">
-      <div class="hp-label">Expediente completo</div>
-      <div class="hp-pct" id="hPct">0%</div>
-      <div class="hp-sub" id="hSub">0 de 8 documentos</div>
-      <div class="hp-bar-bg"><div class="hp-bar-fill" id="hBar"></div></div>
-    </div>
-  </div>
-</div>
-
-<div class="page">
-  <div>
-
-    <!-- PASO 1: DATOS -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-num">1</div>
-        <div>
-          <h2>Tus datos personales</h2>
-          <p>Los marcados ✦ se llenaron automáticamente desde tu precalificación</p>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="fg-grid">
-          <div class="fg c2">
-            <label>Nombre(s)</label>
-            <input type="text" id="d_nombre" placeholder="Juan">
-            <div class="autobadge" id="ab_nombre">✦ Auto-llenado</div>
-          </div>
-          <div class="fg">
-            <label>Apellido paterno</label>
-            <input type="text" id="d_ap_pat" placeholder="García">
-            <div class="autobadge" id="ab_ap_pat">✦ Auto-llenado</div>
-          </div>
-          <div class="fg">
-            <label>Apellido materno</label>
-            <input type="text" id="d_ap_mat" placeholder="López">
-            <div class="autobadge" id="ab_ap_mat">✦ Auto-llenado</div>
-          </div>
-          <div class="fg c2">
-            <label>NSS — Número de Seguridad Social</label>
-            <input type="text" id="d_nss" placeholder="12345678901" maxlength="11">
-            <div class="autobadge" id="ab_nss">✦ Auto-llenado</div>
-          </div>
-          <div class="fg c2">
-            <label>CURP</label>
-            <input type="text" id="d_curp" placeholder="GARL900101HDFRCN01" maxlength="18" oninput="this.value=this.value.toUpperCase()">
-            <div class="autobadge" id="ab_curp">✦ Auto-llenado</div>
-          </div>
-          <div class="fg c2">
-            <label>RFC con homoclave</label>
-            <input type="text" id="d_rfc" placeholder="GARL900101AB1" maxlength="13" oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="fg c2">
-            <label>Estado de la vivienda</label>
-            <select id="d_ciudad">
-              <option value="">— Selecciona tu estado —</option>
-              <option>Aguascalientes</option>
-              <option>Baja California</option>
-              <option>Baja California Sur</option>
-              <option>Campeche</option>
-              <option>Chiapas</option>
-              <option>Chihuahua</option>
-              <option>Ciudad de México</option>
-              <option>Coahuila</option>
-              <option>Colima</option>
-              <option>Durango</option>
-              <option>Estado de México</option>
-              <option>Guanajuato</option>
-              <option>Guerrero</option>
-              <option>Hidalgo</option>
-              <option>Jalisco</option>
-              <option>Michoacán</option>
-              <option>Morelos</option>
-              <option>Nayarit</option>
-              <option>Nuevo León</option>
-              <option>Oaxaca</option>
-              <option>Puebla</option>
-              <option>Querétaro</option>
-              <option>Quintana Roo</option>
-              <option>San Luis Potosí</option>
-              <option>Sinaloa</option>
-              <option>Sonora</option>
-              <option>Tabasco</option>
-              <option>Tamaulipas</option>
-              <option>Tlaxcala</option>
-              <option>Veracruz</option>
-              <option>Yucatán</option>
-              <option>Zacatecas</option>
-            </select>
-          </div>
-          <div class="fg c2">
-            <label>WhatsApp</label>
-            <input type="tel" id="d_telefono" placeholder="55 1234 5678">
-            <div class="autobadge" id="ab_telefono">✦ Auto-llenado</div>
-          </div>
-          <div class="fg c2">
-            <label>Correo electrónico</label>
-            <input type="email" id="d_email" placeholder="juan@correo.com">
-            <div class="autobadge" id="ab_email">✦ Auto-llenado</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PASO 2: DOCUMENTOS -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-num">2</div>
-        <div>
-          <h2>Sube tus documentos</h2>
-          <p>Formatos aceptados: PDF, JPG o PNG. Máximo 20 MB por archivo.</p>
-        </div>
-      </div>
-
-      <div class="sec-label">Identificación y documentos personales</div>
-
-      <div class="doc-row" id="dr_ine">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">INE / Credencial de elector o Pasaporte vigente</div>
-          <div class="doc-desc">Ambos lados del INE en original y copia al 200%. Pasaporte: página con fotografía.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_ine" accept="image/*,.pdf" onchange="onFile('ine',this)">
-          <button class="btn-up" id="ub_ine" onclick="document.getElementById('f_ine').click()">↑ Subir</button>
-          <div class="fname" id="fn_ine"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_acta">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Acta de nacimiento</div>
-          <div class="doc-desc">Original y copia legible.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_acta" accept="image/*,.pdf" onchange="onFile('acta',this)">
-          <button class="btn-up" id="ub_acta" onclick="document.getElementById('f_acta').click()">↑ Subir</button>
-          <div class="fname" id="fn_acta"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_curpdoc">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">CURP impresa</div>
-          <div class="doc-desc">Descárgala en gob.mx. Debe coincidir exactamente con tu INE.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_curpdoc" accept="image/*,.pdf" onchange="onFile('curpdoc',this)">
-          <button class="btn-up" id="ub_curpdoc" onclick="document.getElementById('f_curpdoc').click()">↑ Subir</button>
-          <div class="fname" id="fn_curpdoc"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_rfc">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Constancia de situación fiscal (RFC)</div>
-          <div class="doc-desc">Impresión del portal SAT con homoclave, no mayor a 3 meses.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_rfc" accept="image/*,.pdf" onchange="onFile('rfc',this)">
-          <button class="btn-up" id="ub_rfc" onclick="document.getElementById('f_rfc').click()">↑ Subir</button>
-          <div class="fname" id="fn_rfc"></div>
-        </div>
-      </div>
-
-      <div class="sec-label">Domicilio</div>
-
-      <div class="doc-row" id="dr_dom">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Comprobante de domicilio de la vivienda a remodelar</div>
-          <div class="doc-desc">No mayor a 3 meses. Recibo de luz, agua, predial, teléfono fijo, gas, internet o celular domiciliado.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_dom" accept="image/*,.pdf" onchange="onFile('dom',this)">
-          <button class="btn-up" id="ub_dom" onclick="document.getElementById('f_dom').click()">↑ Subir</button>
-          <div class="fname" id="fn_dom"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_banco">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Estado de cuenta bancario con CLABE</div>
-          <div class="doc-desc">No mayor a 2 meses, a tu nombre, con CLABE de 18 dígitos y RFC con homoclave visibles. No se aceptan cuentas mancomunadas.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_banco" accept="image/*,.pdf" onchange="onFile('banco',this)">
-          <button class="btn-up" id="ub_banco" onclick="document.getElementById('f_banco').click()">↑ Subir</button>
-          <div class="fname" id="fn_banco"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_foto">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Fotografía de la vivienda actual</div>
-          <div class="doc-desc">Foto a color del área que quieres remodelar. Ayuda a tu asesor a evaluar tu caso. No es requisito oficial del Infonavit.</div>
-          <span class="doc-tag t-opt">Recomendado</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_foto" accept="image/*" onchange="onFile('foto',this)">
-          <button class="btn-up" id="ub_foto" onclick="document.getElementById('f_foto').click()">↑ Subir</button>
-          <div class="fname" id="fn_foto"></div>
-        </div>
-      </div>
-
-      <div class="sec-label">Formatos oficiales Infonavit — los generamos por ti ↓</div>
-
-      <div class="doc-row" id="dr_carta">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">✨ Declaratoria Bajo Protesta de Decir Verdad — firmada</div>
-          <div class="doc-desc">Genera el PDF en la sección de abajo, imprímelo, fírmalo y súbelo aquí.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_carta" accept="image/*,.pdf" onchange="onFile('carta',this)">
-          <button class="btn-up" id="ub_carta" onclick="document.getElementById('f_carta').click()">↑ Subir firmada</button>
-          <div class="fname" id="fn_carta"></div>
-        </div>
-      </div>
-
-      <div class="doc-row" id="dr_pres">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">✨ Formato de Presupuesto Inicial — firmado</div>
-          <div class="doc-desc">Genera el PDF abajo, imprímelo, fírmalo y súbelo aquí.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_pres" accept="image/*,.pdf" onchange="onFile('pres',this)">
-          <button class="btn-up" id="ub_pres" onclick="document.getElementById('f_pres').click()">↑ Subir firmado</button>
-          <div class="fname" id="fn_pres"></div>
-        </div>
-      </div>
-
-      <div class="sec-label">Después de recibir el crédito</div>
-
-      <div class="doc-row" id="dr_ev">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">Reporte fotográfico + tickets y facturas de la obra</div>
-          <div class="doc-desc">Mínimo 1 foto por área remodelada + comprobantes de compra. Un solo PDF, máximo 20 MB. Se sube en Mi Cuenta Infonavit.</div>
-          <span class="doc-tag t-post">Post-crédito</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_ev" accept="image/*,.pdf" onchange="onFile('ev',this)">
-          <button class="btn-up" id="ub_ev" onclick="document.getElementById('f_ev').click()">↑ Subir</button>
-          <div class="fname" id="fn_ev"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- GENERADOR -->
-    <div class="gen-card">
-      <h3>📄 Descarga tus documentos oficiales</h3>
-      <p>Generados automáticamente con tus datos. <strong>Imprímelos, fírmalos de puño y letra</strong> y súbelos en la sección de arriba.</p>
-
-      <div class="gen-datos-preview" id="genPreview" style="display:none">
-        <div class="gdp-row"><span class="gdp-label">Nombre</span><span class="gdp-val" id="prev_nombre">—</span></div>
-        <div class="gdp-row"><span class="gdp-label">NSS</span><span class="gdp-val" id="prev_nss">—</span></div>
-        <div class="gdp-row"><span class="gdp-label">CURP</span><span class="gdp-val" id="prev_curp">—</span></div>
-        <div class="gdp-row"><span class="gdp-label">Fecha</span><span class="gdp-val" id="prev_fecha">—</span></div>
-      </div>
-
-      <button class="gen-btn" onclick="genCartaConPreview()">
-        <span class="gi">📝</span>
-        <div>
-          <strong>Declaratoria Bajo Protesta de Decir Verdad</strong>
-          <span>Formato oficial CRED.1037.00/01 — PDF listo para imprimir y firmar</span>
-        </div>
-        <span class="ga">↓</span>
-      </button>
-      <button class="gen-btn" onclick="genPresConPreview()">
-        <span class="gi">🧾</span>
-        <div>
-          <strong>Presupuesto Inicial de la Mejora</strong>
-          <span>Formato oficial Infonavit — PDF listo para imprimir y firmar</span>
-        </div>
-        <span class="ga">↓</span>
-      </button>
-
-      <div class="gen-aviso">
-        ⚠️ Si algún dato está vacío, llénalo en "Tus datos personales" antes de descargar.
-      </div>
-    </div>
-
-  </div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="side-card">
-      <div class="side-head">📊 Progreso del expediente</div>
-      <div class="prog-body">
-        <div class="prog-sec">Obligatorios (8)</div>
-        <div class="prog-row"><span>INE / Pasaporte</span><span class="prog-val" id="ps_ine">—</span></div>
-        <div class="prog-row"><span>Acta de nacimiento</span><span class="prog-val" id="ps_acta">—</span></div>
-        <div class="prog-row"><span>CURP</span><span class="prog-val" id="ps_curpdoc">—</span></div>
-        <div class="prog-row"><span>RFC / Situación fiscal</span><span class="prog-val" id="ps_rfc">—</span></div>
-        <div class="prog-row"><span>Comprobante domicilio</span><span class="prog-val" id="ps_dom">—</span></div>
-        <div class="prog-row"><span>Estado de cuenta</span><span class="prog-val" id="ps_banco">—</span></div>
-        <div class="prog-row"><span>Carta bajo protesta</span><span class="prog-val" id="ps_carta">—</span></div>
-        <div class="prog-row"><span>Presupuesto inicial</span><span class="prog-val" id="ps_pres">—</span></div>
-        <div class="prog-sec">Opcionales</div>
-        <div class="prog-row"><span>Foto de vivienda</span><span class="prog-val" id="ps_foto">—</span></div>
-        <div class="prog-row"><span>Evidencia post-obra</span><span class="prog-val" id="ps_ev">—</span></div>
-      </div>
-    </div>
-
-    <div class="side-card">
-      <div class="side-head">💬 ¿Necesitas ayuda?</div>
-      <div style="padding:16px 18px">
-       <button id="btnSiguiente" onclick="irAConsentimiento()" disabled style="width:100%;background:#1B3D6B;color:#fff;border:none;padding:15px;border-radius:50px;font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;margin-bottom:10px;display:block;text-align:center;opacity:0.4;transition:opacity 0.2s,background 0.2s;">📋 Continuar — Acuerdo de servicio →</button>
-       <div id="btnSiguienteHint" style="text-align:center;font-size:12px;color:var(--gris-medio);margin-bottom:8px;margin-top:-4px;">Completa tus datos y sube los 8 documentos obligatorios para continuar</div>
-       <a id="btnWa" href="https://wa.me/5215521893011" target="_blank" class="btn-wa">💬 Hablar con mi asesor</a>
-      </div>
-      <div class="side-nota">🔒 Tus documentos son confidenciales y solo los ve el equipo Credifika.</div>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── AUTO-FILL ────────────────────────────────────────────
-(function() {
-  const p = new URLSearchParams(window.location.search);
-  let s = {};
-  try { s = JSON.parse(localStorage.getItem('credifika_precal') || '{}'); } catch(e) {}
-  [
-    ['nombre',   'd_nombre',   'ab_nombre'],
-    ['ap_pat',   'd_ap_pat',   'ab_ap_pat'],
-    ['ap_mat',   'd_ap_mat',   'ab_ap_mat'],
-    ['nss',      'd_nss',      'ab_nss'],
-    ['curp',     'd_curp',     'ab_curp'],
-    ['telefono', 'd_telefono', 'ab_telefono'],
-    ['email',    'd_email',    'ab_email'],
-  ].forEach(([key, inputId, badgeId]) => {
-    const val = p.get(key) || s[key];
-    if (!val) return;
-    const el = document.getElementById(inputId);
-    const badge = document.getElementById(badgeId);
-    if (el) { el.value = val; if (badge) badge.style.display = 'block'; }
-  });
-  // Actualizar preview de datos con lo que se auto-llenó
-  setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
-
-  // Restaurar progreso guardado en localStorage
-  try {
-    var saved = JSON.parse(localStorage.getItem('credifika_expediente') || '{}');
-    ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && saved[id] && !el.value) {
-        el.value = saved[id];
-        var badge = document.getElementById('ab_' + id.replace('d_',''));
-        if (badge && saved['_from_url_' + id]) badge.style.display = 'block';
-      }
-    });
-    setTimeout(function() { actualizarPreview(); verificarListo(); }, 150);
-  } catch(e) {}
-})();
+  return true;
+}
 
 // ── UPLOAD ───────────────────────────────────────────────
 const uploaded = {};
@@ -545,6 +31,61 @@ const OBLIG = ['ine','acta','curpdoc','rfc','dom','banco','carta','pres'];
 const OPT   = ['foto','ev'];
 
 // Mapa de id a tipo para la Edge Function de Claude
+const TIPO_DOC = {
+  ine:'ine', acta:'acta', curpdoc:'curp', rfc:'rfc',
+  dom:'comprobante_domicilio', banco:'estado_cuenta',
+  carta:'carta_protesta', pres:'presupuesto',
+  foto:null, ev:null
+};
+
+async function validarConClaude(file, tipoDoc, nombreCliente, nss) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const base64 = e.target.result.split(',')[1];
+        const res = await fetch(SUPA_URL + '/functions/v1/validar-documento', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo_documento: tipoDoc, imagen_base64: base64, nombre_cliente: nombreCliente, nss: nss })
+        });
+        if (!res.ok) { resolve(null); return; }
+        resolve(await res.json());
+      } catch(err) { resolve(null); }
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+function mostrarResultadoValidacion(id, resultado) {
+  let el = document.getElementById('val_' + id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'val_' + id;
+    el.style.cssText = 'font-size:12px;margin:4px 0 0 0;padding:6px 10px;border-radius:8px;line-height:1.4;';
+    const fn = document.getElementById('fn_' + id);
+    if (fn && fn.parentNode) fn.parentNode.insertBefore(el, fn.nextSibling);
+  }
+  if (!resultado) { el.style.display='none'; return; }
+  if (resultado.aprobado) {
+    el.style.cssText += 'background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
+    el.innerHTML = '✅ <strong>Documento aprobado</strong>' + (resultado.motivo ? ' — ' + resultado.motivo : '');
+  } else {
+    el.style.cssText += 'background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;display:block;';
+    const prob = resultado.problemas && resultado.problemas.length ? '<br>• ' + resultado.problemas.join('<br>• ') : '';
+    el.innerHTML = '⚠️ <strong>Documento rechazado</strong>' + (resultado.motivo ? ' — ' + resultado.motivo : '') + prob +
+      '<br><span style="font-size:11px;opacity:0.8">Por favor vuelve a subir el documento corregido.</span>';
+    delete uploaded[id];
+    document.getElementById('dr_' + id).classList.remove('done');
+    const btn2 = document.getElementById('ub_' + id);
+    btn2.classList.remove('done'); btn2.textContent = '↑ Subir';
+    const fnEl = document.getElementById('fn_' + id);
+    if (fnEl) { fnEl.textContent=''; fnEl.classList.remove('show'); }
+  }
+}
+
+async // Mapa de id a tipo para la Edge Function de Claude
 const TIPO_DOC = {
   ine:'ine', acta:'acta', curpdoc:'curp', rfc:'rfc',
   dom:'comprobante_domicilio', banco:'estado_cuenta',
