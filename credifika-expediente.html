@@ -161,11 +161,12 @@
 <body>
 
 <div class="header">
-  <img src="https://static.wixstatic.com/media/4e80a9_da80905d3a444d4a98acfec1fe5ba85d~mv2.png/v1/fill/w_432,h_350,al_c,q_85,enc_avif,quality_auto/credifika_logo_highres%202.png" alt="Credifika" class="logo-img logo-img--white">
+  <img src="https://static.wixstatic.com/media/4e80a9_da80905d3a444d4a98acfec1fe5ba85d~mv2.png/v1/fill/w_432,h_350,al_c,q_85,enc_avif,quality_auto/credifika_logo_highres%202.png" alt="Credifika" class="logo-img logo-img--white" onclick="window.location.href='index.html'" style="cursor:pointer" title="Ir al inicio">
   <div class="header-row">
     <div class="header-text">
       <h1>Arma tu expediente<br><em>Mejoravit</em></h1>
       <p>Ya estás preaprobado. Completa tus datos, sube los documentos y generamos los formatos oficiales automáticamente.</p>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px;margin-top:10px;font-size:12px;color:rgba(255,255,255,0.85);">💾 Tu progreso se guarda automáticamente — puedes cerrar y continuar después</div>
     </div>
     <div class="header-progress">
       <div class="hp-label">Expediente completo</div>
@@ -522,6 +523,20 @@
   });
   // Actualizar preview de datos con lo que se auto-llenó
   setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
+
+  // Restaurar progreso guardado en localStorage
+  try {
+    var saved = JSON.parse(localStorage.getItem('credifika_expediente') || '{}');
+    ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && saved[id] && !el.value) {
+        el.value = saved[id];
+        var badge = document.getElementById('ab_' + id.replace('d_',''));
+        if (badge && saved['_from_url_' + id]) badge.style.display = 'block';
+      }
+    });
+    setTimeout(function() { actualizarPreview(); verificarListo(); }, 150);
+  } catch(e) {}
 })();
 
 // ── UPLOAD ───────────────────────────────────────────────
@@ -706,6 +721,16 @@ function genPres() {
   if (el) {
     el.addEventListener('input', actualizarPreview);
     el.addEventListener('input', verificarListo);
+    el.addEventListener('input', function() {
+      try {
+        var data = {};
+        ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(fid) {
+          var fel = document.getElementById(fid);
+          if (fel) data[fid] = fel.value;
+        });
+        localStorage.setItem('credifika_expediente', JSON.stringify(data));
+      } catch(e) {}
+    });
   }
 });
 
@@ -744,35 +769,7 @@ function verificarListo() {
 
 
 // ── VERIFICAR SI PUEDE CONTINUAR ────────────────────────
-function verificarListo() {
-  var campos = ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'];
-  var camposOk = campos.every(function(id) {
-    var el = document.getElementById(id);
-    return el && el.value.trim().length > 0;
-  });
-  var docsOk = OBLIG.every(function(id) { return !!uploaded[id]; });
-  var btn  = document.getElementById('btnSiguiente');
-  var hint = document.getElementById('btnSiguienteHint');
-  if (!btn) return;
-  var listo = camposOk && docsOk;
-  btn.disabled = !listo;
-  btn.style.opacity = listo ? '1' : '0.4';
-  btn.style.cursor  = listo ? 'pointer' : 'not-allowed';
-  if (listo) {
-    hint.textContent = '✓ Todo listo — puedes continuar';
-    hint.style.color = '#1A7A4A';
-  } else {
-    var faltanCampos = campos.filter(function(id) { var el=document.getElementById(id); return !el||!el.value.trim(); });
-    var faltanDocs   = OBLIG.filter(function(id) { return !uploaded[id]; });
-    var msgs = [];
-    if (faltanCampos.length) msgs.push('Faltan ' + faltanCampos.length + ' dato(s) personales');
-    if (faltanDocs.length)   msgs.push(faltanDocs.length + ' documento(s) obligatorio(s) pendiente(s)');
-    hint.textContent = msgs.join(' · ');
-    hint.style.color = '#4A4A4A';
-  }
-}
 
-// ── IR A CONSENTIMIENTO ──────────────────────────────────
 function irAConsentimiento() {
   var nombre   = document.getElementById('d_nombre').value.trim();
   var ap_pat   = document.getElementById('d_ap_pat').value.trim();
