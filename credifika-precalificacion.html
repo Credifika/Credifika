@@ -336,9 +336,12 @@ function sel(el, grupo, val) {
 
 // ── LÓGICA DE PRECALIFICACIÓN (criterio operativo real) ─
 function calcular() {
-  const nombre_raw = document.getElementById('nombre').value.trim();
-  const ap_pat     = document.getElementById('apellido_paterno').value.trim();
-  const ap_mat     = document.getElementById('apellido_materno').value.trim();
+  window._nombre_raw = document.getElementById('nombre').value.trim();
+  window._ap_pat     = document.getElementById('apellido_paterno').value.trim();
+  window._ap_mat     = document.getElementById('apellido_materno').value.trim();
+  const nombre_raw = window._nombre_raw;
+  const ap_pat     = window._ap_pat;
+  const ap_mat     = window._ap_mat;
   const nombre     = [nombre_raw, ap_pat, ap_mat].filter(Boolean).join(' ') || 'tú';
   const nss        = document.getElementById('nss').value.trim();
   const curp       = document.getElementById('curp').value.trim();
@@ -436,7 +439,14 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
   if (razon === 'califica') {
     btnExp.classList.add('visible');
     // Pasar nombre y NSS a la página de expediente via URL params
-    const params = new URLSearchParams({ nombre: nombre_raw, ap_pat: ap_pat, ap_mat: ap_mat, nss: nss || '', curp: curp || '', telefono: telefono || '' });
+    const _nr  = window._nombre_raw || nombre || '';
+    const _app = window._ap_pat || '';
+    const _apm = window._ap_mat || '';
+    // Also save NSS and CURP from form if available
+    const _nss  = nss || document.getElementById('nss') && document.getElementById('nss').value || '';
+    const _curp = document.getElementById('curp') ? document.getElementById('curp').value : '';
+    const _tel  = telefono || '';
+    const params = new URLSearchParams({ nombre: _nr, ap_pat: _app, ap_mat: _apm, nss: _nss, curp: _curp, telefono: _tel });
     btnExp.href = `credifika-expediente.html?${params.toString()}`;
   } else {
     btnExp.classList.remove('visible');
