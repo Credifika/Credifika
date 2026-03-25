@@ -539,49 +539,12 @@
   } catch(e) {}
 })();
 
-
-// ââ SUPABASE CONFIG ââââââââââââââââââââââââââââââââââââââ
-const SUPA_URL  = 'https://ntcekfevzqfpdpkeviug.supabase.co';
-const SUPA_KEY  = 'sb_publishable_CkUpXFu6_o5hnViE2nt5zg_VC3nntss';
-const BUCKET    = 'expedientes';
-
-async function subirASupabase(file, clienteId, docId) {
-  const ruta = clienteId + '/' + docId + '_' + file.name;
-  const res = await fetch(
-    SUPA_URL + '/storage/v1/object/' + BUCKET + '/' + ruta,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + SUPA_KEY,
-        'Content-Type': file.type || 'application/octet-stream',
-        'x-upsert': 'true'
-      },
-      body: file
-    }
-  );
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('Supabase upload error:', err);
-    return false;
-  }
-  return true;
-}
-
-function generarClienteId() {
-  const nss    = document.getElementById('d_nss').value.trim();
-  const nombre = document.getElementById('d_nombre').value.trim();
-  const ap_pat = document.getElementById('d_ap_pat').value.trim();
-  if (nss) return 'NSS-' + nss;
-  if (nombre && ap_pat) return (nombre + '-' + ap_pat).replace(/\s+/g,'-').toLowerCase();
-  return 'cliente-' + Date.now();
-}
-
 // ââ UPLOAD âââââââââââââââââââââââââââââââââââââââââââââââ
 const uploaded = {};
 const OBLIG = ['ine','acta','curpdoc','rfc','dom','banco','carta','pres'];
 const OPT   = ['foto','ev'];
 
-// Mapa de id → tipo para la Edge Function de Claude
+// Mapa de id a tipo para la Edge Function de Claude
 const TIPO_DOC = {
   ine:'ine', acta:'acta', curpdoc:'curp', rfc:'rfc',
   dom:'comprobante_domicilio', banco:'estado_cuenta',
@@ -621,16 +584,16 @@ function mostrarResultadoValidacion(id, resultado) {
   if (!resultado) { el.style.display='none'; return; }
   if (resultado.aprobado) {
     el.style.cssText += 'background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
-    el.innerHTML = '\u2705 <strong>Documento aprobado<\/strong>' + (resultado.motivo ? ' \u2014 ' + resultado.motivo : '');
+    el.innerHTML = '✅ <strong>Documento aprobado</strong>' + (resultado.motivo ? ' — ' + resultado.motivo : '');
   } else {
     el.style.cssText += 'background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;display:block;';
-    const problemas = resultado.problemas && resultado.problemas.length ? '<br>\u2022 ' + resultado.problemas.join('<br>\u2022 ') : '';
-    el.innerHTML = '\u26A0\uFE0F <strong>Documento rechazado<\/strong>' + (resultado.motivo ? ' \u2014 ' + resultado.motivo : '') + problemas +
-      '<br><span style="font-size:11px;opacity:0.8">Por favor vuelve a subir el documento corregido.<\/span>';
+    const prob = resultado.problemas && resultado.problemas.length ? '<br>• ' + resultado.problemas.join('<br>• ') : '';
+    el.innerHTML = '⚠️ <strong>Documento rechazado</strong>' + (resultado.motivo ? ' — ' + resultado.motivo : '') + prob +
+      '<br><span style="font-size:11px;opacity:0.8">Por favor vuelve a subir el documento corregido.</span>';
     delete uploaded[id];
     document.getElementById('dr_' + id).classList.remove('done');
     const btn2 = document.getElementById('ub_' + id);
-    btn2.classList.remove('done'); btn2.textContent = '\u2191 Subir';
+    btn2.classList.remove('done'); btn2.textContent = '↑ Subir';
     const fnEl = document.getElementById('fn_' + id);
     if (fnEl) { fnEl.textContent=''; fnEl.classList.remove('show'); }
   }
@@ -642,27 +605,31 @@ async function onFile(id, input) {
   if (f.size > 20 * 1024 * 1024) { alert('El archivo supera 20 MB. Comprime o divide el documento.'); input.value=''; return; }
   const btn = document.getElementById('ub_' + id);
   const fn  = document.getElementById('fn_' + id);
-  btn.textContent = '\u23F3 Subiendo...'; btn.disabled = true;
+  btn.textContent = '⏳ Subiendo...'; btn.disabled = true;
   const clienteId = generarClienteId();
-  const nombreCliente = [document.getElementById('d_nombre')?.value||'', document.getElementById('d_ap_pat')?.value||'', document.getElementById('d_ap_mat')?.value||''].filter(Boolean).join(' ');
+  const nombreCliente = [
+    document.getElementById('d_nombre')?.value||'',
+    document.getElementById('d_ap_pat')?.value||'',
+    document.getElementById('d_ap_mat')?.value||''
+  ].filter(Boolean).join(' ');
   const nss = document.getElementById('d_nss')?.value || '';
   const subioOk = await subirASupabase(f, clienteId, id);
   if (!subioOk) {
-    btn.textContent = '\u2717 Error \u2014 reintentar'; btn.disabled = false;
+    btn.textContent = '✗ Error — reintentar'; btn.disabled = false;
     btn.style.cssText += 'background:#fee2e2;color:#dc2626;'; return;
   }
   uploaded[id] = f.name;
   document.getElementById('dr_' + id).classList.add('done');
-  btn.classList.add('done'); btn.textContent = '\u23F3 Validando...'; btn.disabled = true;
+  btn.classList.add('done'); btn.textContent = '⏳ Validando...'; btn.disabled = true;
   fn.textContent = f.name; fn.classList.add('show');
   const tipoDoc = TIPO_DOC[id];
   if (tipoDoc) {
     const resultado = await validarConClaude(f, tipoDoc, nombreCliente, nss);
     mostrarResultadoValidacion(id, resultado);
     if (resultado && !resultado.aprobado) {
-      btn.textContent = '\u2191 Subir de nuevo'; btn.disabled = false; btn.classList.remove('done');
-    } else { btn.textContent = '\u2713 Aprobado'; btn.disabled = false; }
-  } else { btn.textContent = '\u2713 Subido'; btn.disabled = false; }
+      btn.textContent = '↑ Subir de nuevo'; btn.disabled = false; btn.classList.remove('done');
+    } else { btn.textContent = '✓ Aprobado'; btn.disabled = false; }
+  } else { btn.textContent = '✓ Subido'; btn.disabled = false; }
   refresh();
 }
 
