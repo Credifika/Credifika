@@ -234,6 +234,14 @@
               oninput="document.getElementById('subcuentaVal').textContent='$'+Number(this.value).toLocaleString('es-MX')">
           </div>
         </div>
+        <div style="margin-top:8px;">
+          <a href="https://micuenta.infonavit.org.mx/" target="_blank"
+             style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:9px;font-size:12px;font-weight:600;text-decoration:none;"
+             onmouseover="this.style.background='#1B3D6B';this.style.color='#fff';"
+             onmouseout="this.style.background='#EAF0FA';this.style.color='#1B3D6B';">
+            🏦 Consultar mi saldo real en Mi Cuenta Infonavit
+          </a>
+        </div>
 
         <!-- Tipo de contrato -->
         <div>
@@ -391,6 +399,15 @@ function calcular() {
   }
 
   // ── CALIFICA ──────────────────────────────────────────
+  var _nssCheck=nss||document.getElementById('nss')?.value||'';
+  var _apPatCheck=window._ap_pat||'';
+  var _apMatCheck=window._ap_mat||'';
+  var _telCheck=telefono||'';
+  var _curpCheck=document.getElementById('curp')?.value||'';
+  if(verificarDuplicado(_nssCheck)){
+    mostrarExpedienteDuplicado(window._nombre_raw||n,_nssCheck,_apPatCheck,_apMatCheck,_curpCheck,_telCheck);
+    return;
+  }
   mostrar('azul', '🎉', `¡${n}, tu perfil precalifica!`,
     `Cumples con los requisitos para tramitar el crédito Mejoravit. El siguiente paso es que un asesor Credifika valide tu expediente y te guíe en el proceso — nosotros nos encargamos de todo sin que tengas que ir a ninguna oficina.`,
     true, nombre, nss, telefono, subcuenta, 'califica');
@@ -448,6 +465,34 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
     const _tel  = telefono || '';
     const params = new URLSearchParams({ nombre: _nr, ap_pat: _app, ap_mat: _apm, nss: _nss, curp: _curp, telefono: _tel });
     btnExp.href = `credifika-expediente.html?${params.toString()}`;
+    if (_tel && _tel.replace(/\D/g,'').length >= 10) {
+      const monto2 = Math.min(Math.max((subcuenta||0)*0.9,10318),169039);
+      const montoFmt2 = '
+
+  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── RECALCULAR ──────────────────────────────────────────
+function recalcular() {
+  document.getElementById('formulario').style.display = 'block';
+  document.getElementById('resultado').style.display = 'none';
+  ['sd1'].forEach(id => { document.getElementById(id).className = 'step-dot active'; });
+  ['sd2','sd3'].forEach(id => { document.getElementById(id).className = 'step-dot'; });
+  ['sl1','sl2'].forEach(id => { document.getElementById(id).classList.remove('done'); });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Variable curp para el mensaje WhatsApp
+var curp = '';
+document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
+</script>
+</body>
+</html>
++Math.round(monto2).toLocaleString('es-MX');
+      const nombreCompleto2=[_nr,_app,_apm].filter(Boolean).join(' ');
+      const msgCliente2=encodeURIComponent('¡Hola '+nombreCompleto2+'! 🎉\n\nTu precalificación en Credifika fue *exitosa*. Estás más cerca de tu crédito Mejoravit preaprobado por aproximadamente *'+montoFmt2+' pesos*.\n\nEl siguiente paso es armar tu expediente digital. Un asesor Credifika te acompañará en todo el proceso.\n\n¿Tienes alguna duda o quieres continuar ahora?');
+      window.open('https://wa.me/52'+_tel.replace(/\D/g,'')+'?text='+msgCliente2,'_blank');
+    }
   } else {
     btnExp.classList.remove('visible');
   }
@@ -468,6 +513,25 @@ function recalcular() {
 // Variable curp para el mensaje WhatsApp
 var curp = '';
 document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
+
+function verificarDuplicado(nss) {
+  if(!nss)return false;
+  try{var sv=JSON.parse(localStorage.getItem('uploaded_NSS-'+nss)||'{}');return Object.keys(sv).length>0;}catch(e){return false;}
+}
+function mostrarExpedienteDuplicado(nombre,nss,apPat,apMat,curpV,tel) {
+  document.getElementById('formulario').style.display='none';
+  document.getElementById('resultado').style.display='block';
+  var params=new URLSearchParams({nombre:nombre,ap_pat:apPat,ap_mat:apMat,nss:nss,curp:curpV,telefono:tel});
+  var expUrl='credifika-expediente.html?'+params.toString();
+  var waMsg=encodeURIComponent('Hola Credifika, soy '+nombre+' (NSS: '+nss+'). Ya tengo un expediente y necesito ayuda.');
+  var rc=document.getElementById('resultCard');
+  rc.className='result-card r-amarillo';
+  rc.innerHTML='<div class="result-icon">📋</div><div class="result-title">Ya tienes un expediente registrado</div><div class="result-sub">Encontramos un expediente previo con el NSS <strong>'+nss+'</strong>.</div><div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;"><a href="'+expUrl+'" style="display:block;text-align:center;padding:14px;background:#1B3D6B;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;">📂 Continuar donde me quedé</a><button onclick="recalcular()" style="padding:14px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:12px;font-weight:600;cursor:pointer;">✏️ Ingresar nuevos datos</button><a href="https://wa.me/5215521893011?text='+waMsg+'" target="_blank" style="display:block;text-align:center;padding:14px;background:#25D366;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;">💬 Hablar con un asesor</a></div>';
+  document.getElementById('montoCard').style.display='none';
+  document.getElementById('btnWa').style.display='none';
+  document.getElementById('btnExpediente').style.display='none';
+  document.getElementById('resultado').scrollIntoView({behavior:'smooth'});
+}
 </script>
 </body>
 </html>
