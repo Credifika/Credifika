@@ -635,7 +635,10 @@ async function onFile(id,input){
   const fn=document.getElementById('fn_'+id);
   btn.textContent='⏳ Subiendo...';btn.disabled=true;
   const clienteId=generarClienteId();
-  const nombreCliente=[document.getElementById('d_nombre')?.value||'',document.getElementById('d_ap_pat')?.value||'',document.getElementById('d_ap_mat')?.value||''].filter(Boolean).join(' ');
+  // Read name from multiple possible field IDs (d_ prefix or plain)
+  const _getNombre = id => (document.getElementById('d_'+id)||document.getElementById(id))?.value?.trim()||'';
+  const nombreCliente = [_getNombre('nombre'),_getNombre('ap_pat'),_getNombre('ap_mat')].filter(Boolean).join(' ');
+  console.log('[Credifika] Validando:', id, '| nombre_cliente:', nombreCliente, '| nss:', nss);
   const nss=document.getElementById('d_nss')?.value||'';
   const ok=await subirASupabase(f,clienteId,id);
   if(!ok){btn.textContent='✗ Error';btn.disabled=false;btn.style.cssText+='background:#fee2e2;color:#dc2626;';return;}
@@ -890,9 +893,9 @@ function irAConsentimiento() {
       const btn=document.getElementById('ub_'+id);
       const fn=document.getElementById('fn_'+id);
       if(dr)dr.classList.add('done');
-      if(btn){btn.classList.add('done');btn.textContent='✓ Ya subido';}
+      if(btn){btn.classList.remove('done');btn.textContent='↺ Revalidar';}
       if(fn){fn.textContent=fname;fn.classList.add('show');}
-      uploaded[id]=fname;
+      // Don't auto-restore to uploaded - require revalidation
       let el=document.getElementById('val_'+id);
       if(!el){
         el=document.createElement('div');el.id='val_'+id;
@@ -900,7 +903,8 @@ function irAConsentimiento() {
         const fnEl=document.getElementById('fn_'+id);
         if(fnEl&&fnEl.parentNode)fnEl.parentNode.insertBefore(el,fnEl.nextSibling);
       }
-      el.innerHTML='📂 Documento ya subido. Sube uno nuevo para reemplazarlo.';
+      el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;display:block;';
+      el.innerHTML='⚠️ Documento subido anteriormente — vuelve a subirlo para validarlo.';
     }
     refresh();
   }
