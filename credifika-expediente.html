@@ -584,78 +584,37 @@ const OBLIG=['ine','acta','curpdoc','rfc','dom','banco','carta','pres'];
 const OPT=['foto','ev'];
 const TIPO_DOC={ine:'ine',acta:'acta',curpdoc:'curp',rfc:'rfc',dom:'comprobante_domicilio',banco:'estado_cuenta',carta:'carta_protesta',pres:'presupuesto',foto:null,ev:null};
 
-async function validarConClaude(file,tipoDoc,nombreCliente,nss){
-  return new Promise((resolve)=>{
-    const reader=new FileReader();
-    reader.onload=async(e)=>{
-      try{
-        const base64=e.target.result.split(',')[1];
-        const res=await fetch(SUPA_URL+'/functions/v1/validar-documento',{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({tipo_documento:tipoDoc,imagen_base64:base64,nombre_cliente:nombreCliente,nss:nss})
-        });
-        if(!res.ok){resolve(null);return;}
-        resolve(await res.json());
-      }catch(err){resolve(null);}
-    };
-    reader.onerror=()=>resolve(null);
-    reader.readAsDataURL(file);
-  });
-}
-
-function mostrarResultadoValidacion(id,resultado){
-  let el=document.getElementById('val_'+id);
-  if(!el){
-    el=document.createElement('div');el.id='val_'+id;
-    el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:6px 10px;border-radius:8px;line-height:1.4;';
-    const fn=document.getElementById('fn_'+id);
-    if(fn&&fn.parentNode)fn.parentNode.insertBefore(el,fn.nextSibling);
-  }
-  if(!resultado){el.style.display='none';return;}
-  if(resultado.aprobado){
-    el.style.cssText+='background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
-    el.innerHTML='✅ <strong>Documento aprobado</strong>'+(resultado.motivo?' — '+resultado.motivo:'');
-  }else{
-    el.style.cssText+='background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;display:block;';
-    const prob=resultado.problemas&&resultado.problemas.length?'<br>• '+resultado.problemas.join('<br>• '):'';
-    el.innerHTML='⚠️ <strong>Documento rechazado</strong>'+(resultado.motivo?' — '+resultado.motivo:'')+prob+'<br><span style="font-size:11px;opacity:0.8">Por favor vuelve a subir el documento corregido.</span>';
-    delete uploaded[id];
-    _saveUploaded();
-    document.getElementById('dr_'+id).classList.remove('done');
-    const b2=document.getElementById('ub_'+id);b2.classList.remove('done');b2.textContent='↑ Subir';
-    const fnEl=document.getElementById('fn_'+id);if(fnEl){fnEl.textContent='';fnEl.classList.remove('show');}
-  }
-}
 
 async function onFile(id,input){
   if(!input.files.length)return;
   const f=input.files[0];
-  if(f.size>20*1024*1024){alert('El archivo supera 20 MB.');input.value='';return;}
+  if(f.size>20*1024*1024){alert('El archivo supera 20 MB. Comprime o divide el documento.');input.value='';return;}
   const btn=document.getElementById('ub_'+id);
   const fn=document.getElementById('fn_'+id);
   btn.textContent='⏳ Subiendo...';btn.disabled=true;
   const clienteId=generarClienteId();
-  // Read name from multiple possible field IDs (d_ prefix or plain)
-  const _getNombre = id => (document.getElementById('d_'+id)||document.getElementById(id))?.value?.trim()||'';
-  const nombreCliente = [_getNombre('nombre'),_getNombre('ap_pat'),_getNombre('ap_mat')].filter(Boolean).join(' ');
-  console.log('[Credifika] Validando:', id, '| nombre_cliente:', nombreCliente, '| nss:', nss);
-  const nss=document.getElementById('d_nss')?.value||'';
   const ok=await subirASupabase(f,clienteId,id);
-  if(!ok){btn.textContent='✗ Error';btn.disabled=false;btn.style.cssText+='background:#fee2e2;color:#dc2626;';return;}
+  if(!ok){
+    btn.textContent='✗ Error — reintentar';btn.disabled=false;
+    btn.style.cssText+='background:#fee2e2;color:#dc2626;';return;
+  }
   uploaded[id]=f.name;
   _saveUploaded();
   document.getElementById('dr_'+id).classList.add('done');
-  btn.classList.add('done');btn.textContent='⏳ Validando...';btn.disabled=true;
+  btn.classList.add('done');btn.textContent='✓ Subido';btn.disabled=false;
   fn.textContent=f.name;fn.classList.add('show');
-  const tipoDoc=TIPO_DOC[id];
-  if(tipoDoc){
-    const resultado=await validarConClaude(f,tipoDoc,nombreCliente,nss);
-    mostrarResultadoValidacion(id,resultado);
-    if(resultado&&!resultado.aprobado){btn.textContent='↑ Subir de nuevo';btn.disabled=false;btn.classList.remove('done');}
-    else{btn.textContent='✓ Aprobado';btn.disabled=false;}
-  }else{btn.textContent='✓ Subido';btn.disabled=false;}
+  // Show simple success badge
+  let el=document.getElementById('val_'+id);
+  if(!el){
+    el=document.createElement('div');el.id='val_'+id;
+    el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;display:block;';
+    if(fn&&fn.parentNode)fn.parentNode.insertBefore(el,fn.nextSibling);
+  }
+  el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
+  el.innerHTML='✅ Documento cargado correctamente';
   refresh();
 }
+
 
 function refresh() {
   const done = OBLIG.filter(id => uploaded[id]).length;
