@@ -547,7 +547,7 @@ const BUCKET='expedientes';
 async function subirASupabase(file,clienteId,docId){
   const ruta=clienteId+'/'+docId+'_'+file.name;
   const res=await fetch(SUPA_URL+'/storage/v1/object/'+BUCKET+'/'+ruta,{
-    method:'POST',
+    method:'PUT',
     headers:{'Authorization':'Bearer '+SUPA_KEY,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},
     body:file
   });
@@ -565,7 +565,21 @@ function generarClienteId(){
 }
 
 // ── UPLOAD ────────────────────────────────────────────────────────
-const uploaded={};
+// Load uploaded state from localStorage so it persists across sessions
+function _loadUploaded(){
+  try{
+    const nss=document.getElementById('d_nss')?.value||'sin-nss';
+    const saved=localStorage.getItem('uploaded_'+nss);
+    return saved?JSON.parse(saved):{};
+  }catch(e){return{};}
+}
+function _saveUploaded(){
+  try{
+    const nss=document.getElementById('d_nss')?.value||'sin-nss';
+    localStorage.setItem('uploaded_'+nss,JSON.stringify(uploaded));
+  }catch(e){}
+}
+const uploaded=_loadUploaded();
 const OBLIG=['ine','acta','curpdoc','rfc','dom','banco','carta','pres'];
 const OPT=['foto','ev'];
 const TIPO_DOC={ine:'ine',acta:'acta',curpdoc:'curp',rfc:'rfc',dom:'comprobante_domicilio',banco:'estado_cuenta',carta:'carta_protesta',pres:'presupuesto',foto:null,ev:null};
@@ -606,6 +620,7 @@ function mostrarResultadoValidacion(id,resultado){
     const prob=resultado.problemas&&resultado.problemas.length?'<br>• '+resultado.problemas.join('<br>• '):'';
     el.innerHTML='⚠️ <strong>Documento rechazado</strong>'+(resultado.motivo?' — '+resultado.motivo:'')+prob+'<br><span style="font-size:11px;opacity:0.8">Por favor vuelve a subir el documento corregido.</span>';
     delete uploaded[id];
+    _saveUploaded();
     document.getElementById('dr_'+id).classList.remove('done');
     const b2=document.getElementById('ub_'+id);b2.classList.remove('done');b2.textContent='↑ Subir';
     const fnEl=document.getElementById('fn_'+id);if(fnEl){fnEl.textContent='';fnEl.classList.remove('show');}
@@ -625,6 +640,7 @@ async function onFile(id,input){
   const ok=await subirASupabase(f,clienteId,id);
   if(!ok){btn.textContent='✗ Error';btn.disabled=false;btn.style.cssText+='background:#fee2e2;color:#dc2626;';return;}
   uploaded[id]=f.name;
+  _saveUploaded();
   document.getElementById('dr_'+id).classList.add('done');
   btn.classList.add('done');btn.textContent='⏳ Validando...';btn.disabled=true;
   fn.textContent=f.name;fn.classList.add('show');
@@ -861,6 +877,35 @@ function irAConsentimiento() {
   var params   = new URLSearchParams({ nombre: nombre, ap_pat: ap_pat, ap_mat: ap_mat, nss: nss, curp: curp_val, telefono: tel });
   window.location.href = 'credifika-consentimiento.html?' + params.toString();
 }
+
+// ── RESTAURAR documentos ya subidos al recargar la página
+(function(){
+  function restoreUploaded(){
+    const nss=document.getElementById('d_nss')?.value||'sin-nss';
+    let saved={};
+    try{const s=localStorage.getItem('uploaded_'+nss);if(s)saved=JSON.parse(s);}catch(e){}
+    for(const [id,fname] of Object.entries(saved)){
+      if(!fname)continue;
+      const dr=document.getElementById('dr_'+id);
+      const btn=document.getElementById('ub_'+id);
+      const fn=document.getElementById('fn_'+id);
+      if(dr)dr.classList.add('done');
+      if(btn){btn.classList.add('done');btn.textContent='✓ Ya subido';}
+      if(fn){fn.textContent=fname;fn.classList.add('show');}
+      uploaded[id]=fname;
+      let el=document.getElementById('val_'+id);
+      if(!el){
+        el=document.createElement('div');el.id='val_'+id;
+        el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#EAF0FA;color:#1B3D6B;border:1px solid #c8d8f0;display:block;';
+        const fnEl=document.getElementById('fn_'+id);
+        if(fnEl&&fnEl.parentNode)fnEl.parentNode.insertBefore(el,fnEl.nextSibling);
+      }
+      el.innerHTML='📂 Documento ya subido. Sube uno nuevo para reemplazarlo.';
+    }
+    refresh();
+  }
+  setTimeout(restoreUploaded,900);
+})();
 </script>
 </body>
 </html>
