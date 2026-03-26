@@ -288,7 +288,7 @@
         <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
           <div class="doc-name">INE / Credencial de elector o Pasaporte vigente</div>
-          <div class="doc-desc">Ambos lados del INE en original y copia al 200%. Pasaporte: página con fotografía.</div>
+          <div class="doc-desc">Sube foto o escaneo de ambos lados de tu INE. También se acepta pasaporte (página con fotografía).</div>
           <span class="doc-tag t-req">Obligatorio</span>
         </div>
         <div class="upload-col">
@@ -302,7 +302,7 @@
         <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
           <div class="doc-name">Acta de nacimiento</div>
-          <div class="doc-desc">Original y copia legible.</div>
+          <div class="doc-desc">Sube foto o escaneo legible de tu acta de nacimiento. No necesitas llevar la original.</div>
           <span class="doc-tag t-req">Obligatorio</span>
         </div>
         <div class="upload-col">
@@ -316,7 +316,7 @@
         <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
           <div class="doc-name">CURP impresa</div>
-          <div class="doc-desc">Descárgala en gob.mx. Debe coincidir exactamente con tu INE.</div>
+          <div class="doc-desc">Descárgala e imprímela. Debe coincidir exactamente con tu INE.<br><a href="https://www.gob.mx/curp/" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:5px 10px;background:#EAF0FA;color:#1B3D6B;border:1px solid #1B3D6B;border-radius:7px;font-size:11px;font-weight:600;text-decoration:none;">🔍 Descargar mi CURP en gob.mx</a></div>
           <span class="doc-tag t-req">Obligatorio</span>
         </div>
         <div class="upload-col">
@@ -386,31 +386,29 @@
 
       <div class="sec-label">Formatos oficiales Infonavit — los generamos por ti ↓</div>
 
-      <div class="doc-row" id="dr_carta">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="doc-row" id="dr_carta" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
+        <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
-          <div class="doc-name">✨ Declaratoria Bajo Protesta de Decir Verdad — firmada</div>
-          <div class="doc-desc">Genera el PDF en la sección de abajo, imprímelo, fírmalo y súbelo aquí.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
-        </div>
-        <div class="upload-col">
-          <input type="file" id="f_carta" accept="image/*,.pdf" onchange="onFile('carta',this)">
-          <button class="btn-up" id="ub_carta" onclick="document.getElementById('f_carta').click()">↑ Subir firmada</button>
-          <div class="fname" id="fn_carta"></div>
+          <div class="doc-name">📋 Carta Bajo Protesta de Decir Verdad</div>
+          <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se firma el día de tu cita en nuestras oficinas.</strong> No necesitas subirlo ni imprimirlo ahora. Credifika lo tiene listo para ti.</div>
+          <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
         </div>
       </div>
 
-      <div class="doc-row" id="dr_pres">
-        <div class="doc-check"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="doc-row" id="dr_pres" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
+        <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
-          <div class="doc-name">✨ Formato de Presupuesto Inicial — firmado</div>
-          <div class="doc-desc">Genera el PDF abajo, imprímelo, fírmalo y súbelo aquí.</div>
-          <span class="doc-tag t-req">Obligatorio</span>
+          <div class="doc-name">📋 Formato de Presupuesto de Mejoramiento</div>
+          <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se firma el día de tu cita en nuestras oficinas.</strong> No necesitas subirlo ni imprimirlo ahora. Credifika lo tiene listo para ti.</div>
+          <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
         </div>
-        <div class="upload-col">
-          <input type="file" id="f_pres" accept="image/*,.pdf" onchange="onFile('pres',this)">
-          <button class="btn-up" id="ub_pres" onclick="document.getElementById('f_pres').click()">↑ Subir firmado</button>
-          <div class="fname" id="fn_pres"></div>
+      </div>
+      <div class="doc-row" id="dr_solicitud" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
+        <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="doc-info">
+          <div class="doc-name">📋 Solicitud de Inscripción de Crédito Mejoravit</div>
+          <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se completa y firma el día de tu cita.</strong> No necesitas hacer nada ahora.</div>
+          <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
         </div>
       </div>
 
@@ -525,19 +523,29 @@
   setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
 
   // Restaurar progreso guardado en localStorage
+  // Campos personales solo si NSS coincide (evitar herencia entre usuarios)
   try {
     var saved = JSON.parse(localStorage.getItem('credifika_expediente') || '{}');
-    ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp','d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
+    var urlNSS = p.get('nss') || '';
+    var savedNSS = saved['d_nss'] || '';
+    var mismoUsuario = urlNSS && savedNSS && urlNSS === savedNSS;
+    ['d_nombre','d_ap_pat','d_ap_mat','d_nss','d_curp'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el && saved[id] && !el.value) {
-        el.value = saved[id];
-        var badge = document.getElementById('ab_' + id.replace('d_',''));
-        if (badge && saved['_from_url_' + id]) badge.style.display = 'block';
-      }
+      if (el && saved[id] && !el.value) el.value = saved[id];
     });
+    if (mismoUsuario) {
+      ['d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && saved[id] && !el.value) el.value = saved[id];
+      });
+    } else {
+      ['d_rfc','d_ciudad','d_telefono','d_email'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
     setTimeout(function() { actualizarPreview(); verificarListo(); }, 150);
   } catch(e) {}
-})();
 
 // ── SUPABASE CONFIG ────────────────────────────────────────────
 const SUPA_URL='https://ntcekfevzqfpdpkeviug.supabase.co';
@@ -580,7 +588,7 @@ function _saveUploaded(){
   }catch(e){}
 }
 const uploaded=_loadUploaded();
-const OBLIG=['ine','acta','curpdoc','rfc','dom','banco','carta','pres'];
+const OBLIG = ['ine','acta','curpdoc','rfc','dom','banco'];
 const OPT=['foto','ev'];
 const TIPO_DOC={ine:'ine',acta:'acta',curpdoc:'curp',rfc:'rfc',dom:'comprobante_domicilio',banco:'estado_cuenta',carta:'carta_protesta',pres:'presupuesto',foto:null,ev:null};
 
@@ -868,6 +876,28 @@ function irAConsentimiento() {
     refresh();
   }
   setTimeout(restoreUploaded,900);
+})();
+
+(function(){
+  function doRestore(){
+    var nss=document.getElementById('d_nss')?document.getElementById('d_nss').value:'';
+    if(!nss){setTimeout(doRestore,600);return;}
+    var sv;try{sv=JSON.parse(localStorage.getItem('uploaded_NSS-'+nss)||'{}');}catch(e){return;}
+    Object.keys(sv).forEach(function(id){
+      var fname=sv[id];if(!fname)return;
+      uploaded[id]=fname;
+      var dr=document.getElementById('dr_'+id),btn=document.getElementById('ub_'+id),fn=document.getElementById('fn_'+id);
+      if(dr)dr.classList.add('done');
+      if(btn){btn.classList.add('done');btn.textContent='✓ Subido';}
+      if(fn){fn.textContent=fname;fn.classList.add('show');}
+      var vEl=document.getElementById('val_'+id);
+      if(!vEl){vEl=document.createElement('div');vEl.id='val_'+id;if(fn&&fn.parentNode)fn.parentNode.insertBefore(vEl,fn.nextSibling);}
+      vEl.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
+      vEl.innerHTML='✅ Documento cargado correctamente';
+    });
+    refresh();
+  }
+  setTimeout(doRestore,800);
 })();
 </script>
 </body>
