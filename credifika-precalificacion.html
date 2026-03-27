@@ -234,6 +234,14 @@
               oninput="document.getElementById('subcuentaVal').textContent='$'+Number(this.value).toLocaleString('es-MX')">
           </div>
         </div>
+        <div style="margin-top:8px;">
+          <a href="https://micuenta.infonavit.org.mx/" target="_blank"
+             style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:9px;font-size:12px;font-weight:600;text-decoration:none;"
+             onmouseover="this.style.background='#1B3D6B';this.style.color='#fff';"
+             onmouseout="this.style.background='#EAF0FA';this.style.color='#1B3D6B';">
+            🏦 Consultar mi saldo real en Mi Cuenta Infonavit
+          </a>
+        </div>
 
         <!-- Tipo de contrato -->
         <div>
@@ -286,7 +294,7 @@
       </div>
     </div>
 
-    <button class="btn-calc" onclick="calcular()">Ver si califico →</button>
+    <button class="btn-calc" id="btnCalificar" onclick="validarYCalcular()">Ver si califico →</button>
 
     <div class="nota">🔒 Tus datos son confidenciales y no se almacenan. Este análisis es orientativo — un asesor Credifika revisará tu caso de forma personalizada sin costo.</div>
 
@@ -391,6 +399,17 @@ function calcular() {
   }
 
   // ── CALIFICA ──────────────────────────────────────────
+  // ── VERIFICAR SI YA EXISTE EXPEDIENTE CON ESTE NSS ──────
+  const _nssVal = nss || document.getElementById('nss')?.value || '';
+  const _apPatVal = window._ap_pat || '';
+  const _apMatVal = window._ap_mat || '';
+  const _telVal = telefono || '';
+  const _curpVal = document.getElementById('curp')?.value || '';
+  if (verificarDuplicado(_nssVal, n)) {
+    mostrarExpedienteDuplicado(window._nombre_raw || n, n, _nssVal, _apPatVal, _apMatVal, _curpVal, _telVal);
+    return;
+  }
+
   mostrar('azul', '🎉', `¡${n}, tu perfil precalifica!`,
     `Cumples con los requisitos para tramitar el crédito Mejoravit. El siguiente paso es que un asesor Credifika valide tu expediente y te guíe en el proceso — nosotros nos encargamos de todo sin que tengas que ir a ninguna oficina.`,
     true, nombre, nss, telefono, subcuenta, 'califica');
@@ -448,6 +467,24 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
     const _tel  = telefono || '';
     const params = new URLSearchParams({ nombre: _nr, ap_pat: _app, ap_mat: _apm, nss: _nss, curp: _curp, telefono: _tel });
     btnExp.href = `credifika-expediente.html?${params.toString()}`;
+
+    // ── WHATSAPP AUTOMÁTICO AL PRECALIFICAR ──────────────
+    // Enviar mensaje al número del cliente si proporcionó WhatsApp
+    if (_tel && _tel.length >= 10) {
+      const monto = Math.min(Math.max((subcuenta||0) * 0.9, 10318), 169039);
+      const montoFmt = '$' + Math.round(monto).toLocaleString('es-MX');
+      const nombreCompleto = [_nr, _app, _apm].filter(Boolean).join(' ');
+      const msgCliente = encodeURIComponent(
+        `¡Hola ${nombreCompleto}! 🎉\n\n` +
+        `Tu precalificación en Credifika fue *exitosa*. ` +
+        `Estás más cerca de tu crédito Mejoravit preaprobado por aproximadamente *${montoFmt} pesos*.\n\n` +
+        `El siguiente paso es armar tu expediente digital. Un asesor Credifika te acompañará en todo el proceso.\n\n` +
+        `¿Tienes alguna duda o quieres continuar ahora?`
+      );
+      // Abrir WhatsApp en nueva pestaña con mensaje prellenado al número del cliente
+      const waCliente = `https://wa.me/52${_tel.replace(/\D/g,'')}?text=${msgCliente}`;
+      window.open(waCliente, '_blank');
+    }
   } else {
     btnExp.classList.remove('visible');
   }
@@ -468,6 +505,125 @@ function recalcular() {
 // Variable curp para el mensaje WhatsApp
 var curp = '';
 document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
+
+// ── VERIFICAR EXPEDIENTE DUPLICADO ──────────────────────
+function verificarDuplicado(nss, nombre) {
+  if (!nss) return false;
+  const key = 'uploaded_NSS-' + nss;
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const data = JSON.parse(saved);
+      // Si tiene al menos 1 documento subido, existe expediente
+      return Object.keys(data).length > 0;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function mostrarExpedienteDuplicado(nombre, nss, nssParam, apPat, apMat, curpVal, tel) {
+  // Ocultar formulario y mostrar pantalla de duplicado
+  document.getElementById('formulario').style.display = 'none';
+  document.getElementById('resultado').style.display = 'block';
+
+  const params = new URLSearchParams({
+    nombre: nombre, ap_pat: apPat, ap_mat: apMat,
+    nss: nssParam, curp: curpVal, telefono: tel
+  });
+  const expUrl = 'credifika-expediente.html?' + params.toString();
+  const waMsg = encodeURIComponent(`Hola Credifika, soy ${nombre} (NSS: ${nssParam}). Ya tengo un expediente y necesito ayuda.`);
+
+  const rc = document.getElementById('resultCard');
+  rc.className = 'result-card r-amarillo';
+  rc.innerHTML = `
+    <div class="result-icon">📋</div>
+    <div class="result-title">Ya tienes un expediente registrado</div>
+    <div class="result-sub">Encontramos un expediente previo con el NSS <strong>${nssParam}</strong> a nombre de <strong>${nombre}</strong>.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;">
+      <a href="${expUrl}" style="display:block;text-align:center;padding:14px 20px;background:#1B3D6B;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;">
+        📂 Continuar donde me quedé
+      </a>
+      <button onclick="recalcular()" style="padding:14px 20px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;">
+        ✏️ Ingresar nuevos datos
+      </button>
+      <a href="https://wa.me/5215521893011?text=${waMsg}" target="_blank" style="display:block;text-align:center;padding:14px 20px;background:#25D366;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;">
+        💬 Hablar con un asesor
+      </a>
+    </div>
+  `;
+  document.getElementById('montoCard').style.display = 'none';
+  document.getElementById('btnWa').style.display = 'none';
+  document.getElementById('btnExpediente').style.display = 'none';
+  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── VALIDACIÓN DE CAMPOS OBLIGATORIOS ────────────────────────
+function validarYCalcular() {
+  const campos = [
+    { id: 'nombre',           label: 'Nombre(s)' },
+    { id: 'apellido_paterno', label: 'Apellido paterno' },
+    { id: 'apellido_materno', label: 'Apellido materno' },
+    { id: 'nss',              label: 'NSS' },
+    { id: 'curp',             label: 'CURP' },
+    { id: 'telefono',         label: 'WhatsApp' },
+  ];
+
+  let hayError = false;
+
+  campos.forEach(function(campo) {
+    const el = document.getElementById(campo.id);
+    if (!el) return;
+    const val = el.value.trim();
+    if (!val) {
+      // Marcar campo en rojo
+      el.style.borderColor = '#dc2626';
+      el.style.background  = '#fff5f5';
+      // Agregar mensaje de error si no existe
+      let errEl = document.getElementById('err_' + campo.id);
+      if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.id = 'err_' + campo.id;
+        errEl.style.cssText = 'font-size:11px;color:#dc2626;margin-top:3px;font-weight:500;';
+        el.parentNode.appendChild(errEl);
+      }
+      errEl.textContent = campo.label + ' es obligatorio';
+      hayError = true;
+    } else {
+      // Limpiar error
+      el.style.borderColor = '';
+      el.style.background  = '';
+      const errEl = document.getElementById('err_' + campo.id);
+      if (errEl) errEl.textContent = '';
+    }
+  });
+
+  if (hayError) {
+    // Hacer scroll al primer campo con error
+    const primerError = campos.find(c => !document.getElementById(c.id).value.trim());
+    if (primerError) {
+      document.getElementById(primerError.id).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(primerError.id).focus();
+    }
+    return; // No continuar
+  }
+
+  // Todo OK — proceder
+  calcular();
+}
+
+// Limpiar error en tiempo real al escribir
+['nombre','apellido_paterno','apellido_materno','nss','curp','telefono'].forEach(function(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    if (this.value.trim()) {
+      this.style.borderColor = '';
+      this.style.background  = '';
+      const errEl = document.getElementById('err_' + id);
+      if (errEl) errEl.textContent = '';
+    }
+  });
+});
 </script>
 </body>
 </html>
