@@ -522,22 +522,6 @@
   // Actualizar preview de datos con lo que se auto-llenó
   setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
 
-  // Guardar en localStorage inmediatamente si vinieron datos por URL
-  // para que "Continuar mi trámite" pueda encontrar al usuario
-  try {
-    var urlNSSCheck = p.get('nss') || '';
-    if (urlNSSCheck) {
-      var autoData = {};
-      [['nombre','d_nombre'],['ap_pat','d_ap_pat'],['ap_mat','d_ap_mat'],
-       ['nss','d_nss'],['curp','d_curp'],['telefono','d_telefono'],['email','d_email']
-      ].forEach(function(pair) {
-        var v = p.get(pair[0]);
-        if (v) autoData[pair[1]] = v;
-      });
-      localStorage.setItem('credifika_expediente', JSON.stringify(autoData));
-    }
-  } catch(e) {}
-
   // Restaurar progreso guardado en localStorage
   // Campos personales solo si NSS coincide (evitar herencia entre usuarios)
   try {
@@ -562,6 +546,7 @@
     }
     setTimeout(function() { actualizarPreview(); verificarListo(); }, 150);
   } catch(e) {}
+})();
 
 // ── SUPABASE CONFIG ────────────────────────────────────────────
 const SUPA_URL='https://ntcekfevzqfpdpkeviug.supabase.co';
