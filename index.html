@@ -800,18 +800,41 @@
 <script>
 (function() {
   try {
+    var btn = document.getElementById('btnContinuar');
+    var hint = document.getElementById('continuar-hint');
+
+    // Prioridad 1: datos de precalificacion completada
+    var precal = JSON.parse(localStorage.getItem('credifika_precal') || '{}');
     var exp = JSON.parse(localStorage.getItem('credifika_expediente') || '{}');
-    if (exp['d_nombre'] || exp['d_nss']) {
-      var btn = document.getElementById('btnContinuar');
-      var hint = document.getElementById('continuar-hint');
+
+    var nombre = precal['nombre'] || exp['d_nombre'] || '';
+    var nss    = precal['nss']    || exp['d_nss']    || '';
+
+    if (nombre || nss) {
+      // Construir URL al expediente con todos los datos disponibles
+      var params = new URLSearchParams();
+      if (precal['nombre']   || exp['d_nombre'])   params.set('nombre',   precal['nombre']   || exp['d_nombre']);
+      if (precal['ap_pat']   || exp['d_ap_pat'])   params.set('ap_pat',   precal['ap_pat']   || exp['d_ap_pat']);
+      if (precal['ap_mat']   || exp['d_ap_mat'])   params.set('ap_mat',   precal['ap_mat']   || exp['d_ap_mat']);
+      if (precal['nss']      || exp['d_nss'])      params.set('nss',      precal['nss']      || exp['d_nss']);
+      if (precal['curp']     || exp['d_curp'])     params.set('curp',     precal['curp']     || exp['d_curp']);
+      if (precal['telefono'] || exp['d_telefono']) params.set('telefono', precal['telefono'] || exp['d_telefono']);
+      if (precal['email']    || exp['d_email'])    params.set('email',    precal['email']    || exp['d_email']);
+
+      var expUrl = 'credifika-expediente.html?' + params.toString();
+
       if (btn) {
+        btn.href = expUrl;
         btn.style.display = 'inline-flex';
         btn.style.alignItems = 'center';
         btn.style.gap = '8px';
       }
       if (hint) {
+        var primerNombre = nombre.split(' ')[0];
         hint.style.display = 'block';
-        hint.textContent = '✓ Tienes un trámite guardado en este navegador';
+        hint.textContent = primerNombre
+          ? '✓ Hola ' + primerNombre + ', tienes un trámite guardado'
+          : '✓ Tienes un trámite guardado en este navegador';
       }
     }
   } catch(e) {}

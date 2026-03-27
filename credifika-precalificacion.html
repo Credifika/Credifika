@@ -451,7 +451,15 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
     `Usé la calculadora de precalificación ${estado}. ` +
     `${telefono ? 'Mi WhatsApp: '+telefono+'.' : ''} ¿Me pueden apoyar?`
   );
-  document.getElementById('btnWa').href = `https://wa.me/5215521893011?text=${msg}`;
+  // Mensaje de presentación del asesor — humano y cálido
+  // Se incluyen datos del cliente para que el asesor tenga contexto
+  const nombreParaAsesor = [nombre, nss ? '(NSS: ' + nss + ')' : ''].filter(Boolean).join(' ');
+  const msgAsesor = encodeURIComponent(
+    `Hola! 👋 Acabo de usar la calculadora de Credifika` +
+    `${nombreParaAsesor ? ' — soy ' + nombreParaAsesor : ''}. ` +
+    `Me interesa saber más sobre el crédito Mejoravit. ¿Me pueden orientar?`
+  );
+  document.getElementById('btnWa').href = `https://wa.me/5215521893011?text=${msgAsesor}`;
 
   // Botón de expediente — solo cuando precalifica
   const btnExp = document.getElementById('btnExpediente');
@@ -481,9 +489,11 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
         `El siguiente paso es armar tu expediente digital. Un asesor Credifika te acompañará en todo el proceso.\n\n` +
         `¿Tienes alguna duda o quieres continuar ahora?`
       );
-      // Abrir WhatsApp en nueva pestaña con mensaje prellenado al número del cliente
-      const waCliente = `https://wa.me/52${_tel.replace(/\D/g,'')}?text=${msgCliente}`;
-      window.open(waCliente, '_blank');
+      // Guardar referencia del mensaje (para uso futuro con WhatsApp Business API)
+      // NO abrir ventana — el mensaje se enviará vía webhook cuando esté configurado
+      window._waClienteUrl = `https://wa.me/52${_tel.replace(/\D/g,'')}?text=${msgCliente}`;
+      window._waClienteMonto = montoFmt;
+      window._waClienteNombre = nombreCompleto;
     }
   } else {
     btnExp.classList.remove('visible');
