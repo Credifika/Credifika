@@ -234,14 +234,6 @@
               oninput="document.getElementById('subcuentaVal').textContent='$'+Number(this.value).toLocaleString('es-MX')">
           </div>
         </div>
-        <div style="margin-top:8px;">
-          <a href="https://micuenta.infonavit.org.mx/" target="_blank"
-             style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:9px;font-size:12px;font-weight:600;text-decoration:none;"
-             onmouseover="this.style.background='#1B3D6B';this.style.color='#fff';"
-             onmouseout="this.style.background='#EAF0FA';this.style.color='#1B3D6B';">
-            🏦 Consultar mi saldo real en Mi Cuenta Infonavit
-          </a>
-        </div>
 
         <!-- Tipo de contrato -->
         <div>
@@ -399,15 +391,6 @@ function calcular() {
   }
 
   // ── CALIFICA ──────────────────────────────────────────
-  var _nssCheck=nss||document.getElementById('nss')?.value||'';
-  var _apPatCheck=window._ap_pat||'';
-  var _apMatCheck=window._ap_mat||'';
-  var _telCheck=telefono||'';
-  var _curpCheck=document.getElementById('curp')?.value||'';
-  if(verificarDuplicado(_nssCheck)){
-    mostrarExpedienteDuplicado(window._nombre_raw||n,_nssCheck,_apPatCheck,_apMatCheck,_curpCheck,_telCheck);
-    return;
-  }
   mostrar('azul', '🎉', `¡${n}, tu perfil precalifica!`,
     `Cumples con los requisitos para tramitar el crédito Mejoravit. El siguiente paso es que un asesor Credifika valide tu expediente y te guíe en el proceso — nosotros nos encargamos de todo sin que tengas que ir a ninguna oficina.`,
     true, nombre, nss, telefono, subcuenta, 'califica');
@@ -465,34 +448,6 @@ function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telef
     const _tel  = telefono || '';
     const params = new URLSearchParams({ nombre: _nr, ap_pat: _app, ap_mat: _apm, nss: _nss, curp: _curp, telefono: _tel });
     btnExp.href = `credifika-expediente.html?${params.toString()}`;
-    if (_tel && _tel.replace(/\D/g,'').length >= 10) {
-      const monto2 = Math.min(Math.max((subcuenta||0)*0.9,10318),169039);
-      const montoFmt2 = '
-
-  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ── RECALCULAR ──────────────────────────────────────────
-function recalcular() {
-  document.getElementById('formulario').style.display = 'block';
-  document.getElementById('resultado').style.display = 'none';
-  ['sd1'].forEach(id => { document.getElementById(id).className = 'step-dot active'; });
-  ['sd2','sd3'].forEach(id => { document.getElementById(id).className = 'step-dot'; });
-  ['sl1','sl2'].forEach(id => { document.getElementById(id).classList.remove('done'); });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Variable curp para el mensaje WhatsApp
-var curp = '';
-document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
-</script>
-</body>
-</html>
-+Math.round(monto2).toLocaleString('es-MX');
-      const nombreCompleto2=[_nr,_app,_apm].filter(Boolean).join(' ');
-      const msgCliente2=encodeURIComponent('¡Hola '+nombreCompleto2+'! 🎉\n\nTu precalificación en Credifika fue *exitosa*. Estás más cerca de tu crédito Mejoravit preaprobado por aproximadamente *'+montoFmt2+' pesos*.\n\nEl siguiente paso es armar tu expediente digital. Un asesor Credifika te acompañará en todo el proceso.\n\n¿Tienes alguna duda o quieres continuar ahora?');
-      window.open('https://wa.me/52'+_tel.replace(/\D/g,'')+'?text='+msgCliente2,'_blank');
-    }
   } else {
     btnExp.classList.remove('visible');
   }
@@ -513,71 +468,6 @@ function recalcular() {
 // Variable curp para el mensaje WhatsApp
 var curp = '';
 document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
-
-function verificarDuplicado(nss) {
-  if(!nss)return false;
-  try{var sv=JSON.parse(localStorage.getItem('uploaded_NSS-'+nss)||'{}');return Object.keys(sv).length>0;}catch(e){return false;}
-}
-function mostrarExpedienteDuplicado(nombre, nss, apPat, apMat, curpV, tel) {
-  document.getElementById('formulario').style.display = 'none';
-  document.getElementById('resultado').style.display = 'block';
-
-  var params = new URLSearchParams({ nombre: nombre, ap_pat: apPat, ap_mat: apMat, nss: nss, curp: curpV, telefono: tel });
-  var expUrl = 'credifika-expediente.html?' + params.toString();
-  var waMsg = encodeURIComponent('Hola Credifika, soy ' + nombre + ' (NSS: ' + nss + '). Ya tengo un expediente y necesito ayuda.');
-
-  var rc = document.getElementById('resultCard');
-  rc.className = 'result-card r-amarillo';
-
-  // Usar DOM para evitar problemas de escape en innerHTML
-  while (rc.firstChild) rc.removeChild(rc.firstChild);
-
-  var icon = document.createElement('div');
-  icon.className = 'result-icon';
-  icon.textContent = '📋';
-  rc.appendChild(icon);
-
-  var title = document.createElement('div');
-  title.className = 'result-title';
-  title.textContent = 'Ya tienes un expediente registrado';
-  rc.appendChild(title);
-
-  var sub = document.createElement('div');
-  sub.className = 'result-sub';
-  sub.innerHTML = 'Encontramos un expediente previo con el NSS <strong>' + nss + '</strong> a nombre de <strong>' + nombre + '</strong>.';
-  rc.appendChild(sub);
-
-  var btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:24px;';
-
-  var btn1 = document.createElement('a');
-  btn1.href = expUrl;
-  btn1.style.cssText = 'display:block;text-align:center;padding:14px 20px;background:#1B3D6B;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;';
-  btn1.textContent = '📂 Continuar donde me quedé';
-  btns.appendChild(btn1);
-
-  var btn2 = document.createElement('button');
-  btn2.setAttribute('onclick', 'recalcular()');
-  btn2.style.cssText = 'padding:14px 20px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;';
-  btn2.textContent = '✏️ Ingresar nuevos datos';
-  btns.appendChild(btn2);
-
-  var btn3 = document.createElement('a');
-  btn3.href = 'https://wa.me/5215521893011?text=' + waMsg;
-  btn3.target = '_blank';
-  btn3.style.cssText = 'display:block;text-align:center;padding:14px 20px;background:#25D366;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;';
-  btn3.textContent = '💬 Hablar con un asesor';
-  btns.appendChild(btn3);
-
-  rc.appendChild(btns);
-
-  document.getElementById('montoCard').style.display = 'none';
-  document.getElementById('btnWa').style.display = 'none';
-  document.getElementById('btnExpediente').style.display = 'none';
-  ['sd1','sd2','sd3'].forEach(function(id) { document.getElementById(id).className = 'step-dot done'; });
-  ['sl1','sl2'].forEach(function(id) { document.getElementById(id).classList.add('done'); });
-  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-}
 </script>
 </body>
 </html>
