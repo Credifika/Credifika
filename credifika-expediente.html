@@ -531,6 +531,7 @@
     }
     setTimeout(function() { actualizarPreview(); verificarListo(); }, 150);
   } catch(e) {}
+})();
 
 // ── SUPABASE CONFIG ────────────────────────────────────────────
 const SUPA_URL='https://ntcekfevzqfpdpkeviug.supabase.co';
@@ -862,7 +863,6 @@ function irAConsentimiento() {
     refresh();
   }
   setTimeout(restoreUploaded,900);
-})();
 
 (function(){
   function doRestore(){
