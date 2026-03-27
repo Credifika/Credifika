@@ -386,14 +386,6 @@
 
       <div class="sec-label">Formatos oficiales Infonavit — los generamos por ti ↓</div>
 
-      <div class="doc-row" id="dr_solicitud" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
-        <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="doc-info">
-          <div class="doc-name">📋 Solicitud de Inscripción de Crédito Mejoravit</div>
-          <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se completa y firma el día de tu cita.</strong> No necesitas hacer nada ahora.</div>
-          <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
-        </div>
-      </div>
       <div class="doc-row" id="dr_carta" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
         <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
@@ -402,11 +394,20 @@
           <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
         </div>
       </div>
+
       <div class="doc-row" id="dr_pres" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
         <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="doc-info">
           <div class="doc-name">📋 Formato de Presupuesto de Mejoramiento</div>
           <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se firma el día de tu cita en nuestras oficinas.</strong> No necesitas subirlo ni imprimirlo ahora. Credifika lo tiene listo para ti.</div>
+          <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
+        </div>
+      </div>
+      <div class="doc-row" id="dr_solicitud" style="background:#EAF4FF;border:1.5px solid #BDD7F5;">
+        <div class="doc-check" style="opacity:0.3;"><svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#1B3D6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="doc-info">
+          <div class="doc-name">📋 Solicitud de Inscripción de Crédito Mejoravit</div>
+          <div class="doc-desc" style="color:#1B3D6B;"><strong>Este documento se completa y firma el día de tu cita.</strong> No necesitas hacer nada ahora.</div>
           <span class="doc-tag" style="background:#BDD7F5;color:#1B3D6B;border:none;">📅 Se firma en tu cita</span>
         </div>
       </div>
@@ -429,6 +430,39 @@
 
     </div>
 
+    <!-- GENERADOR -->
+    <div class="gen-card">
+      <h3>📄 Descarga tus documentos oficiales</h3>
+      <p>Generados automáticamente con tus datos. <strong>Imprímelos, fírmalos de puño y letra</strong> y súbelos en la sección de arriba.</p>
+
+      <div class="gen-datos-preview" id="genPreview" style="display:none">
+        <div class="gdp-row"><span class="gdp-label">Nombre</span><span class="gdp-val" id="prev_nombre">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">NSS</span><span class="gdp-val" id="prev_nss">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">CURP</span><span class="gdp-val" id="prev_curp">—</span></div>
+        <div class="gdp-row"><span class="gdp-label">Fecha</span><span class="gdp-val" id="prev_fecha">—</span></div>
+      </div>
+
+      <button class="gen-btn" onclick="genCartaConPreview()">
+        <span class="gi">📝</span>
+        <div>
+          <strong>Declaratoria Bajo Protesta de Decir Verdad</strong>
+          <span>Formato oficial CRED.1037.00/01 — PDF listo para imprimir y firmar</span>
+        </div>
+        <span class="ga">↓</span>
+      </button>
+      <button class="gen-btn" onclick="genPresConPreview()">
+        <span class="gi">🧾</span>
+        <div>
+          <strong>Presupuesto Inicial de la Mejora</strong>
+          <span>Formato oficial Infonavit — PDF listo para imprimir y firmar</span>
+        </div>
+        <span class="ga">↓</span>
+      </button>
+
+      <div class="gen-aviso">
+        ⚠️ Si algún dato está vacío, llénalo en "Tus datos personales" antes de descargar.
+      </div>
+    </div>
 
   </div>
 
@@ -468,7 +502,6 @@
 // ── AUTO-FILL ────────────────────────────────────────────
 (function() {
   const p = new URLSearchParams(window.location.search);
-  // Leer de precalificacion guardada en localStorage como fallback
   let s = {};
   try { s = JSON.parse(localStorage.getItem('credifika_precal') || '{}'); } catch(e) {}
   [
@@ -480,30 +513,12 @@
     ['telefono', 'd_telefono', 'ab_telefono'],
     ['email',    'd_email',    'ab_email'],
   ].forEach(([key, inputId, badgeId]) => {
-    // Prioridad: URL params > localStorage precal
-    const val = p.get(key) || s[key] || '';
+    const val = p.get(key) || s[key];
     if (!val) return;
     const el = document.getElementById(inputId);
     const badge = document.getElementById(badgeId);
-    if (el && !el.value) { el.value = val; if (badge) badge.style.display = 'block'; }
+    if (el) { el.value = val; if (badge) badge.style.display = 'block'; }
   });
-
-  // También guardar los datos en credifika_precal si vinieron por URL
-  // para que persistan si el cliente recarga la página
-  try {
-    const urlNSS = p.get('nss');
-    if (urlNSS) {
-      const toSave = {};
-      [['nombre','nombre'],['ap_pat','ap_pat'],['ap_mat','ap_mat'],
-       ['nss','nss'],['curp','curp'],['telefono','telefono'],['email','email']
-      ].forEach(([urlKey, storeKey]) => {
-        const v = p.get(urlKey);
-        if (v) toSave[storeKey] = v;
-      });
-      localStorage.setItem('credifika_precal', JSON.stringify(toSave));
-    }
-  } catch(e) {}
-
   // Actualizar preview de datos con lo que se auto-llenó
   setTimeout(function() { actualizarPreview(); verificarListo(); }, 100);
 
@@ -846,10 +861,9 @@ function irAConsentimiento() {
       const btn=document.getElementById('ub_'+id);
       const fn=document.getElementById('fn_'+id);
       if(dr)dr.classList.add('done');
-      if(btn){btn.classList.add('done');btn.textContent='✓ Subido';}
+      if(btn){btn.classList.remove('done');btn.textContent='↺ Revalidar';}
       if(fn){fn.textContent=fname;fn.classList.add('show');}
-      // Restaurar como válido — ya fue subido anteriormente
-      uploaded[id]=fname;
+      // Don't auto-restore to uploaded - require revalidation
       let el=document.getElementById('val_'+id);
       if(!el){
         el=document.createElement('div');el.id='val_'+id;
@@ -857,12 +871,13 @@ function irAConsentimiento() {
         const fnEl=document.getElementById('fn_'+id);
         if(fnEl&&fnEl.parentNode)fnEl.parentNode.insertBefore(el,fnEl.nextSibling);
       }
-      el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#E8F5E9;color:#2E7D32;border:1px solid #C8E6C9;display:block;';
-      el.innerHTML='✅ Documento cargado correctamente';
+      el.style.cssText='font-size:12px;margin:4px 0 0 0;padding:5px 10px;border-radius:8px;background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;display:block;';
+      el.innerHTML='⚠️ Documento subido anteriormente — vuelve a subirlo para validarlo.';
     }
     refresh();
   }
   setTimeout(restoreUploaded,900);
+})();
 
 (function(){
   function doRestore(){
