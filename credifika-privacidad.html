@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidad — Credifika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1D3557; --teal: #3A7D8C; --teal-light: #4A9BAD;
+    --teal-pale: #E8F4F7; --cream: #F5F3EE; --cream-dark: #E8E4DA;
+    --text: #1D3557; --text-mid: #4A5C72; --text-light: #7A8EA0;
+    --white: #FFFFFF; --border: #D5CFBF;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--cream); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+  nav {
+    background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; height: 84px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 68px; width: auto; }
+  .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--text-mid); font-size: 14px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-cta { background: var(--navy); color: var(--white) !important; padding: 9px 22px; border-radius: 8px; font-weight: 500 !important; transition: background 0.2s !important; }
+  .nav-cta:hover { background: var(--teal) !important; }
+
+  .page-header {
+    background: var(--navy); padding: 56px 2rem 52px; text-align: center;
+  }
+  .page-header-label { font-size: 12px; font-weight: 600; letter-spacing: 1.6px; text-transform: uppercase; color: var(--teal-light); margin-bottom: 12px; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 44px); color: var(--white); letter-spacing: -0.5px; margin-bottom: 10px; }
+  .page-header p { font-size: 14px; color: rgba(255,255,255,0.5); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 2rem 80px; }
+
+  .back { display: inline-flex; align-items: center; gap: 6px; color: var(--teal); font-size: 13px; font-weight: 500; text-decoration: none; margin-bottom: 36px; transition: color 0.2s; }
+  .back:hover { color: var(--navy); }
+
+  .sec { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 16px; padding: 32px 36px; margin-bottom: 16px; }
+  .sec h2 { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .sec-num { width: 28px; height: 28px; background: var(--teal-pale); color: var(--teal); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .sec p { font-size: 15px; color: var(--text-mid); margin-bottom: 12px; line-height: 1.7; }
+  .sec p:last-child { margin-bottom: 0; }
+  .sec ul { margin: 10px 0 12px 0; list-style: none; }
+  .sec li { font-size: 15px; color: var(--text-mid); margin-bottom: 8px; padding-left: 20px; position: relative; line-height: 1.6; }
+  .sec li::before { content: ''; position: absolute; left: 0; top: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+
+  .hl { background: var(--teal-pale); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+  .hl p { margin-bottom: 0 !important; font-weight: 500; color: var(--teal); font-size: 14px !important; }
+
+  .warn { background: #FFF8E1; border-left: 3px solid #F59E0B; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; }
+  .warn p { margin-bottom: 0 !important; color: #92400E; font-size: 14px !important; }
+
+  .cbox { background: var(--navy); border-radius: 16px; padding: 32px 36px; margin-top: 32px; }
+  .cbox h3 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 16px; }
+  .cbox p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .cbox a { color: var(--teal-light); text-decoration: none; }
+  .cbox a:hover { text-decoration: underline; }
+
+  footer { background: var(--cream); border-top: 1px solid var(--border); padding: 32px 2rem; }
+  .footer-inner { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer-inner p { font-size: 12px; color: var(--text-light); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 12px; color: var(--text-mid); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--navy); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .sec { padding: 24px 20px; }
+    .cbox { padding: 24px 20px; }
+    .footer-inner { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="credifika_logo.png" alt="Credifika"></a>
+  <ul class="nav-links">
+    <li><a href="index.html#califica">¿Quién califica?</a></li>
+    <li><a href="index.html#como-funciona">Cómo funciona</a></li>
+    <li><a href="index.html#faq">Preguntas</a></li>
+    <li><a href="credifika-precalificacion.html" class="nav-cta">Verificar elegibilidad</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <p class="page-header-label">Legal</p>
+  <h1>Política de Privacidad</h1>
+  <p>Última actualización: abril de 2026</p>
+</div>
+
+<div class="container">
+  <a href="index.html" class="back">← Volver al inicio</a>
+
+  <div class="sec">
+    <h2><span class="sec-num">1</span>¿Quiénes somos?</h2>
+    <p>Credifika es una <strong>gestoría privada</strong> especializada en el trámite del crédito Mejoravit del Infonavit. No somos un canal oficial del Infonavit. Operamos en la Ciudad de México y Estado de México.</p>
+    <p>Esta Política describe cómo recopilamos, usamos y protegemos tu información personal al utilizar nuestro sitio y servicios.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">2</span>Información que recopilamos</h2>
+    <p>Para gestionar tu trámite solicitamos:</p>
+    <ul>
+      <li>Nombre completo y datos de identificación (INE, CURP, RFC, NSS)</li>
+      <li>Número de Seguridad Social (NSS) y datos del portal Mi Cuenta Infonavit</li>
+      <li>Datos de contacto: número de WhatsApp y correo electrónico</li>
+      <li>Información financiera: estado de cuenta bancario con CLABE interbancaria</li>
+      <li>Documentos personales: acta de nacimiento, comprobante de domicilio, constancia fiscal</li>
+      <li>Datos laborales: empresa donde laboras y número de registro patronal</li>
+    </ul>
+    <div class="hl"><p>Toda la información se almacena en servidores seguros. No la compartimos con terceros salvo para gestionar tu trámite ante el Infonavit.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">3</span>Cómo usamos tu información</h2>
+    <p>Utilizamos tus datos exclusivamente para:</p>
+    <ul>
+      <li>Evaluar tu precalificación para el crédito Mejoravit</li>
+      <li>Armar y gestionar tu expediente digital ante el Infonavit</li>
+      <li>Comunicarnos contigo por WhatsApp y correo sobre el avance de tu trámite</li>
+      <li>Generar los formatos oficiales requeridos por el Infonavit</li>
+      <li>Agendar tu cita de formalización del crédito</li>
+    </ul>
+    <div class="hl"><p>Base legal del tratamiento: el procesamiento de tus datos personales se sustenta en (a) tu consentimiento explícito al iniciar el trámite, y (b) la relación contractual de prestación de servicios entre tú y Credifika, conforme a los artículos 8 y 10 de la LFPDPPP.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">4</span>Almacenamiento y seguridad</h2>
+    <p>Tus documentos se almacenan en servidores seguros con cifrado en tránsito (HTTPS) y en reposo. Utilizamos Supabase como plataforma de almacenamiento, que cumple con estándares de seguridad internacionales.</p>
+    <p>El acceso a tus documentos está restringido únicamente al equipo de asesores de Credifika que gestiona tu trámite. No vendemos, arrendamos ni compartimos tu información personal con terceros con fines comerciales.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">5</span>Transferencia de datos a terceros</h2>
+    <p>Para la correcta gestión de tu trámite, tu información puede ser compartida con los siguientes terceros, estrictamente para los fines indicados:</p>
+    <ul>
+      <li><strong>Instituto del Fondo Nacional de la Vivienda para los Trabajadores (Infonavit):</strong> para la evaluación, presentación y formalización de tu solicitud de crédito Mejoravit.</li>
+      <li><strong>Grupo Inmobiliario T-Mex S. de R.L. de C.V.:</strong> empresa proveedora de servicios de construcción y verificación de obra, requerida por el programa Mejoravit.</li>
+      <li><strong>KANAN 360:</strong> empresa encargada de la gestión de cobranza y domiciliación del pago de la comisión pactada, únicamente después de que el crédito ha sido depositado en tu cuenta.</li>
+    </ul>
+    <div class="hl"><p>Ninguno de estos terceros está autorizado a usar tu información para fines distintos a los descritos. Credifika no vende ni cede datos personales con fines publicitarios o comerciales.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">6</span>Retención de datos</h2>
+    <p>Conservamos tu información durante el tiempo necesario para completar tu trámite y por el período que establezca la legislación mexicana aplicable. Si deseas que eliminemos tus datos, puedes solicitarlo escribiéndonos a info@credifika.com.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">7</span>Tus derechos (Derechos ARCO)</h2>
+    <p>De conformidad con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), tienes derecho a:</p>
+    <ul>
+      <li><strong>Acceso:</strong> conocer qué datos personales tenemos sobre ti</li>
+      <li><strong>Rectificación:</strong> corregir datos incorrectos o incompletos</li>
+      <li><strong>Cancelación:</strong> solicitar la eliminación de tus datos</li>
+      <li><strong>Oposición:</strong> oponerte al tratamiento de tus datos para fines específicos</li>
+    </ul>
+    <p>Para ejercer estos derechos, contáctanos por WhatsApp al <strong>+52 1 55 1565 7012</strong> o al correo <strong>info@credifika.com</strong>.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">8</span>Cookies y almacenamiento local</h2>
+    <p>Nuestro sitio utiliza localStorage del navegador para guardar tu progreso de precalificación de forma local en tu dispositivo. Esta información no se transmite a terceros y puedes borrarla desde la configuración de tu navegador.</p>
+    <p>No utilizamos cookies de rastreo ni publicidad.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sec-num">9</span>Cambios a esta política</h2>
+    <p>Podemos actualizar esta Política periódicamente. El uso continuado de nuestros servicios después de cambios significativos constituye tu aceptación de la nueva política.</p>
+  </div>
+
+  <div class="cbox">
+    <h3>¿Tienes preguntas sobre tu privacidad?</h3>
+    <p>📱 WhatsApp: <a href="https://wa.me/5215515657012">+52 1 55 1565 7012</a></p>
+    <p>✉️ Correo: <a href="mailto:info@credifika.com">info@credifika.com</a></p>
+    <p>📍 Ciudad de México y Estado de México</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <p>© 2026 Credifika. Todos los derechos reservados.</p>
+    <div class="footer-links">
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="terminos.html">Términos y condiciones</a>
+      <a href="index.html">Inicio</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
