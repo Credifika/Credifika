@@ -4,636 +4,662 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Credifika — ¿Califico para Mejoravit?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
-    --azul: #1B3D6B; --azul-claro: #1E5298; --azul-bg: #EAF0FA; --azul-hover: #142D52;
-    --naranja: #E8622A; --rojo: #D0392B; --rojo-claro: #FEF0EE;
-    --amarillo-bg: #FFF8EC; --amarillo-borde: #F5A623; --amarillo-texto: #7A4F00;
-    --gris-oscuro: #1A1A1A; --gris-medio: #4A4A4A; --gris-suave: #F5F5F2;
-    --blanco: #FAFAF8; --borde: #E0E0D8;
+    --navy:      #1D3557;
+    --teal:      #3A7D8C;
+    --teal-light:#4A9BAD;
+    --teal-pale: #E8F4F7;
+    --cream:     #F5F3EE;
+    --cream-dark:#E8E4DA;
+    --text:      #1D3557;
+    --text-mid:  #4A5C72;
+    --text-light:#7A8EA0;
+    --white:     #FFFFFF;
+    --border:    #D5CFBF;
+    --green:     #25D366;
+    --green-dark:#1DA952;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--gris-suave); color: var(--gris-oscuro); min-height: 100vh; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--cream);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  /* HEADER */
-  .header { background: var(--azul); padding: 28px 5% 36px; color: #fff; }
-  .logo-img { height: 64px; width: auto; display: block; object-fit: contain; filter: brightness(0) invert(1); margin-bottom: 20px; cursor: pointer; }
-  .header h1 { font-size: clamp(24px, 5vw, 40px); line-height: 1.1; font-weight: 700; letter-spacing: -0.3px; }
-  .header h1 em { font-style: italic; color: #7EB5E5; }
-  .header p { font-size: 15px; opacity: 0.8; margin-top: 10px; font-weight: 300; max-width: 480px; line-height: 1.6; }
-  .steps-bar { display: flex; align-items: center; margin-top: 24px; max-width: 360px; }
-  .step-dot { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.6); flex-shrink: 0; transition: all 0.3s; }
-  .step-dot.active { background: #fff; color: var(--azul); }
-  .step-dot.done { background: #7EB5E5; color: var(--azul); }
-  .step-line { flex: 1; height: 2px; background: rgba(255,255,255,0.2); transition: background 0.3s; }
-  .step-line.done { background: #7EB5E5; }
+  /* NAV */
+  nav {
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 84px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 68px; width: auto; }
+  .nav-back {
+    font-size: 14px; color: var(--text-mid);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--navy); }
+
+  /* HERO HEADER */
+  .page-header {
+    background: var(--navy);
+    padding: 52px 2rem 48px;
+    text-align: center;
+  }
+  .page-header-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.1);
+    color: var(--teal-light);
+    font-size: 12px; font-weight: 500;
+    padding: 5px 16px; border-radius: 100px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(74,155,173,0.3);
+  }
+  .page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.15;
+  }
+  .page-header h1 em { font-style: italic; color: var(--teal-light); }
+  .page-header p {
+    font-size: 16px; color: rgba(255,255,255,0.6);
+    font-weight: 300; max-width: 440px; margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    display: flex; justify-content: center;
+    gap: 8px; margin-top: 32px; align-items: center;
+  }
+  .prog-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s;
+  }
+  .prog-dot.active { background: var(--white); width: 24px; border-radius: 4px; }
+  .prog-dot.done { background: var(--teal-light); }
 
   /* MAIN */
-  .main { max-width: 1120px; margin: 0 auto; padding: 28px 5% 64px; }
+  .main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 1.5rem 80px;
+  }
 
   /* CARD */
-  .card { background: #fff; border: 1px solid var(--borde); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
-  .card-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--borde); }
-  .card-header h2 { font-size: 16px; font-weight: 600; }
-  .card-header p { font-size: 13px; color: var(--gris-medio); margin-top: 3px; line-height: 1.5; }
-  .card-body { padding: 24px; }
-
-  /* FORM */
-  .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .fg { display: flex; flex-direction: column; gap: 6px; }
-  .fg.c2 { grid-column: span 2; }
-  .fg.c4 { grid-column: span 4; }
-  .fg label { font-size: 13px; font-weight: 500; color: var(--gris-oscuro); }
-  .fg input, .fg select {
-    padding: 12px 14px; border: 1px solid var(--borde); border-radius: 10px;
-    font-size: 15px; font-family: inherit; color: var(--gris-oscuro);
-    background: var(--blanco); outline: none; transition: border-color 0.2s; -webkit-appearance: none;
+  .form-card {
+    background: var(--white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(29,53,87,0.06);
   }
-  .fg input:focus, .fg select:focus { border-color: var(--azul); }
-  .fg input::placeholder { color: #bbb; }
-  .hint { font-size: 11px; color: var(--gris-medio); line-height: 1.4; }
-
-  /* LINK BOTÓN */
-  .campo-link {
-    display: inline-flex; align-items: center; gap: 6px; margin-top: 7px;
-    font-size: 12px; font-weight: 500; color: var(--azul);
-    background: var(--azul-bg); border: 1px solid #7EB5E5;
-    border-radius: 8px; padding: 7px 11px; text-decoration: none;
-    transition: background 0.2s; width: fit-content;
+  .form-card-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--cream-dark);
   }
-  .campo-link:hover { background: #d4e6f7; }
+  .form-card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--navy);
+    margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .form-card-header p {
+    font-size: 14px; color: var(--text-light);
+    line-height: 1.5;
+  }
+  .form-card-body { padding: 28px 32px 32px; }
 
-  /* SLIDER */
-  .slider-wrap { margin-top: 4px; }
-  .slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .slider-val { font-size: 15px; font-weight: 600; color: var(--azul); background: var(--azul-bg); padding: 3px 12px; border-radius: 50px; }
-  input[type=range] { width: 100%; height: 6px; -webkit-appearance: none; background: var(--borde); border-radius: 3px; outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--azul); cursor: pointer; box-shadow: 0 2px 6px rgba(27,61,107,0.3); }
-  input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; border: none; background: var(--azul); cursor: pointer; }
+  /* INPUTS */
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block; font-size: 13px; font-weight: 500;
+    color: var(--text); margin-bottom: 7px;
+  }
+  .field input {
+    width: 100%; padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px; font-family: inherit;
+    color: var(--text); background: var(--cream);
+    outline: none; transition: border-color 0.2s, background 0.2s;
+  }
+  .field input:focus {
+    border-color: var(--teal);
+    background: var(--white);
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field input.error { border-color: #dc2626; background: #fff5f5; }
+  .field-error { font-size: 12px; color: #dc2626; margin-top: 5px; font-weight: 500; }
 
-  /* RADIO CARDS */
-  .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .radio-card { border: 1.5px solid var(--borde); border-radius: 12px; padding: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: flex-start; gap: 10px; }
-  .radio-card:hover { border-color: var(--azul-claro); }
-  .radio-card.sel { border-color: var(--azul); background: var(--azul-bg); }
-  .rdot { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; border-radius: 50%; border: 2px solid var(--borde); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .radio-card.sel .rdot { border-color: var(--azul); background: var(--azul); }
-  .radio-card.sel .rdot::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; }
-  .rl { font-size: 14px; font-weight: 500; line-height: 1.3; }
-  .rs { font-size: 12px; color: var(--gris-medio); margin-top: 2px; line-height: 1.4; }
+  /* OPCIONES RADIO */
+  .question-label {
+    font-size: 14px; font-weight: 500;
+    color: var(--text); margin-bottom: 10px;
+    display: block;
+  }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .opt-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 10px;
+    user-select: none;
+  }
+  .opt-card:hover { border-color: var(--teal); }
+  .opt-card.sel { border-color: var(--teal); background: var(--teal-pale); }
+  .opt-radio {
+    width: 18px; height: 18px; flex-shrink: 0;
+    border-radius: 50%; border: 2px solid var(--border);
+    transition: all 0.2s; position: relative;
+  }
+  .opt-card.sel .opt-radio {
+    border-color: var(--teal);
+    background: var(--teal);
+  }
+  .opt-card.sel .opt-radio::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    background: white; border-radius: 50%;
+  }
+  .opt-text { font-size: 14px; font-weight: 400; line-height: 1.3; }
 
-  /* BOTÓN CALCULAR */
-  .btn-calc { width: 100%; background: var(--azul); color: #fff; border: none; padding: 16px; border-radius: 50px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.2s, transform 0.1s; margin-top: 8px; }
-  .btn-calc:hover { background: var(--azul-hover); transform: translateY(-1px); }
+  /* MESES SLIDER */
+  .slider-field { margin-bottom: 20px; }
+  .slider-top {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+  }
+  .slider-val {
+    font-size: 15px; font-weight: 600; color: var(--teal);
+    background: var(--teal-pale);
+    padding: 3px 14px; border-radius: 100px;
+  }
+  input[type=range] {
+    width: 100%; height: 6px; -webkit-appearance: none;
+    background: var(--cream-dark); border-radius: 3px;
+    outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px;
+    border-radius: 50%; background: var(--navy);
+    cursor: pointer; box-shadow: 0 2px 8px rgba(29,53,87,0.25);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: none; background: var(--navy); cursor: pointer;
+  }
+  .slider-hints {
+    display: flex; justify-content: space-between;
+    margin-top: 6px;
+  }
+  .slider-hints span { font-size: 11px; color: var(--text-light); }
 
-  /* NOTA */
-  .nota { font-size: 12px; color: var(--gris-medio); background: var(--blanco); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; line-height: 1.6; margin-top: 12px; }
+  /* BOTÓN PRINCIPAL */
+  .btn-submit {
+    width: 100%; background: var(--navy); color: var(--white);
+    border: none; padding: 16px;
+    border-radius: 12px; font-size: 16px; font-weight: 500;
+    font-family: inherit; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { background: var(--teal); transform: translateY(-1px); }
 
-  /* RESULTADO */
+  /* NOTA PRIVACY */
+  .privacy-note {
+    font-size: 12px; color: var(--text-light);
+    text-align: center; margin-top: 16px;
+    line-height: 1.5;
+  }
+  .privacy-note a { color: var(--teal); text-decoration: none; }
+
+  /* ── RESULTADO ── */
   #resultado { display: none; }
-  .result-card { border-radius: 20px; padding: 32px 28px; margin-bottom: 16px; }
-  .r-azul { background: var(--azul); color: #fff; }
-  .r-amarillo { background: var(--amarillo-bg); border: 1.5px solid var(--amarillo-borde); }
-  .r-rojo { background: var(--rojo-claro); border: 1.5px solid #f0b0a8; }
-  .result-icon { font-size: 40px; margin-bottom: 12px; }
-  .result-title { font-size: 26px; font-weight: 700; line-height: 1.1; margin-bottom: 10px; letter-spacing: -0.3px; }
-  .r-azul .result-title { color: #fff; }
-  .r-amarillo .result-title { color: var(--amarillo-texto); }
-  .r-rojo .result-title { color: var(--rojo); }
-  .result-sub { font-size: 15px; line-height: 1.65; font-weight: 300; }
-  .r-azul .result-sub { color: rgba(255,255,255,0.88); }
-  .r-amarillo .result-sub { color: #5A3A00; }
-  .r-rojo .result-sub { color: #7A1F14; }
 
-  /* MONTO CARD */
-  .monto-card { background: var(--azul-bg); border: 1.5px solid #7EB5E5; border-radius: 20px; padding: 24px 28px; margin-bottom: 16px; display: none; }
-  .monto-label { font-size: 11px; font-weight: 600; color: var(--azul); text-transform: uppercase; letter-spacing: 0.07em; }
-  .monto-big { font-size: 52px; font-weight: 700; color: var(--azul); letter-spacing: -1px; line-height: 1; margin: 8px 0 4px; }
-  .monto-sub { font-size: 13px; color: var(--azul-claro); }
-  .monto-nota { font-size: 12px; color: var(--gris-medio); margin-top: 14px; padding-top: 14px; border-top: 1px solid #7EB5E5; line-height: 1.5; }
-
-  /* ACCIONES */
-  .acciones { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-  .btn-wa { background: #25D366; color: #fff; border: none; padding: 15px 20px; border-radius: 50px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: background 0.2s; }
-  .btn-wa:hover { background: #1da952; }
-  .btn-sec { background: #fff; color: var(--gris-oscuro); border: 1.5px solid var(--borde); padding: 14px 20px; border-radius: 50px; font-size: 15px; font-weight: 400; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: border-color 0.2s; }
-  .btn-sec:hover { border-color: var(--azul); }
-  .btn-recalc:hover { color: var(--azul); }
-  .btn-expediente { background: var(--naranja); color: #fff; padding: 16px 20px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; display: none; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: background 0.2s, transform 0.1s; text-align: center; border: none; }
-  .btn-expediente:hover { background: #c94f1e; transform: translateY(-1px); }
-  .btn-expediente.visible { display: flex; }
-
-  @media (max-width: 640px) {
-    .form-grid { grid-template-columns: 1fr 1fr; }
-    .fg.c4 { grid-column: span 2; }
-    .radio-grid { grid-template-columns: 1fr; }
+  .result-card {
+    background: var(--white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(29,53,87,0.06);
+    text-align: center;
   }
-  @media (max-width: 420px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .fg.c2, .fg.c4 { grid-column: span 1; }
+
+  /* RESULTADO POSITIVO */
+  .result-header-ok {
+    background: var(--navy);
+    padding: 40px 32px 36px;
+  }
+  .result-check {
+    width: 64px; height: 64px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+  }
+  .result-title-ok {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--white);
+    letter-spacing: -0.3px; margin-bottom: 8px;
+  }
+  .result-title-ok em { font-style: italic; color: var(--teal-light); }
+  .result-sub-ok {
+    font-size: 15px; color: rgba(255,255,255,0.65);
+    font-weight: 300; line-height: 1.6;
+    max-width: 380px; margin: 0 auto;
+  }
+
+  /* MONTO */
+  .monto-box {
+    background: var(--teal-pale);
+    border-bottom: 1px solid var(--cream-dark);
+    padding: 24px 32px;
+  }
+  .monto-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--teal); margin-bottom: 8px;
+  }
+  .monto-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px; color: var(--navy);
+    letter-spacing: -1px; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .monto-sub { font-size: 13px; color: var(--text-light); }
+
+  /* CTA */
+  .result-body { padding: 28px 32px 32px; }
+  .result-body p {
+    font-size: 15px; color: var(--text-mid);
+    line-height: 1.65; margin-bottom: 24px;
+    font-weight: 300;
+  }
+  .btn-wa {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; width: 100%;
+    background: var(--green); color: var(--white);
+    border: none; padding: 16px 24px;
+    border-radius: 12px; font-size: 16px; font-weight: 500;
+    font-family: inherit; cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-wa:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-wa svg { width: 20px; height: 20px; fill: white; flex-shrink: 0; }
+  .result-reassurance {
+    font-size: 12px; color: var(--text-light);
+    margin-top: 14px; line-height: 1.5;
+  }
+  .btn-recalc {
+    background: none; border: none;
+    color: var(--text-light); font-size: 13px;
+    cursor: pointer; font-family: inherit;
+    margin-top: 16px; text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .btn-recalc:hover { color: var(--navy); }
+
+  /* RESULTADO NEGATIVO */
+  .result-header-no {
+    background: var(--cream);
+    border-bottom: 1px solid var(--cream-dark);
+    padding: 40px 32px 32px;
+  }
+  .result-icon-no { font-size: 40px; margin-bottom: 16px; }
+  .result-title-no {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px; color: var(--navy);
+    letter-spacing: -0.3px; margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .result-sub-no {
+    font-size: 15px; color: var(--text-mid);
+    font-weight: 300; line-height: 1.65;
+    max-width: 380px; margin: 0 auto;
+  }
+  .result-body-no { padding: 28px 32px 32px; text-align: center; }
+  .result-body-no p {
+    font-size: 15px; color: var(--text-mid);
+    line-height: 1.65; margin-bottom: 24px;
+    font-weight: 300;
+  }
+  .btn-volver {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--teal); font-size: 14px; font-weight: 500;
+    text-decoration: none; background: var(--teal-pale);
+    padding: 10px 20px; border-radius: 100px;
+    transition: background 0.2s;
+    border: none; cursor: pointer; font-family: inherit;
+  }
+  .btn-volver:hover { background: var(--cream-dark); }
+
+  /* ANIMACIÓN ENTRADA */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .form-card, .result-card { animation: fadeUp 0.4s ease both; }
+
+  @media (max-width: 480px) {
+    nav { padding: 0 1rem; }
+    .page-header { padding: 40px 1.25rem 36px; }
+    .main { padding: 28px 1rem 60px; }
+    .form-card-header, .form-card-body { padding: 20px; }
+    .result-header-ok, .result-body, .result-header-no, .result-body-no { padding: 24px 20px; }
+    .monto-box { padding: 20px; }
+    .monto-num { font-size: 38px; }
+    .options-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <img src="https://static.wixstatic.com/media/4e80a9_da80905d3a444d4a98acfec1fe5ba85d~mv2.png/v1/fill/w_432,h_350,al_c,q_85,enc_avif,quality_auto/credifika_logo_highres%202.png"
-       alt="Credifika" class="logo-img" onclick="window.location.href='index.html'" title="Ir al inicio">
-  <h1>¿Califico para<br>el crédito <em>Mejoravit</em>?</h1>
-  <p>Ingresa tus datos y en segundos te decimos si tu perfil califica para el crédito de remodelación.</p>
-  <div class="steps-bar">
-    <div class="step-dot active" id="sd1">1</div>
-    <div class="step-line" id="sl1"></div>
-    <div class="step-dot" id="sd2">2</div>
-    <div class="step-line" id="sl2"></div>
-    <div class="step-dot" id="sd3">3</div>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="credifika_logo.png" alt="Credifika">
+  </a>
+  <a href="index.html" class="nav-back">← Volver al inicio</a>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-badge">Verificación gratuita · Sin compromiso</div>
+  <h1>¿Califico para el crédito <em>Mejoravit</em>?</h1>
+  <p>Responde 3 preguntas rápidas y te decimos si puedes acceder a tu crédito.</p>
+  <div class="progress-wrap">
+    <div class="prog-dot active" id="p1"></div>
+    <div class="prog-dot" id="p2"></div>
+    <div class="prog-dot" id="p3"></div>
   </div>
 </div>
 
 <div class="main">
 
+  <!-- FORMULARIO -->
   <div id="formulario">
-
-    <!-- DATOS PERSONALES -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Tus datos personales</h2>
-        <p>No se requiere contraseña ni acceso a tu cuenta. Ningún dato se almacena.</p>
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2>Tus datos</h2>
+        <p>Solo necesitamos lo básico para verificar tu elegibilidad.</p>
       </div>
-      <div class="card-body">
-        <div class="form-grid">
+      <div class="form-card-body">
 
-          <div class="fg c2">
-            <label for="nombre">Nombre(s)</label>
-            <input type="text" id="nombre" placeholder="Juan Carlos">
-          </div>
-
-          <div class="fg">
-            <label for="apellido_paterno">Apellido paterno</label>
-            <input type="text" id="apellido_paterno" placeholder="García">
-          </div>
-
-          <div class="fg">
-            <label for="apellido_materno">Apellido materno</label>
-            <input type="text" id="apellido_materno" placeholder="López">
-          </div>
-
-          <div class="fg c2">
-            <label for="nss">NSS — Número de Seguridad Social</label>
-            <input type="text" id="nss" placeholder="12345678901" maxlength="11">
-            <a href="https://serviciosdigitales.imss.gob.mx/gestionAsegurados-web-externo/asignacionNSS"
-               target="_blank" class="campo-link">🔍 ¿No sabes tu NSS? Consúltalo aquí</a>
-          </div>
-
-          <div class="fg c2">
-            <label for="curp">CURP</label>
-            <input type="text" id="curp" placeholder="GARL900101HDFRCN01" maxlength="18"
-                   oninput="this.value=this.value.toUpperCase()">
-            <a href="https://www.gob.mx/curp/" target="_blank" class="campo-link">🔍 ¿No sabes tu CURP? Consúltala aquí</a>
-          </div>
-
-          <div class="fg c2">
-            <label for="telefono">WhatsApp</label>
-            <input type="tel" id="telefono" placeholder="55 1234 5678">
-            <span class="hint">Para contactarte con el resultado</span>
-          </div>
-
+        <!-- Nombre -->
+        <div class="field">
+          <label for="nombre">Tu nombre</label>
+          <input type="text" id="nombre" placeholder="¿Cómo te llamas?">
+          <div class="field-error" id="err-nombre"></div>
         </div>
-      </div>
-    </div>
 
-    <!-- SITUACIÓN LABORAL -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Tu situación laboral</h2>
-      </div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:22px;">
+        <!-- Teléfono -->
+        <div class="field">
+          <label for="telefono">WhatsApp</label>
+          <input type="tel" id="telefono" placeholder="55 1234 5678">
+          <div class="field-error" id="err-telefono"></div>
+        </div>
 
-        <!-- Meses cotizando — criterio principal oculto -->
-        <div class="fg c4" style="grid-column:1/-1">
-          <label>¿Cuántos meses llevas cotizando de forma continua en tu empresa actual?</label>
-          <div class="slider-wrap">
-            <div class="slider-top">
-              <span class="hint">Meses continuos sin interrupción</span>
-              <span class="slider-val" id="mesesVal">4 meses</span>
+        <!-- Pregunta 1: Zona -->
+        <div style="margin-bottom: 20px;">
+          <span class="question-label">¿Vives o trabajas en CDMX o Estado de México?</span>
+          <div class="options-grid">
+            <div class="opt-card sel" id="zona-si" onclick="seleccionar('zona','si')">
+              <div class="opt-radio"></div>
+              <span class="opt-text">Sí, en CDMX o EdoMex</span>
             </div>
-            <input type="range" id="meses" min="1" max="36" value="4"
-              oninput="document.getElementById('mesesVal').textContent=this.value+(this.value==1?' mes':' meses')">
+            <div class="opt-card" id="zona-no" onclick="seleccionar('zona','no')">
+              <div class="opt-radio"></div>
+              <span class="opt-text">No, soy de otro estado</span>
+            </div>
           </div>
         </div>
 
-        <!-- Subcuenta — informativo -->
-        <div class="fg c4" style="grid-column:1/-1">
-          <label>Saldo estimado en tu Subcuenta de Vivienda Infonavit ($)</label>
-          <div class="slider-wrap">
-            <div class="slider-top">
-              <span class="hint">Revísalo en Mi Cuenta Infonavit · Solo informativo</span>
-              <span class="slider-val" id="subcuentaVal">$25,000</span>
-            </div>
-            <input type="range" id="subcuenta" min="0" max="200000" step="1000" value="25000"
-              oninput="document.getElementById('subcuentaVal').textContent='$'+Number(this.value).toLocaleString('es-MX')">
+        <!-- Pregunta 2: Meses cotizando -->
+        <div class="slider-field">
+          <span class="question-label">¿Cuántos meses llevas cotizando en tu empleo actual?</span>
+          <div class="slider-top">
+            <span style="font-size:13px;color:var(--text-light);">Meses continuos</span>
+            <span class="slider-val" id="mesesVal">4 meses</span>
           </div>
-        </div>
-        <div style="margin-top:8px;">
-          <a href="https://micuenta.infonavit.org.mx/" target="_blank"
-             style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:9px;font-size:12px;font-weight:600;text-decoration:none;"
-             onmouseover="this.style.background='#1B3D6B';this.style.color='#fff';"
-             onmouseout="this.style.background='#EAF0FA';this.style.color='#1B3D6B';">
-            🏦 Consultar mi saldo real en Mi Cuenta Infonavit
-          </a>
+          <input type="range" id="meses" min="1" max="36" value="4"
+            oninput="document.getElementById('mesesVal').textContent=this.value+(this.value==1?' mes':' meses')">
+          <div class="slider-hints">
+            <span>1 mes</span>
+            <span>3 años+</span>
+          </div>
         </div>
 
-        <!-- Tipo de contrato -->
-        <div>
-          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:10px">Tipo de contrato</label>
-          <div class="radio-grid">
-            <div class="radio-card sel" onclick="sel(this,'contrato','permanente')">
-              <div class="rdot"></div>
-              <div><div class="rl">Permanente / Base</div><div class="rs">Contrato indefinido con prestaciones</div></div>
+        <!-- Pregunta 3: Crédito vigente -->
+        <div style="margin-bottom: 8px;">
+          <span class="question-label">¿Tienes algún crédito Infonavit o Mejoravit vigente actualmente?</span>
+          <div class="options-grid">
+            <div class="opt-card sel" id="credito-no" onclick="seleccionar('credito','no')">
+              <div class="opt-radio"></div>
+              <span class="opt-text">No tengo ninguno</span>
             </div>
-            <div class="radio-card" onclick="sel(this,'contrato','temporal')">
-              <div class="rdot"></div>
-              <div><div class="rl">Temporal / Por obra</div><div class="rs">Contrato con fecha de término</div></div>
+            <div class="opt-card" id="credito-si" onclick="seleccionar('credito','si')">
+              <div class="opt-radio"></div>
+              <span class="opt-text">Sí tengo uno activo</span>
             </div>
           </div>
-          <input type="hidden" id="contrato" value="permanente">
         </div>
 
-        <!-- Buró -->
-        <div>
-          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:10px">¿Tienes deudas vencidas o atrasos en el Buró de Crédito?</label>
-          <div class="radio-grid">
-            <div class="radio-card sel" onclick="sel(this,'buro','limpio')">
-              <div class="rdot"></div>
-              <div><div class="rl">No, historial limpio</div><div class="rs">Sin deudas vencidas ni atrasos</div></div>
-            </div>
-            <div class="radio-card" onclick="sel(this,'buro','irregular')">
-              <div class="rdot"></div>
-              <div><div class="rl">Sí, tengo deudas o atrasos</div><div class="rs">Pagos atrasados o deudas activas</div></div>
-            </div>
-          </div>
-          <input type="hidden" id="buro" value="limpio">
-        </div>
+        <button class="btn-submit" onclick="verificar()">Verificar mi elegibilidad →</button>
 
-        <!-- Crédito vigente -->
-        <div>
-          <label style="display:block;font-size:13px;font-weight:500;margin-bottom:10px">¿Tienes algún crédito Infonavit vigente actualmente?</label>
-          <div class="radio-grid">
-            <div class="radio-card sel" onclick="sel(this,'creditovigente','no')">
-              <div class="rdot"></div>
-              <div><div class="rl">No</div><div class="rs">No tengo ningún crédito activo con Infonavit</div></div>
-            </div>
-            <div class="radio-card" onclick="sel(this,'creditovigente','si')">
-              <div class="rdot"></div>
-              <div><div class="rl">Sí</div><div class="rs">Tengo un crédito hipotecario o Mejoravit vigente</div></div>
-            </div>
-          </div>
-          <input type="hidden" id="creditovigente" value="no">
-        </div>
+        <p class="privacy-note">
+          🔒 Tus datos son confidenciales y están protegidos.<br>
+          Al continuar aceptas nuestra <a href="credifika-privacidad.html">Política de Privacidad</a>.
+        </p>
 
       </div>
     </div>
-
-    <button class="btn-calc" id="btnCalificar" onclick="validarYCalcular()">Ver si califico →</button>
-
-    <div class="nota">🔒 Tus datos son confidenciales y no se almacenan. Este análisis es orientativo — un asesor Credifika revisará tu caso de forma personalizada sin costo.</div>
-
   </div>
 
   <!-- RESULTADO -->
   <div id="resultado">
-
-    <div id="resultCard" class="result-card"></div>
-
-    <div id="montoCard" class="monto-card">
-      <div class="monto-label">Monto estimado del crédito Mejoravit</div>
-      <div class="monto-big" id="montoVal">$0</div>
-      <div class="monto-sub">Basado en tu saldo en subcuenta (hasta el 90%)</div>
-      <div class="monto-nota">Estimación orientativa. El monto final lo determina el Infonavit. Máximo disponible: $169,039 pesos.</div>
+    <div class="result-card" id="resultCard"></div>
+    <div style="text-align:center;margin-top:20px;">
+      <button class="btn-recalc" onclick="recalcular()">← Verificar con otros datos</button>
     </div>
-
-    <div class="acciones">
-      <a id="btnExpediente" href="credifika-expediente.html" class="btn-expediente">
-        📂 Iniciar mi expediente →
-      </a>
-      <a id="btnWa" href="https://wa.me/5215521893011" target="_blank" class="btn-wa">
-        💬 Hablar con mi asesor Credifika
-      </a>
-      <a href="https://micuenta.infonavit.org.mx/mi-tramite-credito/precalificacion-puntos"
-         target="_blank" class="btn-sec">
-        🏛️ Confirmar en Mi Cuenta Infonavit
-      </a>
-      <button class="btn-recalc" onclick="recalcular()">← Recalcular con otros datos</button>
-    </div>
-
-    <div class="nota">
-      🔒 Este resultado es una evaluación preliminar basada en los criterios operativos del crédito Mejoravit. Un asesor Credifika revisará tu caso con detalle antes de confirmar tu preaprobación.
-    </div>
-
   </div>
 
 </div>
 
 <script>
-// ── RADIO SELECTOR ─────────────────────────────────────
-function sel(el, grupo, val) {
-  el.parentElement.querySelectorAll('.radio-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  document.getElementById(grupo).value = val;
-}
+  // Estado de selecciones
+  var estado = { zona: 'si', credito: 'no' };
 
-// ── LÓGICA DE PRECALIFICACIÓN (criterio operativo real) ─
-function calcular() {
-  window._nombre_raw = document.getElementById('nombre').value.trim();
-  window._ap_pat     = document.getElementById('apellido_paterno').value.trim();
-  window._ap_mat     = document.getElementById('apellido_materno').value.trim();
-  const nombre_raw = window._nombre_raw;
-  const ap_pat     = window._ap_pat;
-  const ap_mat     = window._ap_mat;
-  const nombre     = [nombre_raw, ap_pat, ap_mat].filter(Boolean).join(' ') || 'tú';
-  const nss        = document.getElementById('nss').value.trim();
-  const curp       = document.getElementById('curp').value.trim();
-  const telefono   = document.getElementById('telefono').value.trim();
-  const meses      = parseInt(document.getElementById('meses').value);
-  const subcuenta  = parseInt(document.getElementById('subcuenta').value);
-  const buro       = document.getElementById('buro').value;
-  const credVig    = document.getElementById('creditovigente').value;
-
-  const n = nombre.split(' ')[0];
-
-  // ── BLOQUEOS DEFINITIVOS ──────────────────────────────
-
-  // 1. Crédito Infonavit vigente → no pasa
-  if (credVig === 'si') {
-    mostrar('rojo', '❌', `${n}, no puedes tramitar Mejoravit en este momento`,
-      'El Infonavit no permite solicitar un crédito Mejoravit si ya tienes un crédito hipotecario u otro Mejoravit vigente. Una vez que liquides tu crédito actual, podemos ayudarte a tramitarlo.',
-      false, nombre, nss, telefono, subcuenta, 'credito_vigente');
-    return;
+  function seleccionar(grupo, valor) {
+    estado[grupo] = valor;
+    // Limpiar selección del grupo
+    document.querySelectorAll('[id^="' + grupo + '-"]').forEach(function(el) {
+      el.classList.remove('sel');
+    });
+    document.getElementById(grupo + '-' + valor).classList.add('sel');
   }
 
-  // 2. Menos de 4 meses cotizando → no pasa (2 bimestres = 4 meses es el mínimo operativo)
-  if (meses < 4) {
-    const faltan = 4 - meses;
-    mostrar('rojo', '⏳', `${n}, aún no cumples el tiempo mínimo`,
-      `Para tramitar Mejoravit necesitas al menos 4 meses cotizando de forma continua en tu empresa actual. Te ${faltan === 1 ? 'falta' : 'faltan'} aproximadamente ${faltan} ${faltan === 1 ? 'mes' : 'meses'}. Guarda nuestro contacto y escríbenos cuando los cumplas.`,
-      false, nombre, nss, telefono, subcuenta, 'pocos_meses');
-    return;
+  function progreso(paso) {
+    ['p1','p2','p3'].forEach(function(id, i) {
+      var el = document.getElementById(id);
+      el.className = 'prog-dot';
+      if (i < paso - 1) el.classList.add('done');
+      else if (i === paso - 1) el.classList.add('active');
+    });
   }
 
-  // 3. Subcuenta muy baja → monto insuficiente para el trámite
-  if (subcuenta < 15000) {
-    mostrar('rojo', '💰', `${n}, el saldo de tu subcuenta es muy bajo por ahora`,
-      `Con menos de $15,000 pesos en tu subcuenta de vivienda el monto del crédito Mejoravit sería demasiado bajo para que el trámite sea viable. Conforme sigas cotizando tu saldo irá creciendo — escríbenos en unos meses y te decimos cuándo es el mejor momento para tramitarlo.`,
-      false, nombre, nss, telefono, subcuenta, 'subcuenta_baja');
-    return;
-  }
+  function verificar() {
+    // Validar campos
+    var nombre   = document.getElementById('nombre').value.trim();
+    var telefono = document.getElementById('telefono').value.trim();
+    var hayError = false;
 
-  // ── CASOS QUE REQUIEREN REVISIÓN MÁS DETALLADA ────────
-
-  // 4. Buró con deudas → posible pero requiere consulta
-  if (buro === 'irregular') {
-    mostrar('amarillo', '🔍', `${n}, necesitamos revisar tu caso con más detalle`,
-      'Tienes posibilidades de calificar para Mejoravit, sin embargo el historial en Buró de Crédito requiere una consulta más profunda antes de darte una respuesta definitiva. Un asesor Credifika revisará tu perfil sin costo y te dirá si procede.',
-      true, nombre, nss, telefono, subcuenta, 'buro_irregular');
-    return;
-  }
-
-  // ── CALIFICA ──────────────────────────────────────────
-  // ── VERIFICAR SI YA EXISTE EXPEDIENTE CON ESTE NSS ──────
-  const _nssVal = nss || document.getElementById('nss')?.value || '';
-  const _apPatVal = window._ap_pat || '';
-  const _apMatVal = window._ap_mat || '';
-  const _telVal = telefono || '';
-  const _curpVal = document.getElementById('curp')?.value || '';
-  if (verificarDuplicado(_nssVal, n)) {
-    mostrarExpedienteDuplicado(window._nombre_raw || n, n, _nssVal, _apPatVal, _apMatVal, _curpVal, _telVal);
-    return;
-  }
-
-  mostrar('azul', '🎉', `¡${n}, tu perfil precalifica!`,
-    `Cumples con los requisitos para tramitar el crédito Mejoravit. El siguiente paso es que un asesor Credifika valide tu expediente y te guíe en el proceso — nosotros nos encargamos de todo sin que tengas que ir a ninguna oficina.`,
-    true, nombre, nss, telefono, subcuenta, 'califica');
-}
-
-// ── MOSTRAR RESULTADO ───────────────────────────────────
-function mostrar(tipo, icon, titulo, subtitulo, mostrarMonto, nombre, nss, telefono, subcuenta, razon) {
-  // Steps
-  ['sd1','sd2','sd3'].forEach(id => document.getElementById(id).className = 'step-dot done');
-  ['sl1','sl2'].forEach(id => document.getElementById(id).classList.add('done'));
-  document.getElementById('sd3').classList.add('active');
-
-  document.getElementById('formulario').style.display = 'none';
-  document.getElementById('resultado').style.display = 'block';
-
-  // Card resultado
-  const rc = document.getElementById('resultCard');
-  rc.className = 'result-card r-' + tipo;
-  rc.innerHTML = `<div class="result-icon">${icon}</div><div class="result-title">${titulo}</div><div class="result-sub">${subtitulo}</div>`;
-
-  // Monto estimado
-  const mc = document.getElementById('montoCard');
-  if (mostrarMonto && subcuenta >= 15000) {
-    const monto = Math.min(Math.max(subcuenta * 0.9, 10318), 169039);
-    document.getElementById('montoVal').textContent = '$' + Math.round(monto).toLocaleString('es-MX');
-    mc.style.display = 'block';
-  } else {
-    mc.style.display = 'none';
-  }
-
-  // WhatsApp con datos del cliente
-  const estado = razon === 'califica'      ? 'y precalifiqué para Mejoravit' :
-                 razon === 'buro_irregular' ? 'y necesito que revisen mi caso (Buró)' :
-                 razon === 'credito_vigente'? 'y tengo un crédito Infonavit vigente' :
-                 razon === 'pocos_meses'    ? 'y aún no tengo los meses mínimos' :
-                                             'y quiero información sobre Mejoravit';
-  const msg = encodeURIComponent(
-    `Hola Credifika, soy ${nombre}${nss ? ' (NSS: '+nss+')' : ''}${curp ? ', CURP: '+curp : ''}. ` +
-    `Usé la calculadora de precalificación ${estado}. ` +
-    `${telefono ? 'Mi WhatsApp: '+telefono+'.' : ''} ¿Me pueden apoyar?`
-  );
-  // Mensaje de presentación del asesor — humano y cálido
-  // Se incluyen datos del cliente para que el asesor tenga contexto
-  const nombreParaAsesor = [nombre, nss ? '(NSS: ' + nss + ')' : ''].filter(Boolean).join(' ');
-  const msgAsesor = encodeURIComponent(
-    `Hola! 👋 Acabo de usar la calculadora de Credifika` +
-    `${nombreParaAsesor ? ' — soy ' + nombreParaAsesor : ''}. ` +
-    `Me interesa saber más sobre el crédito Mejoravit. ¿Me pueden orientar?`
-  );
-  document.getElementById('btnWa').href = `https://wa.me/5215521893011?text=${msgAsesor}`;
-
-  // Botón de expediente — solo cuando precalifica
-  const btnExp = document.getElementById('btnExpediente');
-  if (razon === 'califica') {
-    btnExp.classList.add('visible');
-    // Pasar nombre y NSS a la página de expediente via URL params
-    const _nr  = window._nombre_raw || nombre || '';
-    const _app = window._ap_pat || '';
-    const _apm = window._ap_mat || '';
-    // Also save NSS and CURP from form if available
-    const _nss  = nss || document.getElementById('nss') && document.getElementById('nss').value || '';
-    const _curp = document.getElementById('curp') ? document.getElementById('curp').value : '';
-    const _tel  = telefono || '';
-    const params = new URLSearchParams({ nombre: _nr, ap_pat: _app, ap_mat: _apm, nss: _nss, curp: _curp, telefono: _tel });
-    btnExp.href = `credifika-expediente.html?${params.toString()}`;
-
-    // ── WHATSAPP AUTOMÁTICO AL PRECALIFICAR ──────────────
-    // Enviar mensaje al número del cliente si proporcionó WhatsApp
-    if (_tel && _tel.length >= 10) {
-      const monto = Math.min(Math.max((subcuenta||0) * 0.9, 10318), 169039);
-      const montoFmt = '$' + Math.round(monto).toLocaleString('es-MX');
-      const nombreCompleto = [_nr, _app, _apm].filter(Boolean).join(' ');
-      const msgCliente = encodeURIComponent(
-        `¡Hola ${nombreCompleto}! 🎉\n\n` +
-        `Tu precalificación en Credifika fue *exitosa*. ` +
-        `Estás más cerca de tu crédito Mejoravit preaprobado por aproximadamente *${montoFmt} pesos*.\n\n` +
-        `El siguiente paso es armar tu expediente digital. Un asesor Credifika te acompañará en todo el proceso.\n\n` +
-        `¿Tienes alguna duda o quieres continuar ahora?`
-      );
-      // Guardar referencia del mensaje (para uso futuro con WhatsApp Business API)
-      // NO abrir ventana — el mensaje se enviará vía webhook cuando esté configurado
-      window._waClienteUrl = `https://wa.me/52${_tel.replace(/\D/g,'')}?text=${msgCliente}`;
-      window._waClienteMonto = montoFmt;
-      window._waClienteNombre = nombreCompleto;
-    }
-  } else {
-    btnExp.classList.remove('visible');
-  }
-
-  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ── RECALCULAR ──────────────────────────────────────────
-function recalcular() {
-  document.getElementById('formulario').style.display = 'block';
-  document.getElementById('resultado').style.display = 'none';
-  ['sd1'].forEach(id => { document.getElementById(id).className = 'step-dot active'; });
-  ['sd2','sd3'].forEach(id => { document.getElementById(id).className = 'step-dot'; });
-  ['sl1','sl2'].forEach(id => { document.getElementById(id).classList.remove('done'); });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Variable curp para el mensaje WhatsApp
-var curp = '';
-document.getElementById('curp').addEventListener('input', function() { curp = this.value; });
-
-// ── VERIFICAR EXPEDIENTE DUPLICADO ──────────────────────
-function verificarDuplicado(nss, nombre) {
-  if (!nss) return false;
-  const key = 'uploaded_NSS-' + nss;
-  try {
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      const data = JSON.parse(saved);
-      // Si tiene al menos 1 documento subido, existe expediente
-      return Object.keys(data).length > 0;
-    }
-  } catch(e) {}
-  return false;
-}
-
-function mostrarExpedienteDuplicado(nombre, nss, nssParam, apPat, apMat, curpVal, tel) {
-  // Ocultar formulario y mostrar pantalla de duplicado
-  document.getElementById('formulario').style.display = 'none';
-  document.getElementById('resultado').style.display = 'block';
-
-  const params = new URLSearchParams({
-    nombre: nombre, ap_pat: apPat, ap_mat: apMat,
-    nss: nssParam, curp: curpVal, telefono: tel
-  });
-  const expUrl = 'credifika-expediente.html?' + params.toString();
-  const waMsg = encodeURIComponent(`Hola Credifika, soy ${nombre} (NSS: ${nssParam}). Ya tengo un expediente y necesito ayuda.`);
-
-  const rc = document.getElementById('resultCard');
-  rc.className = 'result-card r-amarillo';
-  rc.innerHTML = `
-    <div class="result-icon">📋</div>
-    <div class="result-title">Ya tienes un expediente registrado</div>
-    <div class="result-sub">Encontramos un expediente previo con el NSS <strong>${nssParam}</strong> a nombre de <strong>${nombre}</strong>.</div>
-    <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;">
-      <a href="${expUrl}" style="display:block;text-align:center;padding:14px 20px;background:#1B3D6B;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;">
-        📂 Continuar donde me quedé
-      </a>
-      <button onclick="recalcular()" style="padding:14px 20px;background:#EAF0FA;color:#1B3D6B;border:1.5px solid #1B3D6B;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;">
-        ✏️ Ingresar nuevos datos
-      </button>
-      <a href="https://wa.me/5215521893011?text=${waMsg}" target="_blank" style="display:block;text-align:center;padding:14px 20px;background:#25D366;color:#fff;border-radius:12px;font-weight:600;text-decoration:none;font-size:15px;">
-        💬 Hablar con un asesor
-      </a>
-    </div>
-  `;
-  document.getElementById('montoCard').style.display = 'none';
-  document.getElementById('btnWa').style.display = 'none';
-  document.getElementById('btnExpediente').style.display = 'none';
-  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ── VALIDACIÓN DE CAMPOS OBLIGATORIOS ────────────────────────
-function validarYCalcular() {
-  const campos = [
-    { id: 'nombre',           label: 'Nombre(s)' },
-    { id: 'apellido_paterno', label: 'Apellido paterno' },
-    { id: 'apellido_materno', label: 'Apellido materno' },
-    { id: 'nss',              label: 'NSS' },
-    { id: 'curp',             label: 'CURP' },
-    { id: 'telefono',         label: 'WhatsApp' },
-  ];
-
-  let hayError = false;
-
-  campos.forEach(function(campo) {
-    const el = document.getElementById(campo.id);
-    if (!el) return;
-    const val = el.value.trim();
-    if (!val) {
-      // Marcar campo en rojo
-      el.style.borderColor = '#dc2626';
-      el.style.background  = '#fff5f5';
-      // Agregar mensaje de error si no existe
-      let errEl = document.getElementById('err_' + campo.id);
-      if (!errEl) {
-        errEl = document.createElement('div');
-        errEl.id = 'err_' + campo.id;
-        errEl.style.cssText = 'font-size:11px;color:#dc2626;margin-top:3px;font-weight:500;';
-        el.parentNode.appendChild(errEl);
-      }
-      errEl.textContent = campo.label + ' es obligatorio';
+    if (!nombre) {
+      document.getElementById('nombre').classList.add('error');
+      document.getElementById('err-nombre').textContent = 'Tu nombre es obligatorio';
       hayError = true;
     } else {
-      // Limpiar error
-      el.style.borderColor = '';
-      el.style.background  = '';
-      const errEl = document.getElementById('err_' + campo.id);
-      if (errEl) errEl.textContent = '';
+      document.getElementById('nombre').classList.remove('error');
+      document.getElementById('err-nombre').textContent = '';
     }
-  });
 
-  if (hayError) {
-    // Hacer scroll al primer campo con error
-    const primerError = campos.find(c => !document.getElementById(c.id).value.trim());
-    if (primerError) {
-      document.getElementById(primerError.id).scrollIntoView({ behavior: 'smooth', block: 'center' });
-      document.getElementById(primerError.id).focus();
+    if (!telefono) {
+      document.getElementById('telefono').classList.add('error');
+      document.getElementById('err-telefono').textContent = 'Tu WhatsApp es obligatorio';
+      hayError = true;
+    } else {
+      document.getElementById('telefono').classList.remove('error');
+      document.getElementById('err-telefono').textContent = '';
     }
-    return; // No continuar
+
+    if (hayError) {
+      document.getElementById('nombre').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    var meses = parseInt(document.getElementById('meses').value);
+    var zona = estado.zona;
+    var credito = estado.credito;
+    var nombreCorto = nombre.split(' ')[0];
+
+    progreso(3);
+    document.getElementById('formulario').style.display = 'none';
+    document.getElementById('resultado').style.display = 'block';
+
+    // Guardar en Supabase
+    guardarLead(nombre, telefono, zona, meses, credito);
+
+    // Determinar resultado
+    if (zona === 'no') {
+      mostrarRechazo(nombreCorto,
+        'Solo atendemos CDMX y Estado de México',
+        'En este momento nuestro servicio está disponible únicamente en Ciudad de México y Estado de México. Si en algún momento te encuentras en esta zona, con gusto te ayudamos.');
+      return;
+    }
+
+    if (credito === 'si') {
+      mostrarRechazo(nombreCorto,
+        'Ya tienes un crédito Infonavit activo',
+        'El programa Mejoravit no permite tramitar un nuevo crédito mientras tienes uno vigente. Una vez que lo liquides, regresa y con gusto revisamos tu caso.');
+      return;
+    }
+
+    if (meses < 4) {
+      var faltan = 4 - meses;
+      mostrarRechazo(nombreCorto,
+        'Aún no cumples el tiempo mínimo',
+        'Para tramitar Mejoravit necesitas al menos 4 meses cotizando de forma continua en tu empleo actual. Te ' + (faltan === 1 ? 'falta' : 'faltan') + ' aproximadamente ' + faltan + ' ' + (faltan === 1 ? 'mes' : 'meses') + '. Regresa cuando los cumplas y con gusto te ayudamos.');
+      return;
+    }
+
+    // Califica
+    mostrarExito(nombreCorto, telefono, nombre);
   }
 
-  // Todo OK — proceder
-  calcular();
-}
+  function mostrarExito(nombreCorto, telefono, nombreCompleto) {
+    var telLimpio = telefono.replace(/\D/g, '');
+    if (!telLimpio.startsWith('52')) telLimpio = '52' + telLimpio;
+    var msg = encodeURIComponent(
+      'Hola, soy ' + nombreCompleto + '. Acabo de verificar mi elegibilidad en el sitio de Credifika y me dice que califico para el crédito Mejoravit. ¿Me pueden ayudar a continuar?'
+    );
+    var waUrl = 'https://wa.me/5215515657012?text=' + msg;
 
-// Limpiar error en tiempo real al escribir
-['nombre','apellido_paterno','apellido_materno','nss','curp','telefono'].forEach(function(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('input', function() {
-    if (this.value.trim()) {
-      this.style.borderColor = '';
-      this.style.background  = '';
-      const errEl = document.getElementById('err_' + id);
-      if (errEl) errEl.textContent = '';
-    }
+    document.getElementById('resultCard').innerHTML =
+      '<div class="result-header-ok">' +
+        '<div class="result-check">✅</div>' +
+        '<div class="result-title-ok">' + nombreCorto + ', <em>tu perfil califica.</em></div>' +
+        '<p class="result-sub-ok">Puedes acceder a un crédito Mejoravit. Un asesor Credifika revisará tu caso sin costo y te guiará en todo el proceso.</p>' +
+      '</div>' +
+      '<div class="result-body">' +
+        '<p>El siguiente paso es hablar con tu asesor. En minutos puede decirte exactamente cuánto dinero tienes disponible y cómo funciona el proceso.</p>' +
+        '<a href="' + waUrl + '" target="_blank" class="btn-wa">' +
+          '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+          'Continuar con mi asesor' +
+        '</a>' +
+        '<p class="result-reassurance">🔒 Sin cobros adelantados · Solo pagas cuando tienes el dinero en tu cuenta</p>' +
+      '</div>';
+  }
+
+  function mostrarRechazo(nombreCorto, titulo, mensaje) {
+    document.getElementById('resultCard').innerHTML =
+      '<div class="result-header-no">' +
+        '<div class="result-icon-no">🙁</div>' +
+        '<div class="result-title-no">' + nombreCorto + ', ' + titulo.toLowerCase() + '</div>' +
+        '<p class="result-sub-no">' + mensaje + '</p>' +
+      '</div>' +
+      '<div class="result-body-no">' +
+        '<p>La consulta es siempre gratuita. Cuando tu situación cambie, regresa y revisamos tu caso sin costo.</p>' +
+        '<a href="index.html" class="btn-volver">← Volver al inicio</a>' +
+      '</div>';
+  }
+
+  function recalcular() {
+    document.getElementById('formulario').style.display = 'block';
+    document.getElementById('resultado').style.display = 'none';
+    progreso(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Limpiar error al escribir
+  ['nombre','telefono'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.classList.remove('error');
+        document.getElementById('err-' + id).textContent = '';
+      }
+    });
   });
-});
+
+  // Guardar lead en Supabase
+  async function guardarLead(nombre, telefono, zona, meses, credito) {
+    try {
+      var telLimpio = telefono.replace(/\D/g,'');
+      if (!telLimpio.startsWith('52')) telLimpio = '52' + telLimpio;
+
+      var califica = (zona === 'si' && credito === 'no' && meses >= 4);
+
+      await fetch('https://ntcekfevzqfpdpkeviug.supabase.co/rest/v1/clientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50Y2VrZmV2enFmcGRwa2V2aXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNzI3NTMsImV4cCI6MjA1NTc0ODc1M30.B4HBsKjimN-SqJXHm8-fVeBqRMWQD3K-L8RO1VN-Jyg',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50Y2VrZmV2enFmcGRwa2V2aXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNzI3NTMsImV4cCI6MjA1NTc0ODc1M30.B4HBsKjimN-SqJXHm8-fVeBqRMWQD3K-L8RO1VN-Jyg',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          telefono: telLimpio,
+          nombre: nombre.split(' ')[0],
+          apellido_paterno: nombre.split(' ')[1] || null,
+          origen: 'sitio_web',
+          zona: zona === 'si' ? 'CDMX' : 'otro',
+          etapa: califica ? 'E1' : 'rechazado',
+          estado: califica ? 'activo' : 'rechazado',
+          notas: 'Meses cotizando: ' + meses + ' | Crédito vigente: ' + credito
+        })
+      });
+    } catch(e) {
+      console.log('Supabase save error:', e);
+    }
+  }
 </script>
+
 </body>
 </html>
