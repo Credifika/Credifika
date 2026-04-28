@@ -762,7 +762,19 @@ function startRefresh() {
   refreshTimer = setInterval(refreshNow, 60000);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────────────────────
+const PASS = "Richiepulco94";
+const stored = sessionStorage.getItem("cf_auth");
+if (stored !== PASS) {
+  const input = prompt("Acceso restringido. Contraseña:");
+  if (input !== PASS) {
+    document.body.innerHTML = "<div style=\"display:flex;align-items:center;justify-content:center;height:100vh;background:#0D1B2A;color:#F5F3EE;font-family:DM Sans,sans-serif;font-size:14px\">Acceso denegado.</div>";
+  } else {
+    sessionStorage.setItem("cf_auth", PASS);
+  }
+}
+
+// ── INIT ──
 loadDash();
 startRefresh();
 </script>
