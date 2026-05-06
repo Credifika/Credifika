@@ -592,6 +592,7 @@ src="https://www.facebook.com/tr?id=1288314360078141&ev=PageView&noscript=1"
   }
 
   function mostrarExito(nombreCorto, telefono, nombreCompleto) {
+    fbq('track', 'Lead');
     var telLimpio = telefono.replace(/\D/g, '');
     if (!telLimpio.startsWith('52')) telLimpio = '52' + telLimpio;
     var msg = encodeURIComponent(
