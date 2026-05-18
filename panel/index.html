@@ -544,16 +544,15 @@ async function loadDetalle({ id }) {
   const body=document.getElementById('detalle-body');
   body.innerHTML='<div class="loading"><div class="spin"></div> Cargando…</div>';
   try {
-    const [clis, msgs, convs] = await Promise.all([
+   const [clis, convs] = await Promise.all([
       api('clientes',`?id=eq.${id}&limit=1`),
-      api('carlos_mensajes','?select=*&order=created_at.asc'),
       api('carlos_conversaciones','?select=*')
     ]);
     const c=clis[0];
     if(!c){body.innerHTML='<div class="empty">Cliente no encontrado</div>';return;}
 
-    const myMsgs = msgs.filter(m=>m.telefono===c.telefono);
-    const conv   = convs.find(cv=>cv.telefono===c.telefono);
+    const msgs = await api('carlos_mensajes',`?telefono=eq.${encodeURIComponent(c.telefono)}&select=*&order=created_at.asc`);
+    const myMsgs = msgs;
     const si     = STAGES.indexOf(c.etapa);
 
     body.innerHTML=`
