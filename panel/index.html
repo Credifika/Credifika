@@ -553,6 +553,7 @@ async function loadDetalle({ id }) {
 
     const msgs = await api('carlos_mensajes',`?telefono=eq.${encodeURIComponent(c.telefono)}&select=*&order=created_at.asc`);
     const myMsgs = msgs;
+    const conv = convs.find(cv=>cv.telefono===c.telefono);
     const si     = STAGES.indexOf(c.etapa);
 
     body.innerHTML=`
