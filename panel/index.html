@@ -164,7 +164,17 @@ select.inp{cursor:pointer;color:var(--dim)}
 .conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
 .conv-right{text-align:right;flex-shrink:0}
 .conv-time{font-size:11px;color:var(--muted);margin-top:5px}
-
+.conv-card.archivada{opacity:0.55}
+.conv-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.archive-btn{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);color:#E74C3C;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
+.archive-btn:hover{background:rgba(231,76,60,.25);color:#fff}
+.unarchive-btn{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.25);color:#2ECC71;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
+.unarchive-btn:hover{background:rgba(46,204,113,.25);color:#fff}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:6px;padding:3px;width:fit-content}
+.tab{padding:6px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 150ms}
+.tab.active{background:var(--teal);color:#fff}
+.tab:hover:not(.active){color:var(--cream)}
+  
 /* UTILS */
 .attend-btn{background:rgba(58,125,140,.2);border:1px solid var(--border);color:var(--teal);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
 .attend-btn:hover{background:var(--teal);color:#fff}
@@ -319,10 +329,14 @@ select.inp{cursor:pointer;color:var(--dim)}
       <h1>Conversaciones</h1>
       <p id="conv-sub">Cargando...</p>
     </div>
+    <div class="tabs">
+      <div class="tab active" id="tab-activas" onclick="setConvTab('activas')">Activas</div>
+      <div class="tab" id="tab-archivadas" onclick="setConvTab('archivadas')">Archivadas</div>
+    </div>
     <div class="conv-list" id="conv-list"><div class="loading"><div class="spin"></div></div></div>
   </div>
-
 </main>
+
 <div id="toast"></div>
 
 <script>
@@ -338,6 +352,7 @@ let allCli = [];
 let curView = 'dashboard';
 let prevView = 'clientes';
 let refreshTimer;
+let convTab = 'activas';
 
 // ── API ───────────────────────────────────────────────────────────────────────
 async function api(table, qs = '') {
@@ -602,7 +617,7 @@ async function loadDetalle({ id }) {
     <div class="card">
       <div class="card-title">Datos del Cliente</div>
       ${[
-        ['NSS',c.nss],['CURP',c.curp],['Zona',c.zona],['Origen',c.origen],
+        ['NSS',c.nss],['Contraseña Portal',c.contrasena_portal],['CURP',c.curp],['Zona',c.zona],['Origen',c.origen],
         ['Monto Estimado',money(c.monto_estimado)],['Monto Aprobado',money(c.monto_aprobado)],
         ['Razón Rechazo',c.razon_rechazo],
         ['Registro',fmt(c.created_at,false)],['Actualizado',fmt(c.updated_at,false)]
@@ -721,26 +736,43 @@ async function atender(tpId, cliId) {
 }
 
 // ── CONVERSACIONES ────────────────────────────────────────────────────────────
+function setConvTab(tab) {
+  convTab = tab;
+  document.getElementById('tab-activas').classList.toggle('active', tab==='activas');
+  document.getElementById('tab-archivadas').classList.toggle('active', tab==='archivadas');
+  loadConv();
+}
+
 async function loadConv() {
   try {
     const [convs, clis] = await Promise.all([
-      api('carlos_conversaciones','?select=*&order=updated_at.desc'),
+      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=500'),
       api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno')
     ]);
-    document.getElementById('conv-sub').textContent=`${convs.length} conversaciones`;
-
+    const etapaOrden = {'E8':0,'E7':1,'E6':2,'E5':3,'E4':4,'E3':5,'E2':6,'E1':7,'':8};
+    const sortConvs = arr => arr.slice().sort((a,b)=>{
+      const oa = etapaOrden[a.etapa_actual||''] ?? 8;
+      const ob = etapaOrden[b.etapa_actual||''] ?? 8;
+      if(oa!==ob) return oa-ob;
+      return new Date(b.updated_at)-new Date(a.updated_at);
+    });
+    const activas = sortConvs(convs.filter(cv=>!cv.archivado));
+    const archivadas = sortConvs(convs.filter(cv=>cv.archivado));
+    const mostrar = convTab==='activas' ? activas : archivadas;
+    document.getElementById('conv-sub').textContent=`${activas.length} activas · ${archivadas.length} archivadas`;
     const cliMap={};
     clis.forEach(c=>{cliMap[c.telefono]=c;});
-
     const el=document.getElementById('conv-list');
-    if(!convs.length){el.innerHTML='<div class="empty">Sin conversaciones</div>';return;}
-
-    el.innerHTML=convs.map(cv=>{
+    if(!mostrar.length){el.innerHTML=`<div class="empty">${convTab==='activas'?'Sin conversaciones activas':'Sin conversaciones archivadas'}</div>`;return;}
+    el.innerHTML=mostrar.map(cv=>{
       const cli=cliMap[cv.telefono]||{};
       const nm=cli.nombre?name(cli):(cv.nombre||cv.telefono||'—');
       const clickable=cli.id?`openDetalle('${cli.id}','conversaciones')`:'';
-      return `<div class="conv-card" onclick="${clickable}">
-        <div style="flex:1;min-width:0">
+      const btnArchivar = convTab==='activas'
+        ? `<button class="archive-btn" onclick="event.stopPropagation();archivarConv('${cv.id}',true)">Archivar</button>`
+        : `<button class="unarchive-btn" onclick="event.stopPropagation();archivarConv('${cv.id}',false)">Restaurar</button>`;
+      return `<div class="conv-card ${convTab==='archivadas'?'archivada':''}" onclick="${clickable}">
+        <div style="flex:1;min-width:0;cursor:pointer">
           <div class="conv-name">${esc(nm)}</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${esc(cv.telefono||'')}</div>
           <div class="conv-preview">${esc(cv.historial_resumen||'Sin resumen')}</div>
@@ -748,7 +780,8 @@ async function loadConv() {
         <div class="conv-right">
           ${bE(cv.etapa_actual)}
           <div class="conv-time">${ago(cv.updated_at)}</div>
-          ${cv.reachout_count?`<div style="font-size:10px;color:var(--muted);margin-top:3px">${cv.reachout_count} contactos</div>`:''}
+          ${cv.reachout_count?`<div style="font-size:10px;color:var(--muted)">${cv.reachout_count} contactos</div>`:''}
+          ${btnArchivar}
         </div>
       </div>`;
     }).join('');
@@ -756,6 +789,11 @@ async function loadConv() {
   } catch(e) { toast('Error conversaciones: '+e.message); }
 }
 
+async function archivarConv(convId, archivar) {
+  const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {archivado: archivar});
+  if(ok) { toast(archivar ? '✓ Conversación archivada' : '✓ Conversación restaurada'); loadConv(); }
+  else toast('Error al actualizar');
+}
 // ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
 function startRefresh() {
   clearInterval(refreshTimer);
