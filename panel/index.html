@@ -329,8 +329,19 @@ select.inp{cursor:pointer;color:var(--dim)}
       <h1>Conversaciones</h1>
       <p id="conv-sub">Cargando...</p>
     </div>
-    <div class="tabs">
+   <div class="tabs" style="flex-wrap:wrap;gap:4px">
       <div class="tab active" id="tab-activas" onclick="setConvTab('activas')">Activas</div>
+      <div class="tab" id="tab-nss-pass" onclick="setConvTab('nss_pass')">NSS y contraseña</div>
+      <div class="tab" id="tab-expediente" onclick="setConvTab('expediente')">Expediente</div>
+      <div class="tab" id="tab-contrasena" onclick="setConvTab('contrasena')">Contraseña pendiente</div>
+      <div class="tab" id="tab-bloqueado" onclick="setConvTab('bloqueado')">Portal bloqueado</div>
+      <div class="tab" id="tab-nss-pendiente" onclick="setConvTab('nss_pendiente')">NSS pendiente</div>
+      <div class="tab" id="tab-no-contesta" onclick="setConvTab('no_contesta')">No contesta</div>
+      <div class="tab" id="tab-pausado" onclick="setConvTab('pausado')">Pausado</div>
+      <div class="tab" id="tab-fuera-zona" onclick="setConvTab('fuera_zona')">Fuera de zona</div>
+      <div class="tab" id="tab-sin-patron" onclick="setConvTab('sin_patron')">Sin patrón/IMSS</div>
+      <div class="tab" id="tab-credito-vigente" onclick="setConvTab('credito_vigente')">Crédito vigente</div>
+      <div class="tab" id="tab-menos-4-meses" onclick="setConvTab('menos_4_meses')">Menos 4 meses</div>
       <div class="tab" id="tab-archivadas" onclick="setConvTab('archivadas')">Archivadas</div>
     </div>
     <div class="conv-list" id="conv-list"><div class="loading"><div class="spin"></div></div></div>
@@ -736,10 +747,14 @@ async function atender(tpId, cliId) {
 }
 
 // ── CONVERSACIONES ────────────────────────────────────────────────────────────
+const CARPETAS = ['activas','nss_pass','expediente','contrasena','bloqueado','nss_pendiente','no_contesta','pausado','fuera_zona','sin_patron','credito_vigente','menos_4_meses','archivadas'];
+
 function setConvTab(tab) {
   convTab = tab;
-  document.getElementById('tab-activas').classList.toggle('active', tab==='activas');
-  document.getElementById('tab-archivadas').classList.toggle('active', tab==='archivadas');
+  CARPETAS.forEach(c => {
+    const el = document.getElementById('tab-'+c.replace(/_/g,'-'));
+    if(el) el.classList.toggle('active', c===tab);
+  });
   loadConv();
 }
 
@@ -756,10 +771,9 @@ async function loadConv() {
       if(oa!==ob) return oa-ob;
       return new Date(b.updated_at)-new Date(a.updated_at);
     });
-    const activas = sortConvs(convs.filter(cv=>!cv.archivado));
-    const archivadas = sortConvs(convs.filter(cv=>cv.archivado));
-    const mostrar = convTab==='activas' ? activas : archivadas;
-    document.getElementById('conv-sub').textContent=`${activas.length} activas · ${archivadas.length} archivadas`;
+    const activas = sortConvs(convs.filter(cv=>!cv.carpeta||cv.carpeta==='activas'));
+    const mostrar = sortConvs(convTab==='activas' ? activas : convs.filter(cv=>cv.carpeta===convTab));
+    document.getElementById('conv-sub').textContent=`${activas.length} activas · ${mostrar.length} en esta carpeta`;
     const cliMap={};
     clis.forEach(c=>{cliMap[c.telefono]=c;});
     const el=document.getElementById('conv-list');
@@ -768,9 +782,22 @@ async function loadConv() {
       const cli=cliMap[cv.telefono]||{};
       const nm=cli.nombre?name(cli):(cv.nombre||cv.telefono||'—');
       const clickable=cli.id?`openDetalle('${cli.id}','conversaciones')`:'';
-      const btnArchivar = convTab==='activas'
-        ? `<button class="archive-btn" onclick="event.stopPropagation();archivarConv('${cv.id}',true)">Archivar</button>`
-        : `<button class="unarchive-btn" onclick="event.stopPropagation();archivarConv('${cv.id}',false)">Restaurar</button>`;
+      const btnMover = `<select class="inp" style="font-size:10px;padding:3px 6px;height:auto" onclick="event.stopPropagation()" onchange="moverConv('${cv.id}',this.value)">
+        <option value="">Mover a…</option>
+        <option value="activas" ${cv.carpeta==='activas'||!cv.carpeta?'selected':''}>Activas</option>
+        <option value="nss_pass" ${cv.carpeta==='nss_pass'?'selected':''}>NSS y contraseña</option>
+        <option value="expediente" ${cv.carpeta==='expediente'?'selected':''}>Expediente</option>
+        <option value="contrasena" ${cv.carpeta==='contrasena'?'selected':''}>Contraseña pendiente</option>
+        <option value="bloqueado" ${cv.carpeta==='bloqueado'?'selected':''}>Portal bloqueado</option>
+        <option value="nss_pendiente" ${cv.carpeta==='nss_pendiente'?'selected':''}>NSS pendiente</option>
+        <option value="no_contesta" ${cv.carpeta==='no_contesta'?'selected':''}>No contesta</option>
+        <option value="pausado" ${cv.carpeta==='pausado'?'selected':''}>Pausado</option>
+        <option value="fuera_zona" ${cv.carpeta==='fuera_zona'?'selected':''}>Fuera de zona</option>
+        <option value="sin_patron" ${cv.carpeta==='sin_patron'?'selected':''}>Sin patrón/IMSS</option>
+        <option value="credito_vigente" ${cv.carpeta==='credito_vigente'?'selected':''}>Crédito vigente</option>
+        <option value="menos_4_meses" ${cv.carpeta==='menos_4_meses'?'selected':''}>Menos 4 meses</option>
+        <option value="archivadas" ${cv.carpeta==='archivadas'?'selected':''}>Archivadas</option>
+      </select>`;
       return `<div class="conv-card ${convTab==='archivadas'?'archivada':''}" onclick="${clickable}">
         <div style="flex:1;min-width:0;cursor:pointer">
           <div class="conv-name">${esc(nm)}</div>
@@ -781,7 +808,7 @@ async function loadConv() {
           ${bE(cv.etapa_actual)}
           <div class="conv-time">${ago(cv.updated_at)}</div>
           ${cv.reachout_count?`<div style="font-size:10px;color:var(--muted)">${cv.reachout_count} contactos</div>`:''}
-          ${btnArchivar}
+         ${btnMover}
         </div>
       </div>`;
     }).join('');
@@ -789,10 +816,11 @@ async function loadConv() {
   } catch(e) { toast('Error conversaciones: '+e.message); }
 }
 
-async function archivarConv(convId, archivar) {
-  const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {archivado: archivar});
-  if(ok) { toast(archivar ? '✓ Conversación archivada' : '✓ Conversación restaurada'); loadConv(); }
-  else toast('Error al actualizar');
+async function moverConv(convId, carpeta) {
+  if(!carpeta) return;
+  const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {carpeta});
+  if(ok) { toast('✓ Movida a: '+carpeta.replace(/_/g,' ')); loadConv(); }
+  else toast('Error al mover');
 }
 // ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
 function startRefresh() {
