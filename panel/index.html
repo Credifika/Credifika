@@ -3,350 +3,783 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Credifika Panel</title>
+<title>Credifika · Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ─────────────────────────────────────────────────────────────────── */
 :root {
-  --navy: #1D3557;
-  --teal: #3A7D8C;
-  --cream: #F5F3EE;
-  --bg: #0D1B2A;
-  --surface: #152032;
-  --surface2: #1A2A3E;
-  --border: rgba(58,125,140,0.2);
-  --text: #F5F3EE;
-  --muted: rgba(245,243,238,0.45);
-  --dim: rgba(245,243,238,0.7);
-  --success: #2ECC71;
-  --warn: #F39C12;
-  --danger: #E74C3C;
-  --info: #3498DB;
-  --sw: 220px;
+  --bg:       #080C10;
+  --s1:       #0E1420;
+  --s2:       #141C2C;
+  --s3:       #1A2438;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #EDF0F4;
+  --muted:    rgba(237,240,244,0.38);
+  --dim:      rgba(237,240,244,0.65);
+  --accent:   #00D4AA;
+  --accent2:  #0099FF;
+  --warn:     #F5A623;
+  --danger:   #FF4D6D;
+  --success:  #00D4AA;
+  --sw:       56px;      /* sidebar collapsed width */
+  --lw:       300px;     /* inbox list width */
+  --rw:       300px;     /* right detail width */
+  /* stage colors */
+  --e1: #4A5568; --e2: #2B6CB0; --e3: #2C7A7B;
+  --e4: #D69E2E; --e5: #744210; --e6: #C05621;
+  --e7: #2D3748; --e8: #22543D;
 }
+
+/* ── RESET ──────────────────────────────────────────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;line-height:1.5}
-::-webkit-scrollbar{width:5px;height:5px}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;display:flex}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+button,select,input{font-family:'Instrument Sans',sans-serif}
 
-/* SIDEBAR */
-#sidebar{width:var(--sw);background:var(--navy);position:fixed;top:0;left:0;bottom:0;z-index:100;border-right:1px solid var(--border);display:flex;flex-direction:column}
-.logo-area{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
-.logo-area img{height:30px;object-fit:contain;max-width:160px}
-.logo-fallback{font-family:'DM Serif Display',serif;font-size:17px;color:var(--cream);letter-spacing:.3px}
-.nav{flex:1;padding:10px 0;overflow-y:auto}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--dim);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:all 150ms}
-.nav-item:hover{background:rgba(58,125,140,.15);color:var(--cream)}
-.nav-item.active{background:rgba(58,125,140,.2);color:var(--cream);border-left-color:var(--teal)}
-.nav-item svg{width:15px;height:15px;flex-shrink:0}
-.sidebar-foot{padding:12px 16px;border-top:1px solid var(--border)}
-.agent-status{font-size:10px;color:var(--muted);margin-bottom:2px}
-.agent-dot{font-size:11px;color:#2ECC71;font-weight:600}
+/* ── SIDEBAR ────────────────────────────────────────────────────────────────── */
+#sidebar {
+  width: var(--sw);
+  background: var(--s1);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 4px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.s-logo {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 16px;
+  color: var(--bg);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.s-nav { display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 0 8px; flex: 1 }
+.s-item {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  position: relative;
+  transition: all 150ms;
+  border: 1px solid transparent;
+}
+.s-item:hover { background: var(--s3); color: var(--text); }
+.s-item.active { background: rgba(0,212,170,0.12); color: var(--accent); border-color: rgba(0,212,170,0.2); }
+.s-item svg { width: 17px; height: 17px; }
+.s-tooltip {
+  position: absolute; left: calc(100% + 12px);
+  background: var(--s3); color: var(--text);
+  font-size: 11px; font-weight: 600;
+  padding: 4px 8px; border-radius: 5px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 150ms;
+  border: 1px solid var(--border2);
+  z-index: 999;
+}
+.s-item:hover .s-tooltip { opacity: 1; }
+.s-badge {
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--warn);
+  border: 1.5px solid var(--s1);
+  display: none;
+}
+.s-badge.show { display: block; }
+.s-foot { margin-top: auto; padding: 0 8px; }
+.agent-pill {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.15);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  cursor: default;
+}
+.agent-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(0.85)} }
 
-/* TOPBAR */
-#topbar{position:fixed;top:0;left:var(--sw);right:0;height:50px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:90}
-.top-title{font-family:'DM Serif Display',serif;font-size:15px;color:var(--cream)}
-.top-right{display:flex;align-items:center;gap:12px}
-.refresh-time{font-size:11px;color:var(--muted)}
-.btn-refresh{display:flex;align-items:center;gap:5px;background:rgba(58,125,140,.18);border:1px solid var(--border);color:var(--teal);padding:5px 11px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;transition:all 150ms}
-.btn-refresh:hover{background:rgba(58,125,140,.35);color:var(--cream)}
+/* ── APP SHELL ───────────────────────────────────────────────────────────────── */
+#app { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
-/* MAIN */
-#main{margin-left:var(--sw);margin-top:50px;flex:1;padding:22px;min-height:calc(100vh - 50px)}
-.view{display:none}.view.active{display:block}
-.ph{margin-bottom:20px}
-.ph h1{font-family:'DM Serif Display',serif;font-size:21px;color:var(--cream);margin-bottom:3px}
-.ph p{font-size:12px;color:var(--muted)}
+/* ── TOPBAR ──────────────────────────────────────────────────────────────────── */
+#topbar {
+  height: 48px;
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 18px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 90;
+}
+.top-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 14px;
+  color: var(--text);
+  flex: 1;
+}
+.top-meta { font-size: 11px; color: var(--muted); }
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 150ms;
+  border: 1px solid transparent;
+}
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border2);
+  color: var(--dim);
+}
+.btn-ghost:hover { background: var(--s3); color: var(--text); }
+.btn-accent {
+  background: rgba(0,212,170,0.12);
+  border-color: rgba(0,212,170,0.25);
+  color: var(--accent);
+}
+.btn-accent:hover { background: rgba(0,212,170,0.22); }
 
-/* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
-.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:14px}
+/* ── CONTENT AREA ────────────────────────────────────────────────────────────── */
+#content { flex: 1; display: flex; overflow: hidden; }
 
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.kpi{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--teal);border-radius:8px;padding:14px 18px}
-.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px}
-.kpi-val{font-family:'DM Serif Display',serif;font-size:30px;color:var(--cream);line-height:1}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+/* ── VIEWS ───────────────────────────────────────────────────────────────────── */
+.view { display: none; flex: 1; overflow: hidden; }
+.view.active { display: flex; }
 
-/* CHARTS ROW */
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+/* ── INBOX LAYOUT (Conversaciones) ──────────────────────────────────────────── */
+#v-conversaciones { flex-direction: row; }
 
-/* BAR CHART */
-.barchart{display:flex;align-items:flex-end;gap:6px;height:130px}
-.barcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
-.bar{width:100%;background:var(--teal);border-radius:3px 3px 0 0;min-height:3px;transition:background 150ms;cursor:default}
-.bar:hover{background:#4B9DB0}
-.bar-lbl{font-size:10px;color:var(--muted);text-align:center}
-.bar-cnt{font-size:10px;color:var(--dim);font-weight:600}
+/* LEFT: folder tabs + list */
+#inbox-left {
+  width: var(--lw);
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--s1);
+  overflow: hidden;
+}
+#inbox-search-bar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#inbox-search {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px 6px 30px;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 150ms;
+}
+#inbox-search:focus { border-color: rgba(0,212,170,0.4); }
+#inbox-search::placeholder { color: var(--muted); }
+.search-icon {
+  position: absolute; left: 22px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+#inbox-search-wrap { position: relative; }
+.folder-scroll {
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+}
+.folder-scroll::-webkit-scrollbar { height: 2px; }
+.folders { display: flex; gap: 4px; min-width: max-content; }
+.folder-tab {
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: all 150ms;
+  border: 1px solid transparent;
+  display: flex; align-items: center; gap: 5px;
+}
+.folder-tab:hover { color: var(--text); background: var(--s3); }
+.folder-tab.active {
+  background: rgba(0,212,170,0.1);
+  border-color: rgba(0,212,170,0.2);
+  color: var(--accent);
+}
+.folder-count {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 1px 5px;
+  font-size: 10px;
+}
+.folder-tab.active .folder-count {
+  background: rgba(0,212,170,0.2);
+  color: var(--accent);
+}
+#inbox-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+/* INBOX ITEM */
+.inbox-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 120ms;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.inbox-item:hover { background: var(--s2); }
+.inbox-item.selected {
+  background: var(--s2);
+  border-left-color: var(--accent);
+}
+.inbox-item-top {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  gap: 8px;
+}
+.inbox-name {
+  font-weight: 600; font-size: 12px;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex: 1;
+}
+.inbox-time { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.inbox-preview {
+  font-size: 11px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.inbox-meta {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: 5px;
+}
+.stage-chip {
+  display: inline-flex; align-items: center;
+  padding: 1px 6px; border-radius: 3px;
+  font-size: 9px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+}
+.wait-indicator {
+  font-size: 10px;
+  display: flex; align-items: center; gap: 3px;
+}
+.wait-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.wait-hot { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
+.wait-warm { background: var(--warn); }
+.wait-cold { background: var(--muted); }
 
-/* FUNNEL */
-.funnel-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
-.funnel-lbl{width:26px;font-size:11px;font-weight:700;color:var(--teal)}
-.funnel-track{flex:1;background:var(--surface2);border-radius:3px;height:17px;overflow:hidden}
-.funnel-fill{height:100%;background:linear-gradient(90deg,var(--teal),rgba(58,125,140,.4));border-radius:3px;transition:width 500ms ease}
-.funnel-cnt{width:26px;text-align:right;font-size:12px;font-weight:600;color:var(--cream)}
-.funnel-name{width:70px;font-size:10px;color:var(--muted)}
+/* CENTER: chat panel */
+#inbox-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  min-width: 0;
+}
+.chat-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--s1);
+  flex-shrink: 0;
+}
+.chat-avatar {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--s3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 13px;
+  color: var(--accent);
+  flex-shrink: 0;
+  border: 1px solid rgba(0,212,170,0.2);
+}
+.chat-header-info { flex: 1; min-width: 0; }
+.chat-header-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600; font-size: 13px;
+  color: var(--text);
+}
+.chat-header-sub { font-size: 11px; color: var(--muted); }
+.chat-header-right { display: flex; align-items: center; gap: 6px; }
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.msg-row { display: flex; max-width: 78%; }
+.msg-row.out { align-self: flex-start; }
+.msg-row.in { align-self: flex-end; }
+.bubble {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.bubble-out {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  border-bottom-left-radius: 3px;
+}
+.bubble-in {
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.2);
+  color: var(--text);
+  border-bottom-right-radius: 3px;
+}
+.msg-time {
+  font-size: 9px; color: var(--muted);
+  margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.chat-empty {
+  flex: 1; display: flex;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--muted); gap: 8px;
+}
+.chat-empty svg { opacity: 0.2; }
+.chat-empty p { font-size: 12px; }
 
-/* TABLE */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{padding:9px 11px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
-tbody tr{border-bottom:1px solid rgba(58,125,140,.08);transition:background 150ms;cursor:pointer}
-tbody tr:hover{background:rgba(58,125,140,.09)}
-tbody td{padding:9px 11px;color:var(--dim)}
-td.nm{color:var(--cream);font-weight:500}
+/* RIGHT: client detail */
+#inbox-right {
+  width: var(--rw);
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--s1);
+  overflow-y: auto;
+}
+.detail-section {
+  padding: 14px 14px 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+.detail-section:last-child { border-bottom: none; }
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.info-row {
+  display: flex; justify-content: space-between;
+  align-items: flex-start;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 8px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-lbl { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.info-val {
+  font-size: 11px; color: var(--text);
+  font-weight: 500; text-align: right;
+  word-break: break-all;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+.info-val.normal { font-family: 'Instrument Sans', sans-serif; font-size: 11px; }
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
-.b-activo{background:rgba(46,204,113,.15);color:#2ECC71}
-.b-aprobado{background:rgba(52,152,219,.15);color:#3498DB}
-.b-rechazado{background:rgba(231,76,60,.15);color:#E74C3C}
-.b-inactivo{background:rgba(149,165,166,.15);color:#95A5A6}
-.b-pendiente{background:rgba(243,156,18,.15);color:#F39C12}
-.b-atendido{background:rgba(46,204,113,.15);color:#2ECC71}
-.b-e{background:rgba(58,125,140,.22);color:var(--teal)}
-
-/* TOOLBAR */
-.toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center}
-.inp{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 11px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 150ms}
-.inp::placeholder{color:var(--muted)}
-.inp:focus{border-color:var(--teal)}
-select.inp{cursor:pointer;color:var(--dim)}
-
-/* DETAIL */
-.detail-grid{display:grid;grid-template-columns:1fr 330px;gap:14px}
-.detail-main{display:flex;flex-direction:column;gap:14px}
-.detail-side{display:flex;flex-direction:column;gap:14px}
-
-/* TIMELINE */
-.timeline{display:flex;align-items:center;padding:14px 0}
-.tstep{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
-.tstep::before{content:'';position:absolute;top:13px;left:-50%;right:50%;height:2px;background:var(--border);z-index:0}
-.tstep:first-child::before{display:none}
-.tstep.done::before{background:var(--teal)}
-.tdot{width:26px;height:26px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);position:relative;z-index:1}
-.tstep.done .tdot{background:var(--teal);border-color:var(--teal);color:#fff}
-.tstep.current .tdot{background:var(--navy);border-color:var(--cream);color:var(--cream);box-shadow:0 0 0 3px rgba(245,243,238,.18)}
-.tname{font-size:9px;color:var(--muted);margin-top:5px;text-align:center}
-.tstep.done .tname,.tstep.current .tname{color:var(--dim)}
-
-/* CONVERSATION */
-.thread{display:flex;flex-direction:column;gap:9px;max-height:380px;overflow-y:auto;padding:2px 0}
-.bubble{max-width:82%;padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.45}
-.bbl-carlos{background:rgba(58,125,140,.18);border:1px solid var(--border);color:var(--dim);align-self:flex-start;border-bottom-left-radius:2px}
-.bbl-client{background:rgba(29,53,87,.65);border:1px solid rgba(245,243,238,.1);color:var(--cream);align-self:flex-end;border-bottom-right-radius:2px}
-.bmeta{font-size:10px;color:var(--muted);margin-top:3px}
+/* STAGE PROGRESS */
+.stage-track {
+  display: flex; gap: 3px;
+  padding: 10px 0;
+}
+.stage-seg {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: var(--s3);
+  transition: background 300ms;
+  cursor: default;
+  position: relative;
+}
+.stage-seg.done { background: var(--accent); }
+.stage-seg.current { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.stage-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.stage-lbl {
+  font-size: 9px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+.stage-lbl.done, .stage-lbl.current { color: var(--accent); }
 
 /* COMMANDS */
-.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
-.cmd-btn{background:var(--surface2);border:1px solid var(--border);color:var(--dim);padding:7px 9px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.4px;text-align:left;transition:all 150ms}
-.cmd-btn:hover{background:rgba(58,125,140,.22);border-color:var(--teal);color:var(--cream)}
-.cmd-preview{font-family:'Courier New',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:9px 11px;color:var(--teal);word-break:break-all;min-height:34px;margin-bottom:8px}
-.cmd-row{display:flex;gap:6px}
+.cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
+.cmd-btn {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.4px;
+  text-align: left;
+  transition: all 150ms;
+}
+.cmd-btn:hover {
+  background: var(--s3);
+  border-color: var(--border2);
+  color: var(--text);
+}
+.cmd-preview {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 7px 9px;
+  color: var(--accent); word-break: break-all;
+  min-height: 32px; margin-bottom: 6px;
+}
+.cmd-input-row { display: flex; gap: 5px; }
+.cmd-inp {
+  flex: 1;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 5px 8px;
+  color: var(--text); font-size: 11px;
+  outline: none; transition: border-color 150ms;
+}
+.cmd-inp:focus { border-color: rgba(0,212,170,0.4); }
+.cmd-inp::placeholder { color: var(--muted); }
+.btn-copy {
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.2);
+  color: var(--accent);
+  padding: 5px 10px; border-radius: 5px;
+  cursor: pointer; font-size: 11px; font-weight: 600;
+  transition: all 150ms; white-space: nowrap;
+}
+.btn-copy:hover { background: rgba(0,212,170,0.2); }
 
-/* INFO ROWS */
-.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(58,125,140,.08)}
-.info-row:last-child{border-bottom:none}
-.info-lbl{font-size:11px;color:var(--muted);font-weight:500}
-.info-val{font-size:12px;color:var(--cream);font-weight:500;text-align:right;max-width:170px;word-break:break-word}
+/* folder select */
+.folder-select {
+  width: 100%;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 6px 8px;
+  color: var(--dim); font-size: 11px;
+  outline: none; cursor: pointer;
+  transition: border-color 150ms;
+  margin-top: 8px;
+}
+.folder-select:focus { border-color: rgba(0,212,170,0.4); }
 
-/* BACK */
-.back{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer;margin-bottom:14px;transition:color 150ms}
-.back:hover{color:var(--cream)}
+/* ── DASHBOARD / CLIENTES / TP views ────────────────────────────────────────── */
+#v-dashboard, #v-clientes, #v-touchpoints {
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 22px;
+  gap: 16px;
+}
+.ph { flex-shrink: 0; }
+.ph h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 20px;
+  color: var(--text); margin-bottom: 3px;
+}
+.ph p { font-size: 12px; color: var(--muted); }
 
-/* CONV LIST */
-.conv-list{display:flex;flex-direction:column;gap:7px}
-.conv-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:all 150ms}
-.conv-card:hover{background:var(--surface2);border-color:var(--teal)}
-.conv-name{font-weight:600;color:var(--cream);font-size:13px;margin-bottom:2px}
-.conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
-.conv-right{text-align:right;flex-shrink:0}
-.conv-time{font-size:11px;color:var(--muted);margin-top:5px}
-.conv-card.archivada{opacity:0.55}
-.conv-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.archive-btn{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);color:#E74C3C;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
-.archive-btn:hover{background:rgba(231,76,60,.25);color:#fff}
-.unarchive-btn{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.25);color:#2ECC71;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
-.unarchive-btn:hover{background:rgba(46,204,113,.25);color:#fff}
-.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:6px;padding:3px;width:fit-content}
-.tab{padding:6px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 150ms}
-.tab.active{background:var(--teal);color:#fff}
-.tab:hover:not(.active){color:var(--cream)}
-  
+.card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+}
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin-bottom: 14px;
+}
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.kpi {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  position: relative; overflow: hidden;
+}
+.kpi::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+.kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 8px; }
+.kpi-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+.kpi-sub { font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+/* CHARTS */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.barchart { display: flex; align-items: flex-end; gap: 5px; height: 110px; }
+.barcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; background: rgba(0,212,170,0.35); border-radius: 2px 2px 0 0; min-height: 2px; transition: background 150ms; cursor: default; border-top: 1px solid rgba(0,212,170,0.6); }
+.bar:hover { background: rgba(0,212,170,0.6); }
+.bar-lbl { font-size: 9px; color: var(--muted); text-align: center; font-family:'JetBrains Mono',monospace; }
+.bar-cnt { font-size: 9px; color: var(--dim); font-weight: 600; }
+.funnel-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.funnel-lbl { width: 22px; font-size: 10px; font-weight: 700; color: var(--accent); font-family:'JetBrains Mono',monospace; }
+.funnel-track { flex: 1; background: var(--s2); border-radius: 2px; height: 14px; overflow: hidden; }
+.funnel-fill { height: 100%; background: linear-gradient(90deg,var(--accent),rgba(0,212,170,0.3)); border-radius: 2px; transition: width 500ms ease; }
+.funnel-name { width: 72px; font-size: 10px; color: var(--muted); }
+.funnel-cnt { width: 22px; text-align: right; font-size: 11px; font-weight: 600; color: var(--text); font-family:'JetBrains Mono',monospace; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  padding: 8px 10px; text-align: left;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  white-space: nowrap; font-family: 'Syne', sans-serif;
+}
+tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 120ms; cursor: pointer; }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody td { padding: 8px 10px; color: var(--dim); }
+td.nm { color: var(--text); font-weight: 600; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; font-family:'JetBrains Mono',monospace; }
+.b-activo    { background: rgba(0,212,170,0.12); color: var(--accent); }
+.b-aprobado  { background: rgba(0,153,255,0.12); color: var(--accent2); }
+.b-rechazado { background: rgba(255,77,109,0.12); color: var(--danger); }
+.b-inactivo  { background: rgba(255,255,255,0.08); color: var(--muted); }
+.b-pendiente { background: rgba(245,166,35,0.12); color: var(--warn); }
+.b-atendido  { background: rgba(0,212,170,0.12); color: var(--accent); }
+.b-e {
+  background: rgba(0,212,170,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,212,170,0.2);
+}
+
+/* TOOLBAR */
+.toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.inp {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px;
+  color: var(--text); font-size: 12px;
+  outline: none; transition: border-color 150ms;
+}
+.inp::placeholder { color: var(--muted); }
+.inp:focus { border-color: rgba(0,212,170,0.4); }
+select.inp { cursor: pointer; color: var(--dim); }
+
+/* TOUCHPOINTS */
+.attend-btn {
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.2);
+  color: var(--accent); padding: 4px 10px;
+  border-radius: 4px; cursor: pointer;
+  font-size: 10px; font-weight: 600;
+  transition: all 150ms; white-space: nowrap;
+}
+.attend-btn:hover { background: rgba(0,212,170,0.2); }
+
 /* UTILS */
-.attend-btn{background:rgba(58,125,140,.2);border:1px solid var(--border);color:var(--teal);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;transition:all 150ms;white-space:nowrap}
-.attend-btn:hover{background:var(--teal);color:#fff}
-.loading{display:flex;align-items:center;justify-content:center;padding:36px;color:var(--muted);font-size:13px;gap:9px}
-.spin{width:15px;height:15px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:36px;color:var(--muted);font-size:13px}
-#toast{position:fixed;bottom:22px;right:22px;background:var(--navy);border:1px solid var(--teal);color:var(--cream);padding:9px 15px;border-radius:7px;font-size:12px;z-index:999;opacity:0;transition:opacity 200ms;pointer-events:none}
-#toast.show{opacity:1}
+.loading { display: flex; align-items: center; justify-content: center; padding: 32px; color: var(--muted); font-size: 12px; gap: 8px; }
+.spin { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 32px; color: var(--muted); font-size: 12px; }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--s3); border: 1px solid rgba(0,212,170,0.3);
+  color: var(--text); padding: 8px 14px;
+  border-radius: 8px; font-size: 12px;
+  z-index: 9999; opacity: 0; transition: opacity 200ms;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+#toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <div class="logo-area">
-    <img src="credifika_logo.png" alt="Credifika"
-      onerror="this.style.display='none';document.getElementById('lf').style.display='block'">
-    <span id="lf" class="logo-fallback" style="display:none">Credifika</span>
-  </div>
-  <nav class="nav">
-    <div class="nav-item active" data-v="dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
+  <div class="s-logo">C</div>
+  <nav class="s-nav">
+    <div class="s-item active" data-v="conversaciones">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="s-tooltip">Bandeja</span>
+      <div class="s-badge" id="badge-conv"></div>
     </div>
-    <div class="nav-item" data-v="clientes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Clientes
+    <div class="s-item" data-v="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span class="s-tooltip">Dashboard</span>
     </div>
-    <div class="nav-item" data-v="touchpoints">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Touchpoints <span id="tp-badge" style="display:none;background:var(--warn);color:#000;font-size:9px;font-weight:700;border-radius:10px;padding:1px 5px;margin-left:4px"></span>
+    <div class="s-item" data-v="clientes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="s-tooltip">Clientes</span>
     </div>
-    <div class="nav-item" data-v="conversaciones">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Conversaciones
+    <div class="s-item" data-v="touchpoints">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="s-tooltip">Touchpoints</span>
+      <div class="s-badge" id="badge-tp"></div>
     </div>
   </nav>
-  <div class="sidebar-foot">
-    <div class="agent-status">Carlos AI Agent</div>
-    <div class="agent-dot">● Activo</div>
+  <div class="s-foot">
+    <div class="agent-pill" title="Carlos · Activo">
+      <div class="agent-dot"></div>
+    </div>
   </div>
 </div>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <span class="top-title" id="topTitle">Dashboard</span>
-  <div class="top-right">
-    <span class="refresh-time" id="refTime"></span>
-    <button class="btn-refresh" onclick="refreshNow()">
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <span class="top-title" id="topTitle">Bandeja</span>
+    <span class="top-meta" id="refTime"></span>
+    <button class="btn btn-ghost" onclick="refreshNow()">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Actualizar
     </button>
   </div>
-</div>
 
-<!-- MAIN -->
-<main id="main">
+  <!-- CONTENT -->
+  <div id="content">
 
-  <!-- DASHBOARD -->
-  <div id="v-dashboard" class="view active">
-    <div class="ph">
-      <h1>Panel de Control</h1>
-      <p>Resumen operativo — agente Carlos</p>
+    <!-- ── CONVERSACIONES (split inbox) ──────────────────────────────────── -->
+    <div id="v-conversaciones" class="view active">
+
+      <!-- LEFT: list -->
+      <div id="inbox-left">
+        <div id="inbox-search-bar">
+          <div id="inbox-search-wrap">
+            <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="inbox-search" type="text" placeholder="Buscar…" oninput="filterInbox()">
+          </div>
+        </div>
+        <div class="folder-scroll">
+          <div class="folders" id="folders"></div>
+        </div>
+        <div id="inbox-list">
+          <div class="loading"><div class="spin"></div></div>
+        </div>
+      </div>
+
+      <!-- CENTER: chat -->
+      <div id="inbox-center">
+        <div class="chat-empty" id="chat-empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p>Selecciona una conversación</p>
+        </div>
+        <div id="chat-panel" style="display:none;flex-direction:column;height:100%;overflow:hidden">
+          <div class="chat-header" id="chat-header"></div>
+          <div class="chat-body" id="chat-body"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: detail -->
+      <div id="inbox-right">
+        <div id="right-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:8px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <p style="font-size:11px">Datos del cliente</p>
+        </div>
+        <div id="right-detail" style="display:none"></div>
+      </div>
     </div>
-    <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-label">Total Clientes</div><div class="kpi-val" id="k-total">—</div></div>
-      <div class="kpi"><div class="kpi-label">Activos</div><div class="kpi-val" id="k-activos">—</div></div>
-      <div class="kpi"><div class="kpi-label">Aprobados</div><div class="kpi-val" id="k-aprobados">—</div></div>
-      <div class="kpi"><div class="kpi-label">Touchpoints Pendientes</div><div class="kpi-val" id="k-tp">—</div></div>
-    </div>
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Leads por día — últimos 7 días</div>
-        <div class="barchart" id="barchart"><div class="loading"><div class="spin"></div></div></div>
+
+    <!-- ── DASHBOARD ──────────────────────────────────────────────────────── -->
+    <div id="v-dashboard" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
+      <div class="ph">
+        <h1>Dashboard</h1>
+        <p>Resumen operativo · Carlos AI Agent</p>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total Clientes</div><div class="kpi-val" id="k-total">—</div></div>
+        <div class="kpi"><div class="kpi-label">Activos</div><div class="kpi-val" id="k-activos">—</div></div>
+        <div class="kpi"><div class="kpi-label">Aprobados</div><div class="kpi-val" id="k-aprobados">—</div></div>
+        <div class="kpi"><div class="kpi-label">Touchpoints</div><div class="kpi-val" id="k-tp">—</div></div>
+      </div>
+      <div class="charts-row">
+        <div class="card"><div class="card-title">Leads · últimos 7 días</div><div class="barchart" id="barchart"><div class="loading"><div class="spin"></div></div></div></div>
+        <div class="card"><div class="card-title">Funnel por etapa</div><div id="funnel"><div class="loading"><div class="spin"></div></div></div></div>
       </div>
       <div class="card">
-        <div class="card-title">Funnel por etapa</div>
-        <div id="funnel"><div class="loading"><div class="spin"></div></div></div>
+        <div class="card-title">Actividad reciente</div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Cliente</th><th>Teléfono</th><th>Etapa</th><th>Estado</th><th>Zona</th><th>Registro</th></tr></thead>
+          <tbody id="dash-tbody"><tr><td colspan="6" class="loading"><div class="spin"></div></td></tr></tbody></table>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Actividad reciente</div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Cliente</th><th>Teléfono</th><th>Etapa</th><th>Estado</th><th>Origen</th><th>Zona</th><th>Registro</th></tr></thead>
-          <tbody id="dash-tbody"><tr><td colspan="7" class="loading"><div class="spin"></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 
-  <!-- CLIENTES -->
-  <div id="v-clientes" class="view">
-    <div class="ph">
-      <h1>Clientes</h1>
-      <p id="cli-sub">Cargando...</p>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <input class="inp" id="cli-search" type="text" placeholder="Buscar nombre o teléfono…" style="flex:1" oninput="filterCli()">
-        <select class="inp" id="cli-estado" onchange="filterCli()">
-          <option value="">Todos los estados</option>
-          <option value="activo">Activo</option>
-          <option value="aprobado">Aprobado</option>
-          <option value="rechazado">Rechazado</option>
-          <option value="inactivo">Inactivo</option>
-        </select>
-        <select class="inp" id="cli-etapa" onchange="filterCli()">
-          <option value="">Todas las etapas</option>
-          <option>E1</option><option>E2</option><option>E3</option><option>E4</option>
-          <option>E5</option><option>E6</option><option>E7</option><option>E8</option>
-        </select>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Nombre</th><th>Teléfono</th><th>Etapa</th><th>Estado</th><th>Zona</th><th>Monto Est.</th><th>Monto Apr.</th><th>Origen</th><th>Registro</th></tr></thead>
-          <tbody id="cli-tbody"><tr><td colspan="9" class="loading"><div class="spin"></div></td></tr></tbody>
-        </table>
+    <!-- ── CLIENTES ───────────────────────────────────────────────────────── -->
+    <div id="v-clientes" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
+      <div class="ph"><h1>Clientes</h1><p id="cli-sub">Cargando…</p></div>
+      <div class="card">
+        <div class="toolbar">
+          <input class="inp" id="cli-search" type="text" placeholder="Buscar nombre o teléfono…" style="flex:1" oninput="filterCli()">
+          <select class="inp" id="cli-estado" onchange="filterCli()">
+            <option value="">Todos los estados</option>
+            <option value="activo">Activo</option><option value="aprobado">Aprobado</option>
+            <option value="rechazado">Rechazado</option><option value="inactivo">Inactivo</option>
+          </select>
+          <select class="inp" id="cli-etapa" onchange="filterCli()">
+            <option value="">Todas las etapas</option>
+            <option>E1</option><option>E2</option><option>E3</option><option>E4</option>
+            <option>E5</option><option>E6</option><option>E7</option><option>E8</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Nombre</th><th>Teléfono</th><th>Etapa</th><th>Estado</th><th>Zona</th><th>Monto Est.</th><th>Monto Apr.</th><th>Registro</th></tr></thead>
+          <tbody id="cli-tbody"><tr><td colspan="8" class="loading"><div class="spin"></div></td></tr></tbody></table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- DETALLE CLIENTE -->
-  <div id="v-detalle" class="view">
-    <div class="back" id="back-btn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      Volver
-    </div>
-    <div id="detalle-body"><div class="loading"><div class="spin"></div> Cargando…</div></div>
-  </div>
-
-  <!-- TOUCHPOINTS -->
-  <div id="v-touchpoints" class="view">
-    <div class="ph">
-      <h1>Touchpoints</h1>
-      <p id="tp-sub">Cargando...</p>
-    </div>
-    <div class="card">
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Tipo</th><th>Cliente</th><th>Teléfono</th><th>Datos</th><th>Estado</th><th>Hace</th><th>Acción</th></tr></thead>
-          <tbody id="tp-tbody"><tr><td colspan="7" class="loading"><div class="spin"></div></td></tr></tbody>
-        </table>
+    <!-- ── TOUCHPOINTS ────────────────────────────────────────────────────── -->
+    <div id="v-touchpoints" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
+      <div class="ph"><h1>Touchpoints</h1><p id="tp-sub">Cargando…</p></div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Tipo</th><th>Cliente</th><th>Teléfono</th><th>Datos</th><th>Estado</th><th>Hace</th><th>Acción</th></tr></thead>
+          <tbody id="tp-tbody"><tr><td colspan="7" class="loading"><div class="spin"></div></td></tr></tbody></table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- CONVERSACIONES -->
-  <div id="v-conversaciones" class="view">
-    <div class="ph">
-      <h1>Conversaciones</h1>
-      <p id="conv-sub">Cargando...</p>
-    </div>
-   <div class="tabs" style="flex-wrap:wrap;gap:4px">
-      <div class="tab active" id="tab-activas" onclick="setConvTab('activas')">Activas</div>
-      <div class="tab" id="tab-nss-pass" onclick="setConvTab('nss_pass')">NSS y contraseña</div>
-      <div class="tab" id="tab-expediente" onclick="setConvTab('expediente')">Expediente</div>
-      <div class="tab" id="tab-contrasena" onclick="setConvTab('contrasena')">Contraseña pendiente</div>
-      <div class="tab" id="tab-bloqueado" onclick="setConvTab('bloqueado')">Portal bloqueado</div>
-      <div class="tab" id="tab-nss-pendiente" onclick="setConvTab('nss_pendiente')">NSS pendiente</div>
-      <div class="tab" id="tab-no-contesta" onclick="setConvTab('no_contesta')">No contesta</div>
-      <div class="tab" id="tab-pausado" onclick="setConvTab('pausado')">Pausado</div>
-      <div class="tab" id="tab-fuera-zona" onclick="setConvTab('fuera_zona')">Fuera de zona</div>
-      <div class="tab" id="tab-sin-patron" onclick="setConvTab('sin_patron')">Sin patrón/IMSS</div>
-      <div class="tab" id="tab-credito-vigente" onclick="setConvTab('credito_vigente')">Crédito vigente</div>
-      <div class="tab" id="tab-menos-4-meses" onclick="setConvTab('menos_4_meses')">Menos 4 meses</div>
-      <div class="tab" id="tab-archivadas" onclick="setConvTab('archivadas')">Archivadas</div>
-    </div>
-    <div class="conv-list" id="conv-list"><div class="loading"><div class="spin"></div></div></div>
-  </div>
-</main>
+  </div><!-- /content -->
+</div><!-- /app -->
 
 <div id="toast"></div>
 
@@ -358,12 +791,32 @@ const KEY = 'sb_publishable_CkUpXFu6_o5hnViE2nt5zg_VC3nntss';
 const STAGES = ['E1','E2','E3','E4','E5','E6','E7','E8'];
 const SNAMES = {E1:'Contacto',E2:'Calificado',E3:'Docs',E4:'NSS',E5:'Validación',E6:'Aprobación',E7:'Firma',E8:'Liquidado'};
 
+const CARPETAS = [
+  {id:'activas',        label:'Activas'},
+  {id:'nss_pass',       label:'NSS y contraseña'},
+  {id:'expediente',     label:'Expediente'},
+  {id:'contrasena',     label:'Contraseña pend.'},
+  {id:'bloqueado',      label:'Portal bloqueado'},
+  {id:'nss_pendiente',  label:'NSS pendiente'},
+  {id:'no_contesta',    label:'No contesta'},
+  {id:'pausado',        label:'Pausado'},
+  {id:'fuera_zona',     label:'Fuera de zona'},
+  {id:'sin_patron',     label:'Sin patrón/IMSS'},
+  {id:'credito_vigente',label:'Crédito vigente'},
+  {id:'menos_4_meses',  label:'Menos 4 meses'},
+  {id:'archivadas',     label:'Archivadas'},
+];
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let allCli = [];
-let curView = 'dashboard';
-let prevView = 'clientes';
-let refreshTimer;
+let allConvs = [];
 let convTab = 'activas';
+let selectedConvId = null;
+let selectedCliId = null;
+let curView = 'conversaciones';
+let refreshTimer;
+let inboxSearch = '';
+let _curCmd = '';
 
 // ── API ───────────────────────────────────────────────────────────────────────
 async function api(table, qs = '') {
@@ -385,28 +838,31 @@ async function patch(table, filter, body) {
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-const fmt = (iso, short) => {
+const fmt = iso => {
   if (!iso) return '—';
   const d = new Date(iso);
-  return short
-    ? d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'})
-    : d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+};
+const fmtShort = iso => {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
 };
 const ago = iso => {
   if (!iso) return '—';
   const s = Math.floor((Date.now()-new Date(iso))/1000);
-  if (s<60) return 'ahora';
-  if (s<3600) return Math.floor(s/60)+'m';
-  if (s<86400) return Math.floor(s/3600)+'h';
+  if (s < 60) return 'ahora';
+  if (s < 3600) return Math.floor(s/60)+'m';
+  if (s < 86400) return Math.floor(s/3600)+'h';
   return Math.floor(s/86400)+'d';
 };
+const agoSec = iso => iso ? Math.floor((Date.now()-new Date(iso))/1000) : 99999;
 const money = v => v ? '$'+Number(v).toLocaleString('es-MX') : '—';
-const name = c => [c.nombre,c.apellido_paterno,c.apellido_materno].filter(Boolean).join(' ') || c.telefono || '—';
-
-const badge = (val, prefix) => {
-  const cls = prefix ? `b-${prefix}` : `b-${val}`;
-  return val ? `<span class="badge ${cls}">${esc(val)}</span>` : '';
+const nameOf = c => [c.nombre,c.apellido_paterno,c.apellido_materno].filter(Boolean).join(' ') || c.telefono || '—';
+const initials = c => {
+  const n = c.nombre||''; const a = c.apellido_paterno||'';
+  return ((n[0]||'')+(a[0]||'')).toUpperCase() || '?';
 };
+const badge = (val) => val ? `<span class="badge b-${val}">${esc(val)}</span>` : '';
 const bE = v => v ? `<span class="badge b-e">${esc(v)}</span>` : '';
 
 function toast(msg, ms=2600) {
@@ -417,33 +873,344 @@ function toast(msg, ms=2600) {
 
 function setRefTime() {
   const t = new Date();
-  document.getElementById('refTime').textContent = 'Actualizado '+t.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('refTime').textContent = 'Act. '+t.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
+
+// wait color based on hours
+function waitColor(iso) {
+  const h = agoSec(iso) / 3600;
+  if (h > 24) return 'wait-hot';
+  if (h > 4)  return 'wait-warm';
+  return 'wait-cold';
+}
+function waitLabel(iso) {
+  const s = agoSec(iso);
+  if (s < 60) return 'ahora';
+  if (s < 3600) return Math.floor(s/60)+'m';
+  if (s < 86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────────────
-const VIEW_TITLE = {dashboard:'Dashboard',clientes:'Clientes',detalle:'Detalle Cliente',touchpoints:'Touchpoints',conversaciones:'Conversaciones'};
+const VIEW_TITLE = {
+  conversaciones:'Bandeja', dashboard:'Dashboard',
+  clientes:'Clientes', touchpoints:'Touchpoints'
+};
 
-function showView(v, extra) {
+function showView(v) {
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.s-item[data-v]').forEach(x=>x.classList.remove('active'));
   const vEl = document.getElementById('v-'+v);
   if (vEl) vEl.classList.add('active');
-  const nEl = document.querySelector(`[data-v="${v}"]`);
+  const nEl = document.querySelector(`.s-item[data-v="${v}"]`);
   if (nEl) nEl.classList.add('active');
   document.getElementById('topTitle').textContent = VIEW_TITLE[v] || v;
   curView = v;
   if (v==='dashboard') loadDash();
   else if (v==='clientes') loadCli();
   else if (v==='touchpoints') loadTP();
-  else if (v==='conversaciones') loadConv();
-  else if (v==='detalle' && extra) loadDetalle(extra);
+  else if (v==='conversaciones') loadInbox();
 }
 
 function refreshNow() { showView(curView); }
 
-document.querySelectorAll('.nav-item[data-v]').forEach(el => {
-  el.addEventListener('click', () => showView(el.dataset.v));
+document.querySelectorAll('.s-item[data-v]').forEach(el => {
+  el.addEventListener('click', ()=>showView(el.dataset.v));
 });
+
+// ── INBOX ─────────────────────────────────────────────────────────────────────
+function filterInbox() {
+  inboxSearch = (document.getElementById('inbox-search')?.value||'').toLowerCase();
+  renderInboxList();
+}
+
+function setConvTab(tabId) {
+  convTab = tabId;
+  document.querySelectorAll('.folder-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.folder === tabId);
+  });
+  renderInboxList();
+}
+
+function renderFolderTabs(convs) {
+  // count per folder
+  const counts = {};
+  CARPETAS.forEach(c => counts[c.id] = 0);
+  convs.forEach(cv => {
+    const f = cv.carpeta || 'activas';
+    if (counts[f] !== undefined) counts[f]++;
+  });
+  const el = document.getElementById('folders');
+  el.innerHTML = CARPETAS.map(c => `
+    <div class="folder-tab ${c.id===convTab?'active':''}" data-folder="${c.id}" onclick="setConvTab('${c.id}')">
+      ${esc(c.label)}
+      ${counts[c.id] > 0 ? `<span class="folder-count">${counts[c.id]}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+const etapaOrden = {'E8':0,'E7':1,'E6':2,'E5':3,'E4':4,'E3':5,'E2':6,'E1':7,'':8};
+
+function renderInboxList() {
+  const cliMap = {};
+  allCli.forEach(c => { cliMap[c.telefono] = c; });
+
+  let items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
+
+  if (inboxSearch) {
+    items = items.filter(cv => {
+      const cli = cliMap[cv.telefono]||{};
+      const nm = nameOf(cli).toLowerCase();
+      const tel = (cv.telefono||'').toLowerCase();
+      return nm.includes(inboxSearch) || tel.includes(inboxSearch);
+    });
+  }
+
+  // sort: by etapa desc then by updated_at desc
+  items.sort((a,b) => {
+    const oa = etapaOrden[a.etapa_actual||''] ?? 8;
+    const ob = etapaOrden[b.etapa_actual||''] ?? 8;
+    if (oa!==ob) return oa-ob;
+    return new Date(b.updated_at)-new Date(a.updated_at);
+  });
+
+  const el = document.getElementById('inbox-list');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty">Sin conversaciones</div>`;
+    return;
+  }
+
+  el.innerHTML = items.map(cv => {
+    const cli = cliMap[cv.telefono]||{};
+    const nm = cli.nombre ? nameOf(cli) : (cv.nombre || cv.telefono || '—');
+    const wc = waitColor(cv.updated_at);
+    const wl = waitLabel(cv.updated_at);
+    const stageColor = cv.etapa_actual ? `background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)` : '';
+    const isSelected = cv.id === selectedConvId;
+    return `
+      <div class="inbox-item ${isSelected?'selected':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
+        <div class="inbox-item-top">
+          <div class="inbox-name">${esc(nm)}</div>
+          <div class="inbox-time">${wl}</div>
+        </div>
+        <div class="inbox-preview">${esc(cv.historial_resumen||'Sin resumen')}</div>
+        <div class="inbox-meta">
+          ${cv.etapa_actual ? `<span class="stage-chip" style="${stageColor}">${esc(cv.etapa_actual)}</span>` : ''}
+          <div class="wait-indicator">
+            <div class="wait-dot ${wc}"></div>
+            <span style="color:var(--muted)">${cv.reachout_count||0} contactos</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadInbox() {
+  try {
+    const [convs, clis, tps] = await Promise.all([
+      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=500'),
+      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&order=created_at.desc'),
+      api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
+    ]);
+    allConvs = convs;
+    allCli = clis;
+
+    renderFolderTabs(convs);
+    renderInboxList();
+    updateTPBadge(tps.length);
+    setRefTime();
+
+    // if selected still exists, refresh right panel
+    if (selectedConvId) {
+      const cv = allConvs.find(c=>c.id===selectedConvId);
+      if (cv && selectedCliId) refreshRight(cv, selectedCliId);
+    }
+  } catch(e) { toast('Error bandeja: '+e.message); }
+}
+
+async function selectConv(convId, cliId) {
+  selectedConvId = convId;
+  selectedCliId = cliId || null;
+
+  // update selection highlight
+  document.querySelectorAll('.inbox-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.convId === convId);
+  });
+
+  const cv = allConvs.find(c=>c.id===convId);
+  const cli = allCli.find(c=>c.id===cliId)||null;
+
+  // show chat panel
+  document.getElementById('chat-empty').style.display = 'none';
+  const cp = document.getElementById('chat-panel');
+  cp.style.display = 'flex';
+
+  // header
+  const nm = cli ? nameOf(cli) : (cv?.telefono||'—');
+  const ini = cli ? initials(cli) : '?';
+  document.getElementById('chat-header').innerHTML = `
+    <div class="chat-avatar">${esc(ini)}</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">${esc(nm)}</div>
+      <div class="chat-header-sub">${esc(cv?.telefono||'—')} · ${bE(cv?.etapa_actual)} ${badge(cli?.estado||'')}</div>
+    </div>
+    <div class="chat-header-right">
+      ${cliId ? `<button class="btn btn-ghost" style="font-size:10px" onclick="openDetalleView('${cliId}')">Ver perfil</button>` : ''}
+    </div>`;
+
+  // load messages
+  const body = document.getElementById('chat-body');
+  body.innerHTML = `<div class="loading"><div class="spin"></div></div>`;
+  try {
+    if (cv?.telefono) {
+      const msgs = await api('carlos_mensajes', `?telefono=eq.${encodeURIComponent(cv.telefono)}&select=*&order=created_at.asc`);
+      if (!msgs.length) {
+        body.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Sin mensajes registrados</div>`;
+      } else {
+        body.innerHTML = msgs.map(m => `
+          <div class="msg-row ${m.direccion==='salida'?'out':'in'}">
+            <div>
+              <div class="bubble ${m.direccion==='salida'?'bubble-out':'bubble-in'}">${esc(m.mensaje)}</div>
+              <div class="msg-time" style="${m.direccion==='salida'?'':'text-align:right'}">${m.direccion==='salida'?'Carlos':'Cliente'} · ${fmt(m.created_at)}</div>
+            </div>
+          </div>`).join('');
+        body.scrollTop = body.scrollHeight;
+      }
+    }
+  } catch(e) {
+    body.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Error cargando mensajes</div>`;
+  }
+
+  // right panel
+  renderRight(cv, cli);
+}
+
+function renderRight(cv, cli) {
+  document.getElementById('right-placeholder').style.display = 'none';
+  const el = document.getElementById('right-detail');
+  el.style.display = 'block';
+
+  if (!cli && !cv) { el.innerHTML = ''; return; }
+
+  const si = cli ? STAGES.indexOf(cli.etapa||'') : -1;
+
+  el.innerHTML = `
+    <!-- Stage progress -->
+    <div class="detail-section">
+      <div class="section-title">Progreso</div>
+      <div class="stage-track">
+        ${STAGES.map((s,i)=>`<div class="stage-seg ${i<si?'done':''} ${i===si?'current':''}" title="${s} · ${SNAMES[s]}"></div>`).join('')}
+      </div>
+      <div class="stage-labels">
+        ${STAGES.map((s,i)=>`<div class="stage-lbl ${i<=si?'done':''}">${s}</div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Client data -->
+    ${cli ? `
+    <div class="detail-section">
+      <div class="section-title">Datos del Cliente</div>
+      ${[
+        ['NSS', cli.nss],
+        ['Contraseña', cli.contrasena_portal],
+        ['CURP', cli.curp],
+        ['Zona', cli.zona],
+        ['Origen', cli.origen],
+        ['Monto Est.', cli.monto_estimado ? money(cli.monto_estimado) : null],
+        ['Monto Apr.', cli.monto_aprobado ? money(cli.monto_aprobado) : null],
+        ['Registro', fmtShort(cli.created_at)],
+      ].filter(([,v])=>v).map(([l,v])=>`
+        <div class="info-row">
+          <span class="info-lbl">${l}</span>
+          <span class="info-val ${['Zona','Origen','Registro'].includes(l)?'normal':''}">${esc(String(v))}</span>
+        </div>`).join('')}
+      ${cli.notas ? `<div style="margin-top:8px;font-size:11px;color:var(--dim);line-height:1.5;padding:6px 8px;background:var(--s2);border-radius:5px;border:1px solid var(--border)">${esc(cli.notas)}</div>` : ''}
+    </div>` : ''}
+
+    <!-- Mover carpeta -->
+    <div class="detail-section">
+      <div class="section-title">Carpeta</div>
+      <select class="folder-select" onchange="moverConvRight('${cv?.id||''}',this.value)">
+        ${CARPETAS.map(c=>`<option value="${c.id}" ${(cv?.carpeta||'activas')===c.id?'selected':''}>${c.label}</option>`).join('')}
+      </select>
+    </div>
+
+    <!-- Commands -->
+    ${cli ? `
+    <div class="detail-section">
+      <div class="section-title">Comandos Asesor</div>
+      <div class="cmd-grid">
+        <button class="cmd-btn" onclick="buildCmd('MONTO','${esc(cli.telefono||'')}')">MONTO</button>
+        <button class="cmd-btn" onclick="buildCmd('MSG','${esc(cli.telefono||'')}')">MSG</button>
+        <button class="cmd-btn" onclick="buildCmd('CITA1','${esc(cli.telefono||'')}')">CITA1</button>
+        <button class="cmd-btn" onclick="buildCmd('CITA2','${esc(cli.telefono||'')}')">CITA2</button>
+        <button class="cmd-btn" onclick="buildCmd('DOC_OK','${esc(cli.telefono||'')}')">DOC · ok</button>
+        <button class="cmd-btn" onclick="buildCmd('DATOS_OK','${esc(cli.telefono||'')}')">DATOS · ok</button>
+      </div>
+      <div class="cmd-preview" id="cmd-prev">Selecciona un comando…</div>
+      <div class="cmd-input-row">
+        <input class="cmd-inp" id="cmd-extra" placeholder="Parámetros adicionales…">
+        <button class="btn-copy" onclick="copyCmd()">Copiar</button>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+async function refreshRight(cv, cliId) {
+  const cli = allCli.find(c=>c.id===cliId)||null;
+  renderRight(cv, cli);
+}
+
+async function moverConvRight(convId, carpeta) {
+  if (!convId || !carpeta) return;
+  const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {carpeta});
+  if (ok) {
+    toast('✓ Movida a: '+carpeta.replace(/_/g,' '));
+    // update local state
+    const cv = allConvs.find(c=>c.id===convId);
+    if (cv) cv.carpeta = carpeta;
+    renderFolderTabs(allConvs);
+    renderInboxList();
+  } else {
+    toast('Error al mover');
+  }
+}
+
+// commands
+const CMD_TMPL = {
+  MONTO:   t => `MONTO:${t}:[cantidad]`,
+  MSG:     t => `MSG:${t}:[mensaje]`,
+  CITA1:   t => `CITA1:${t}:[opciones]`,
+  CITA2:   t => `CITA2:${t}:[fecha]:[hora]:[lugar]`,
+  DOC_OK:  t => `DOC:ok:[tipo]:${t}`,
+  DATOS_OK:t => `DATOS:ok:${t}`,
+};
+const CMD_PH = {
+  MONTO:'Cantidad (ej: 92300)',
+  MSG:'Mensaje para el cliente',
+  CITA1:'Opciones de horario',
+  CITA2:'fecha:hora:dirección',
+  DOC_OK:'Tipo doc: INE, CSF, acta…',
+  DATOS_OK:'',
+};
+
+function buildCmd(tipo, tel) {
+  _curCmd = CMD_TMPL[tipo] ? CMD_TMPL[tipo](tel) : tipo+':'+tel;
+  const prev = document.getElementById('cmd-prev');
+  const inp  = document.getElementById('cmd-extra');
+  if (prev) prev.textContent = _curCmd;
+  if (inp)  { inp.placeholder = CMD_PH[tipo]||''; inp.value=''; }
+}
+
+function copyCmd() {
+  const extra = (document.getElementById('cmd-extra')?.value||'').trim();
+  let cmd = _curCmd;
+  if (extra) cmd = cmd.replace(/\[[^\]]+\]/, extra);
+  if (!cmd) { toast('Selecciona un comando primero'); return; }
+  navigator.clipboard.writeText(cmd)
+    .then(()=>toast('✓ Copiado'))
+    .catch(()=>{ prompt('Copia este comando:', cmd); });
+}
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function loadDash() {
@@ -453,13 +1220,11 @@ async function loadDash() {
       api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
     ]);
     allCli = clis;
-
     setText('k-total', clis.length);
     setText('k-activos', clis.filter(c=>c.estado==='activo').length);
     setText('k-aprobados', clis.filter(c=>c.estado==='aprobado').length);
     setText('k-tp', tps.length);
     updateTPBadge(tps.length);
-
     renderBar(clis);
     renderFunnel(clis);
     renderDashTable(clis.slice(0,20));
@@ -469,8 +1234,8 @@ async function loadDash() {
 
 function setText(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
 function updateTPBadge(n) {
-  const b=document.getElementById('tp-badge');
-  if (b) { b.textContent=n; b.style.display=n>0?'inline':'none'; }
+  const b = document.getElementById('badge-tp');
+  if (b) b.classList.toggle('show', n > 0);
 }
 
 function renderBar(clis) {
@@ -488,7 +1253,7 @@ function renderBar(clis) {
   document.getElementById('barchart').innerHTML=days.map(d=>`
     <div class="barcol">
       <div class="bar-cnt">${d.n||''}</div>
-      <div class="bar" style="height:${Math.max(d.n/mx*110,3)}px" title="${d.n} leads"></div>
+      <div class="bar" style="height:${Math.max(d.n/mx*95,2)}px" title="${d.n} leads"></div>
       <div class="bar-lbl">${d.lbl}</div>
     </div>`).join('');
 }
@@ -508,16 +1273,15 @@ function renderFunnel(clis) {
 
 function renderDashTable(clis) {
   const tb=document.getElementById('dash-tbody');
-  if(!clis.length){tb.innerHTML='<tr><td colspan="7" class="empty">Sin datos</td></tr>';return;}
+  if(!clis.length){tb.innerHTML='<tr><td colspan="6" class="empty">Sin datos</td></tr>';return;}
   tb.innerHTML=clis.map(c=>`
-    <tr onclick="openDetalle('${c.id}','dashboard')">
-      <td class="nm">${esc(name(c))}</td>
-      <td style="color:var(--muted)">${esc(c.telefono||'—')}</td>
+    <tr onclick="showView('clientes')">
+      <td class="nm">${esc(nameOf(c))}</td>
+      <td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">${esc(c.telefono||'—')}</td>
       <td>${bE(c.etapa)}</td>
       <td>${badge(c.estado)}</td>
-      <td style="color:var(--muted);font-size:11px">${esc(c.origen||'—')}</td>
-      <td style="color:var(--muted);font-size:11px">${esc(c.zona||'—')}</td>
-      <td style="color:var(--muted);font-size:11px">${fmt(c.created_at,true)}</td>
+      <td style="color:var(--muted)">${esc(c.zona||'—')}</td>
+      <td style="color:var(--muted);font-size:11px">${fmtShort(c.created_at)}</td>
     </tr>`).join('');
 }
 
@@ -536,7 +1300,7 @@ function filterCli() {
   const est=document.getElementById('cli-estado')?.value||'';
   const eta=document.getElementById('cli-etapa')?.value||'';
   let rows=allCli;
-  if(q) rows=rows.filter(c=>name(c).toLowerCase().includes(q)||(c.telefono||'').includes(q));
+  if(q) rows=rows.filter(c=>nameOf(c).toLowerCase().includes(q)||(c.telefono||'').includes(q));
   if(est) rows=rows.filter(c=>c.estado===est);
   if(eta) rows=rows.filter(c=>c.etapa===eta);
   renderCliTable(rows);
@@ -544,156 +1308,28 @@ function filterCli() {
 
 function renderCliTable(rows) {
   const tb=document.getElementById('cli-tbody');
-  if(!rows.length){tb.innerHTML='<tr><td colspan="9" class="empty">Sin resultados</td></tr>';return;}
+  if(!rows.length){tb.innerHTML='<tr><td colspan="8" class="empty">Sin resultados</td></tr>';return;}
   tb.innerHTML=rows.map(c=>`
-    <tr onclick="openDetalle('${c.id}','clientes')">
-      <td class="nm">${esc(name(c))}</td>
-      <td style="color:var(--muted)">${esc(c.telefono||'—')}</td>
+    <tr onclick="goToConvByTel('${esc(c.telefono||'')}')">
+      <td class="nm">${esc(nameOf(c))}</td>
+      <td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">${esc(c.telefono||'—')}</td>
       <td>${bE(c.etapa)}</td>
       <td>${badge(c.estado)}</td>
       <td style="color:var(--muted)">${esc(c.zona||'—')}</td>
-      <td style="color:var(--teal)">${money(c.monto_estimado)}</td>
-      <td style="color:var(--teal)">${money(c.monto_aprobado)}</td>
-      <td style="color:var(--muted);font-size:11px">${esc(c.origen||'—')}</td>
-      <td style="color:var(--muted);font-size:11px">${fmt(c.created_at,true)}</td>
+      <td style="color:var(--accent)">${money(c.monto_estimado)}</td>
+      <td style="color:var(--accent)">${money(c.monto_aprobado)}</td>
+      <td style="color:var(--muted);font-size:11px">${fmtShort(c.created_at)}</td>
     </tr>`).join('');
 }
 
-// ── DETALLE ───────────────────────────────────────────────────────────────────
-function openDetalle(id, from) {
-  prevView = from || 'clientes';
-  document.getElementById('back-btn').onclick = () => showView(prevView);
-  showView('detalle', { id });
-}
-
-async function loadDetalle({ id }) {
-  const body=document.getElementById('detalle-body');
-  body.innerHTML='<div class="loading"><div class="spin"></div> Cargando…</div>';
-  try {
-   const [clis, convs] = await Promise.all([
-      api('clientes',`?id=eq.${id}&limit=1`),
-      api('carlos_conversaciones','?select=*')
-    ]);
-    const c=clis[0];
-    if(!c){body.innerHTML='<div class="empty">Cliente no encontrado</div>';return;}
-
-    const msgs = await api('carlos_mensajes',`?telefono=eq.${encodeURIComponent(c.telefono)}&select=*&order=created_at.asc`);
-    const myMsgs = msgs;
-    const conv = convs.find(cv=>cv.telefono===c.telefono);
-    const si     = STAGES.indexOf(c.etapa);
-
-    body.innerHTML=`
-<div style="margin-bottom:16px">
-  <h2 style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--cream)">${esc(name(c))}</h2>
-  <div style="display:flex;gap:7px;margin-top:6px;align-items:center">
-    ${badge(c.estado)} ${bE(c.etapa)}
-    <span style="font-size:12px;color:var(--muted)">${esc(c.telefono||'')}</span>
-  </div>
-</div>
-
-<div class="card" style="margin-bottom:14px">
-  <div class="card-title">Progreso</div>
-  <div class="timeline">
-    ${STAGES.map((s,i)=>`
-      <div class="tstep ${i<si?'done':''} ${i===si?'current':''}">
-        ${i>0?'':''}
-        <div class="tdot">${s}</div>
-        <div class="tname">${SNAMES[s]}</div>
-      </div>`).join('')}
-  </div>
-</div>
-
-<div class="detail-grid">
-  <div class="detail-main">
-    <div class="card">
-      <div class="card-title">Conversación con Carlos
-        ${conv?`<span style="float:right;font-size:10px;color:var(--muted)">${conv.reachout_count||0} reachouts · act. ${ago(conv.updated_at)}</span>`:''}
-      </div>
-      ${conv&&conv.historial_resumen?`<div style="font-size:11px;color:var(--muted);background:var(--surface2);border-radius:5px;padding:8px 10px;margin-bottom:12px;border:1px solid var(--border)">Resumen: ${esc(conv.historial_resumen)}</div>`:''}
-      <div class="thread" id="thread">
-        ${myMsgs.length===0
-          ?'<div class="empty">Sin mensajes registrados</div>'
-          :myMsgs.map(m=>`
-            <div>
-              <div class="bubble ${m.direccion==='salida'?'bbl-carlos':'bbl-client'}">${esc(m.mensaje)}</div>
-              <div class="bmeta" style="${m.direccion==='salida'?'':'text-align:right'}">
-                ${m.direccion==='salida'?'Carlos':'Cliente'} · ${fmt(m.created_at,false)}
-              </div>
-            </div>`).join('')}
-      </div>
-    </div>
-  </div>
-
-  <div class="detail-side">
-    <div class="card">
-      <div class="card-title">Datos del Cliente</div>
-      ${[
-        ['NSS',c.nss],['Contraseña Portal',c.contrasena_portal],['CURP',c.curp],['Zona',c.zona],['Origen',c.origen],
-        ['Monto Estimado',money(c.monto_estimado)],['Monto Aprobado',money(c.monto_aprobado)],
-        ['Razón Rechazo',c.razon_rechazo],
-        ['Registro',fmt(c.created_at,false)],['Actualizado',fmt(c.updated_at,false)]
-      ].filter(([,v])=>v&&v!=='—').map(([l,v])=>`
-        <div class="info-row"><span class="info-lbl">${l}</span><span class="info-val">${esc(String(v))}</span></div>`).join('')}
-      ${c.notas?`<div style="margin-top:10px"><div class="info-lbl" style="margin-bottom:4px">Notas</div><div style="font-size:12px;color:var(--dim);line-height:1.5">${esc(c.notas)}</div></div>`:''}
-    </div>
-
-    <div class="card">
-      <div class="card-title">Comandos Rápidos</div>
-      <div class="cmd-grid">
-        <button class="cmd-btn" onclick="buildCmd('OK','${esc(c.telefono)}','${esc(String(c.monto_aprobado||''))}')">OK · Aprobar</button>
-        <button class="cmd-btn" onclick="buildCmd('RECHAZAR','${esc(c.telefono)}','')">RECHAZAR</button>
-        <button class="cmd-btn" onclick="buildCmd('CITA','${esc(c.telefono)}','')">CITA</button>
-        <button class="cmd-btn" onclick="buildCmd('MSG','${esc(c.telefono)}','')">MSG</button>
-        <button class="cmd-btn" onclick="buildCmd('STATUS','${esc(c.telefono)}','')">STATUS</button>
-        <button class="cmd-btn" onclick="buildCmd('EXPEDIENTE','${esc(c.telefono)}','')">EXPEDIENTE OK</button>
-      </div>
-      <div class="cmd-preview" id="cmd-prev">Selecciona un comando…</div>
-      <div class="cmd-row">
-        <input class="inp" id="cmd-extra" style="flex:1;font-size:12px;padding:6px 10px" placeholder="Parámetros adicionales…">
-        <button class="attend-btn" style="padding:6px 12px" onclick="copyCmd()">Copiar</button>
-      </div>
-    </div>
-  </div>
-</div>`;
-
-    // scroll thread
-    const th=document.getElementById('thread');
-    if(th) th.scrollTop=th.scrollHeight;
-  } catch(e) { body.innerHTML=`<div class="empty">Error: ${esc(e.message)}</div>`; }
-}
-
-let _curCmd='';
-const CMD_TMPL = {
-  OK:      t => `OK ${t} [saldo]`,
-  RECHAZAR:t => `RECHAZAR ${t} [motivo]`,
-  CITA:    t => `CITA ${t} [fecha] [hora] [dirección]`,
-  MSG:     t => `MSG ${t} [mensaje]`,
-  STATUS:  t => `STATUS ${t}`,
-  EXPEDIENTE: t => `EXPEDIENTE ${t} OK`
-};
-const CMD_PH = {
-  OK:'Saldo aprobado (ej: 45000)',RECHAZAR:'Motivo de rechazo',
-  CITA:'30ene 10:00am Av. Insurgentes 123 CDMX',MSG:'Mensaje personalizado',
-  STATUS:'',EXPEDIENTE:''
-};
-
-function buildCmd(tipo, tel, extra) {
-  _curCmd = CMD_TMPL[tipo] ? CMD_TMPL[tipo](tel) : tipo+' '+tel;
-  if (tipo==='OK' && extra) _curCmd=`OK ${tel} ${extra}`;
-  const prev=document.getElementById('cmd-prev');
-  const inp=document.getElementById('cmd-extra');
-  if(prev) prev.textContent=_curCmd;
-  if(inp){ inp.placeholder=CMD_PH[tipo]||''; inp.value=''; }
-}
-
-function copyCmd() {
-  const extra=(document.getElementById('cmd-extra')?.value||'').trim();
-  let cmd=_curCmd;
-  if(extra) cmd=cmd.replace(/\[[^\]]+\]/,extra);
-  if(!cmd){toast('Selecciona un comando primero');return;}
-  navigator.clipboard.writeText(cmd).then(()=>toast('✓ Copiado: '+cmd)).catch(()=>{
-    prompt('Copia este comando:',cmd);
-  });
+function goToConvByTel(tel) {
+  showView('conversaciones');
+  // find conv for this tel and open it
+  setTimeout(()=>{
+    const cv = allConvs.find(c=>c.telefono===tel);
+    const cli = allCli.find(c=>c.telefono===tel);
+    if (cv) selectConv(cv.id, cli?.id||'');
+  }, 300);
 }
 
 // ── TOUCHPOINTS ───────────────────────────────────────────────────────────────
@@ -706,142 +1342,56 @@ async function loadTP() {
     const pend = tps.filter(t=>t.estado==='pendiente');
     document.getElementById('tp-sub').textContent=`${pend.length} pendientes · ${tps.length} total`;
     updateTPBadge(pend.length);
-
     const cliMap={};
     clis.forEach(c=>{cliMap[c.telefono]=c;});
-
     const tb=document.getElementById('tp-tbody');
     if(!tps.length){tb.innerHTML='<tr><td colspan="7" class="empty">Sin touchpoints</td></tr>';return;}
-
     tb.innerHTML=tps.map(t=>{
       const dat=t.datos||{};
       const tel=dat.telefono||dat.tel||'';
       const cli=cliMap[tel]||{};
-      const nm=cli.nombre?name(cli):(tel||'—');
+      const nm=cli.nombre?nameOf(cli):(tel||'—');
       const datStr=Object.entries(dat).filter(([k])=>k!=='telefono'&&k!=='tel').map(([k,v])=>`${k}: ${v}`).join(' · ');
       return `<tr>
-        <td><span style="font-weight:700;color:var(--teal);font-size:12px">${esc(t.tipo||'—')}</span></td>
+        <td><span style="font-weight:700;color:var(--accent);font-size:11px;font-family:'JetBrains Mono',monospace">${esc(t.tipo||'—')}</span></td>
         <td class="nm">${esc(nm)}</td>
-        <td style="color:var(--muted);font-size:12px">${esc(tel)}</td>
-        <td style="color:var(--muted);font-size:11px;max-width:180px;word-break:break-word">${esc(datStr)||'—'}</td>
+        <td style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${esc(tel)}</td>
+        <td style="color:var(--muted);font-size:10px;max-width:160px;word-break:break-word">${esc(datStr)||'—'}</td>
         <td>${badge(t.estado)}</td>
         <td style="color:var(--muted);font-size:11px">${ago(t.created_at)}</td>
-        <td>${t.estado==='pendiente'
-          ?`<button class="attend-btn" onclick="atender('${t.id}','${cli.id||''}')">Atender</button>`
-          :'—'}</td>
+        <td>${t.estado==='pendiente'?`<button class="attend-btn" onclick="atender('${t.id}')">Atender</button>`:'—'}</td>
       </tr>`;
     }).join('');
     setRefTime();
   } catch(e) { toast('Error touchpoints: '+e.message); }
 }
 
-async function atender(tpId, cliId) {
-  const ok=await patch('carlos_touchpoints',`id=eq.${tpId}`,{estado:'atendido'});
-  if(ok){
-    toast('Touchpoint atendido');
-    if(cliId) openDetalle(cliId,'touchpoints');
-    else loadTP();
-  } else {
-    toast('Error al actualizar');
-  }
+async function atender(tpId) {
+  const ok = await patch('carlos_touchpoints',`id=eq.${tpId}`,{estado:'atendido'});
+  if(ok) { toast('✓ Touchpoint atendido'); loadTP(); }
+  else toast('Error al actualizar');
 }
 
-// ── CONVERSACIONES ────────────────────────────────────────────────────────────
-const CARPETAS = ['activas','nss_pass','expediente','contrasena','bloqueado','nss_pendiente','no_contesta','pausado','fuera_zona','sin_patron','credito_vigente','menos_4_meses','archivadas'];
-
-function setConvTab(tab) {
-  convTab = tab;
-  CARPETAS.forEach(c => {
-    const el = document.getElementById('tab-'+c.replace(/_/g,'-'));
-    if(el) el.classList.toggle('active', c===tab);
-  });
-  loadConv();
-}
-
-async function loadConv() {
-  try {
-    const [convs, clis] = await Promise.all([
-      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=500'),
-      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno')
-    ]);
-    const etapaOrden = {'E8':0,'E7':1,'E6':2,'E5':3,'E4':4,'E3':5,'E2':6,'E1':7,'':8};
-    const sortConvs = arr => arr.slice().sort((a,b)=>{
-      const oa = etapaOrden[a.etapa_actual||''] ?? 8;
-      const ob = etapaOrden[b.etapa_actual||''] ?? 8;
-      if(oa!==ob) return oa-ob;
-      return new Date(b.updated_at)-new Date(a.updated_at);
-    });
-    const activas = sortConvs(convs.filter(cv=>!cv.carpeta||cv.carpeta==='activas'));
-    const mostrar = sortConvs(convTab==='activas' ? activas : convs.filter(cv=>cv.carpeta===convTab));
-    document.getElementById('conv-sub').textContent=`${activas.length} activas · ${mostrar.length} en esta carpeta`;
-    const cliMap={};
-    clis.forEach(c=>{cliMap[c.telefono]=c;});
-    const el=document.getElementById('conv-list');
-    if(!mostrar.length){el.innerHTML=`<div class="empty">${convTab==='activas'?'Sin conversaciones activas':'Sin conversaciones archivadas'}</div>`;return;}
-    el.innerHTML=mostrar.map(cv=>{
-      const cli=cliMap[cv.telefono]||{};
-      const nm=cli.nombre?name(cli):(cv.nombre||cv.telefono||'—');
-      const clickable=cli.id?`openDetalle('${cli.id}','conversaciones')`:'';
-      const btnMover = `<select class="inp" style="font-size:10px;padding:3px 6px;height:auto" onclick="event.stopPropagation()" onchange="moverConv('${cv.id}',this.value)">
-        <option value="">Mover a…</option>
-        <option value="activas" ${cv.carpeta==='activas'||!cv.carpeta?'selected':''}>Activas</option>
-        <option value="nss_pass" ${cv.carpeta==='nss_pass'?'selected':''}>NSS y contraseña</option>
-        <option value="expediente" ${cv.carpeta==='expediente'?'selected':''}>Expediente</option>
-        <option value="contrasena" ${cv.carpeta==='contrasena'?'selected':''}>Contraseña pendiente</option>
-        <option value="bloqueado" ${cv.carpeta==='bloqueado'?'selected':''}>Portal bloqueado</option>
-        <option value="nss_pendiente" ${cv.carpeta==='nss_pendiente'?'selected':''}>NSS pendiente</option>
-        <option value="no_contesta" ${cv.carpeta==='no_contesta'?'selected':''}>No contesta</option>
-        <option value="pausado" ${cv.carpeta==='pausado'?'selected':''}>Pausado</option>
-        <option value="fuera_zona" ${cv.carpeta==='fuera_zona'?'selected':''}>Fuera de zona</option>
-        <option value="sin_patron" ${cv.carpeta==='sin_patron'?'selected':''}>Sin patrón/IMSS</option>
-        <option value="credito_vigente" ${cv.carpeta==='credito_vigente'?'selected':''}>Crédito vigente</option>
-        <option value="menos_4_meses" ${cv.carpeta==='menos_4_meses'?'selected':''}>Menos 4 meses</option>
-        <option value="archivadas" ${cv.carpeta==='archivadas'?'selected':''}>Archivadas</option>
-      </select>`;
-      return `<div class="conv-card ${convTab==='archivadas'?'archivada':''}" onclick="${clickable}">
-        <div style="flex:1;min-width:0;cursor:pointer">
-          <div class="conv-name">${esc(nm)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${esc(cv.telefono||'')}</div>
-          <div class="conv-preview">${esc(cv.historial_resumen||'Sin resumen')}</div>
-        </div>
-        <div class="conv-right">
-          ${bE(cv.etapa_actual)}
-          <div class="conv-time">${ago(cv.updated_at)}</div>
-          ${cv.reachout_count?`<div style="font-size:10px;color:var(--muted)">${cv.reachout_count} contactos</div>`:''}
-         ${btnMover}
-        </div>
-      </div>`;
-    }).join('');
-    setRefTime();
-  } catch(e) { toast('Error conversaciones: '+e.message); }
-}
-
-async function moverConv(convId, carpeta) {
-  if(!carpeta) return;
-  const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {carpeta});
-  if(ok) { toast('✓ Movida a: '+carpeta.replace(/_/g,' ')); loadConv(); }
-  else toast('Error al mover');
-}
-// ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
+// ── AUTO REFRESH ──────────────────────────────────────────────────────────────
 function startRefresh() {
   clearInterval(refreshTimer);
   refreshTimer = setInterval(refreshNow, 60000);
 }
 
-// ── AUTH ──────────────────────────────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────────────────────────
 const PASS = "Richiepulco94";
 const stored = sessionStorage.getItem("cf_auth");
 if (stored !== PASS) {
   const input = prompt("Acceso restringido. Contraseña:");
   if (input !== PASS) {
-    document.body.innerHTML = "<div style=\"display:flex;align-items:center;justify-content:center;height:100vh;background:#0D1B2A;color:#F5F3EE;font-family:DM Sans,sans-serif;font-size:14px\">Acceso denegado.</div>";
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#080C10;color:#EDF0F4;font-family:Instrument Sans,sans-serif;font-size:14px">Acceso denegado.</div>`;
   } else {
     sessionStorage.setItem("cf_auth", PASS);
   }
 }
 
-// ── INIT ──
-loadDash();
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadInbox();
 startRefresh();
 </script>
 </body>
