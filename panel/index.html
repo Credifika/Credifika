@@ -487,17 +487,30 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 }
 .btn-copy:hover { background: rgba(0,212,170,0.2); }
 
-/* folder select */
-.folder-select {
-  width: 100%;
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: 5px; padding: 6px 8px;
-  color: var(--dim); font-size: 11px;
-  outline: none; cursor: pointer;
-  transition: border-color 150ms;
-  margin-top: 8px;
+/* folder buttons grid */
+.folder-btn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 4px;
 }
-.folder-select:focus { border-color: rgba(0,212,170,0.4); }
+.folder-btn {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 6px;
+  color: var(--muted);
+  font-size: 10px; font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 120ms;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.folder-btn:hover { background: var(--s3); color: var(--text); border-color: var(--border2); }
+.folder-btn.active { background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.25); color: var(--accent); }
 
 /* ── DASHBOARD / CLIENTES / TP views ────────────────────────────────────────── */
 #v-dashboard, #v-clientes, #v-touchpoints {
@@ -792,6 +805,7 @@ const STAGES = ['E1','E2','E3','E4','E5','E6','E7','E8'];
 const SNAMES = {E1:'Contacto',E2:'Calificado',E3:'Docs',E4:'NSS',E5:'Validación',E6:'Aprobación',E7:'Firma',E8:'Liquidado'};
 
 const CARPETAS = [
+  {id:'recientes',      label:'Recientes'},
   {id:'activas',        label:'Activas'},
   {id:'nss_pass',       label:'NSS y contraseña'},
   {id:'expediente',     label:'Expediente'},
@@ -810,7 +824,7 @@ const CARPETAS = [
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let allCli = [];
 let allConvs = [];
-let convTab = 'activas';
+let convTab = 'recientes';
 let selectedConvId = null;
 let selectedCliId = null;
 let curView = 'conversaciones';
@@ -936,6 +950,7 @@ function renderFolderTabs(convs) {
   // count per folder
   const counts = {};
   CARPETAS.forEach(c => counts[c.id] = 0);
+  counts['recientes'] = convs.length; // recientes = todas
   convs.forEach(cv => {
     const f = cv.carpeta || 'activas';
     if (counts[f] !== undefined) counts[f]++;
@@ -955,7 +970,13 @@ function renderInboxList() {
   const cliMap = {};
   allCli.forEach(c => { cliMap[c.telefono] = c; });
 
-  let items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
+  let items;
+  if (convTab === 'recientes') {
+    // todas las conversaciones ordenadas por última interacción — igual que WhatsApp
+    items = [...allConvs].sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
+  } else {
+    items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
+  }
 
   if (inboxSearch) {
     items = items.filter(cv => {
@@ -966,13 +987,15 @@ function renderInboxList() {
     });
   }
 
-  // sort: by etapa desc then by updated_at desc
-  items.sort((a,b) => {
-    const oa = etapaOrden[a.etapa_actual||''] ?? 8;
-    const ob = etapaOrden[b.etapa_actual||''] ?? 8;
-    if (oa!==ob) return oa-ob;
-    return new Date(b.updated_at)-new Date(a.updated_at);
-  });
+  // sort: recientes = pure time order; others = etapa then time
+  if (convTab !== 'recientes') {
+    items.sort((a,b) => {
+      const oa = etapaOrden[a.etapa_actual||''] ?? 8;
+      const ob = etapaOrden[b.etapa_actual||''] ?? 8;
+      if (oa!==ob) return oa-ob;
+      return new Date(b.updated_at)-new Date(a.updated_at);
+    });
+  }
 
   const el = document.getElementById('inbox-list');
   if (!items.length) {
@@ -1129,10 +1152,13 @@ function renderRight(cv, cli) {
 
     <!-- Mover carpeta -->
     <div class="detail-section">
-      <div class="section-title">Carpeta</div>
-      <select class="folder-select" onchange="moverConvRight('${cv?.id||''}',this.value)">
-        ${CARPETAS.map(c=>`<option value="${c.id}" ${(cv?.carpeta||'activas')===c.id?'selected':''}>${c.label}</option>`).join('')}
-      </select>
+      <div class="section-title">Mover a carpeta</div>
+      <div class="folder-btn-grid">
+        ${CARPETAS.filter(c=>c.id!=='recientes').map(c=>`
+          <button class="folder-btn ${(cv?.carpeta||'activas')===c.id?'active':''}"
+            onclick="moverConvRight('${cv?.id||''}','${c.id}')"
+            title="${c.label}">${esc(c.label)}</button>`).join('')}
+      </div>
     </div>
 
     <!-- Commands -->
@@ -1171,6 +1197,11 @@ async function moverConvRight(convId, carpeta) {
     if (cv) cv.carpeta = carpeta;
     renderFolderTabs(allConvs);
     renderInboxList();
+    // refresh right panel to update active button
+    if (cv) {
+      const cli = allCli.find(c=>c.telefono===cv.telefono)||null;
+      renderRight(cv, cli);
+    }
   } else {
     toast('Error al mover');
   }
