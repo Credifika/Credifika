@@ -512,6 +512,53 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .folder-btn:hover { background: var(--s3); color: var(--text); border-color: var(--border2); }
 .folder-btn.active { background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.25); color: var(--accent); }
 
+/* COMPOSE BAR */
+#compose-bar {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--s1);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+#compose-input {
+  flex: 1;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: 'Instrument Sans', sans-serif;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+  transition: border-color 150ms;
+}
+#compose-input:focus { border-color: rgba(0,212,170,0.4); }
+#compose-input::placeholder { color: var(--muted); }
+#compose-send {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 150ms;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+#compose-send:hover { background: #00BFA0; }
+#compose-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── DASHBOARD / CLIENTES / TP views ────────────────────────────────────────── */
 #v-dashboard, #v-clientes, #v-touchpoints {
   flex-direction: column;
@@ -718,6 +765,12 @@ select.inp { cursor: pointer; color: var(--dim); }
         <div id="chat-panel" style="display:none;flex-direction:column;height:100%;overflow:hidden">
           <div class="chat-header" id="chat-header"></div>
           <div class="chat-body" id="chat-body"></div>
+          <div id="compose-bar">
+            <textarea id="compose-input" placeholder="Escribe un mensaje como Carlos…" rows="1" oninput="autoResize(this)" onkeydown="composeKeydown(event)"></textarea>
+            <button id="compose-send" onclick="enviarMensajeDirecto()">
+              Enviar como Carlos
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1421,6 +1474,78 @@ if (stored !== PASS) {
   }
 }
 
+
+// ── COMPOSE — ENVIAR MENSAJE DIRECTO COMO CARLOS ─────────────────────────────
+const WA_TOKEN   = "EAAdBXFMQxxIBRRlSRcmMZCfpTLstsHXZAMsxVBeN9yks7IwkptTjgO7BiQJp5KU6Uq4DIa5ZC62MziCyBfI7tuKC14QURbKGZCQfaQcru9oQHgvjz7UT3cZCEip1oce4ihD96UaE7vsW1LOYPlgnYvW20fSirGAMn6ZCMds38u0ClSbbWoZALRqDcDZAjG2x2sZCCZAwZDZD";
+const WA_PHONE_ID = "1076223582238773";
+const ASESOR_NUMBER = "5215513848700";
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+
+function composeKeydown(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    enviarMensajeDirecto();
+  }
+}
+
+async function enviarMensajeDirecto() {
+  const input = document.getElementById("compose-input");
+  const btn   = document.getElementById("compose-send");
+  const texto = (input?.value || "").trim();
+  if (!texto) return;
+  if (!selectedConvId) { toast("Selecciona una conversación primero"); return; }
+
+  const cv  = allConvs.find(c => c.id === selectedConvId);
+  const tel = cv?.telefono;
+  if (!tel) { toast("No se pudo obtener el teléfono del cliente"); return; }
+
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+
+  // Construir comando MSG para Carlos
+  const comando = `MSG:${tel}:${texto}`;
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/${WA_PHONE_ID}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${WA_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: ASESOR_NUMBER,
+        type: "text",
+        text: { body: comando }
+      })
+    });
+
+    if (res.ok) {
+      toast("✓ Mensaje enviado como Carlos");
+      input.value = "";
+      input.style.height = "auto";
+      // Agregar burbuja visual inmediata en el chat
+      const body = document.getElementById("chat-body");
+      const div  = document.createElement("div");
+      div.className = "msg-row out";
+      div.innerHTML = `<div><div class="bubble bubble-out">${esc(texto)}</div><div class="msg-time">Tú (como Carlos) · ahora</div></div>`;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+    } else {
+      const err = await res.json();
+      toast("Error: " + (err?.error?.message || res.status));
+    }
+  } catch(e) {
+    toast("Error de red: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar como Carlos`;
+  }
+}
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadInbox();
 startRefresh();
