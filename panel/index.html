@@ -23,16 +23,14 @@
   --warn:     #F5A623;
   --danger:   #FF4D6D;
   --success:  #00D4AA;
-  --sw:       56px;      /* sidebar collapsed width */
-  --lw:       300px;     /* inbox list width */
-  --rw:       300px;     /* right detail width */
-  /* stage colors */
+  --sw:       56px;
+  --lw:       300px;
+  --rw:       300px;
   --e1: #4A5568; --e2: #2B6CB0; --e3: #2C7A7B;
   --e4: #D69E2E; --e5: #744210; --e6: #C05621;
   --e7: #2D3748; --e8: #22543D;
 }
 
-/* ── RESET ──────────────────────────────────────────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;display:flex}
@@ -165,10 +163,9 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .view { display: none; flex: 1; overflow: hidden; }
 .view.active { display: flex; }
 
-/* ── INBOX LAYOUT (Conversaciones) ──────────────────────────────────────────── */
+/* ── INBOX LAYOUT ────────────────────────────────────────────────────────────── */
 #v-conversaciones { flex-direction: row; }
 
-/* LEFT: folder tabs + list */
 #inbox-left {
   width: var(--lw);
   flex-shrink: 0;
@@ -242,7 +239,8 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   overflow-y: auto;
   padding: 6px 0;
 }
-/* INBOX ITEM */
+
+/* ── INBOX ITEM v3.1 ─────────────────────────────────────────────────────────── */
 .inbox-item {
   padding: 10px 14px;
   cursor: pointer;
@@ -255,11 +253,37 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   background: var(--s2);
   border-left-color: var(--accent);
 }
+
+/* ── BOTÓN X — aparece solo en hover del item ── */
+.inbox-dismiss {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms, background 150ms, color 150ms;
+  z-index: 10;
+  flex-shrink: 0;
+}
+.inbox-item:hover .inbox-dismiss { opacity: 1; }
+.inbox-dismiss:hover {
+  background: rgba(255,77,109,0.15);
+  border-color: rgba(255,77,109,0.3);
+  color: var(--danger);
+}
+.inbox-dismiss svg { width: 9px; height: 9px; pointer-events: none; }
+
 .inbox-item-top {
   display: flex; align-items: center;
   justify-content: space-between;
   margin-bottom: 3px;
   gap: 8px;
+  padding-right: 22px; /* espacio para el X */
 }
 .inbox-name {
   font-weight: 600; font-size: 12px;
@@ -295,7 +319,20 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .wait-warm { background: var(--warn); }
 .wait-cold { background: var(--muted); }
 
-/* CENTER: chat panel */
+/* ── INDICADOR DOCUMENTO ── */
+.doc-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 1px 5px; border-radius: 3px;
+  background: rgba(0,153,255,0.12);
+  border: 1px solid rgba(0,153,255,0.25);
+  color: var(--accent2);
+  font-size: 9px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.2px;
+}
+.doc-badge svg { width: 8px; height: 8px; }
+
+/* CENTER */
 #inbox-center {
   flex: 1;
   display: flex;
@@ -373,7 +410,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .chat-empty svg { opacity: 0.2; }
 .chat-empty p { font-size: 12px; }
 
-/* RIGHT: client detail */
+/* RIGHT */
 #inbox-right {
   width: var(--rw);
   flex-shrink: 0;
@@ -406,15 +443,13 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .info-row:last-child { border-bottom: none; }
 .info-lbl { font-size: 11px; color: var(--muted); flex-shrink: 0; }
 .info-val {
-  font-size: 11px; color: var(--text);
+  font-size: 10px; color: var(--text);
   font-weight: 500; text-align: right;
   word-break: break-all;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
 }
 .info-val.normal { font-family: 'Instrument Sans', sans-serif; font-size: 11px; }
 
-/* STAGE PROGRESS */
 .stage-track {
   display: flex; gap: 3px;
   padding: 10px 0;
@@ -423,8 +458,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   flex: 1; height: 4px; border-radius: 2px;
   background: var(--s3);
   transition: background 300ms;
-  cursor: default;
-  position: relative;
 }
 .stage-seg.done { background: var(--accent); }
 .stage-seg.current { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
@@ -440,7 +473,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 }
 .stage-lbl.done, .stage-lbl.current { color: var(--accent); }
 
-/* COMMANDS */
 .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px; }
 .cmd-btn {
   background: var(--s2);
@@ -487,7 +519,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 }
 .btn-copy:hover { background: rgba(0,212,170,0.2); }
 
-/* folder buttons grid */
 .folder-btn-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -512,7 +543,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .folder-btn:hover { background: var(--s3); color: var(--text); border-color: var(--border2); }
 .folder-btn.active { background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.25); color: var(--accent); }
 
-/* COMPOSE BAR */
 #compose-bar {
   padding: 10px 12px;
   border-top: 1px solid var(--border);
@@ -559,7 +589,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 #compose-send:hover { background: #00BFA0; }
 #compose-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── DASHBOARD / CLIENTES / TP views ────────────────────────────────────────── */
+/* ── DASHBOARD / CLIENTES / TP ────────────────────────────────────────────────── */
 #v-dashboard, #v-clientes, #v-touchpoints {
   flex-direction: column;
   overflow-y: auto;
@@ -573,7 +603,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   color: var(--text); margin-bottom: 3px;
 }
 .ph p { font-size: 12px; color: var(--muted); }
-
 .card {
   background: var(--s1);
   border: 1px solid var(--border);
@@ -585,8 +614,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   text-transform: uppercase; letter-spacing: 1px;
   color: var(--muted); margin-bottom: 14px;
 }
-
-/* KPI */
 .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
 .kpi {
   background: var(--s1); border: 1px solid var(--border);
@@ -603,8 +630,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 8px; }
 .kpi-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
 .kpi-sub { font-size: 10px; color: var(--muted); margin-top: 5px; }
-
-/* CHARTS */
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .barchart { display: flex; align-items: flex-end; gap: 5px; height: 110px; }
 .barcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; height: 100%; justify-content: flex-end; }
@@ -618,8 +643,6 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .funnel-fill { height: 100%; background: linear-gradient(90deg,var(--accent),rgba(0,212,170,0.3)); border-radius: 2px; transition: width 500ms ease; }
 .funnel-name { width: 72px; font-size: 10px; color: var(--muted); }
 .funnel-cnt { width: 22px; text-align: right; font-size: 11px; font-weight: 600; color: var(--text); font-family:'JetBrains Mono',monospace; }
-
-/* TABLE */
 .tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead th {
@@ -633,8 +656,6 @@ tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: backgrou
 tbody tr:hover { background: rgba(255,255,255,0.03); }
 tbody td { padding: 8px 10px; color: var(--dim); }
 td.nm { color: var(--text); font-weight: 600; }
-
-/* BADGES */
 .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; font-family:'JetBrains Mono',monospace; }
 .b-activo    { background: rgba(0,212,170,0.12); color: var(--accent); }
 .b-aprobado  { background: rgba(0,153,255,0.12); color: var(--accent2); }
@@ -647,8 +668,6 @@ td.nm { color: var(--text); font-weight: 600; }
   color: var(--accent);
   border: 1px solid rgba(0,212,170,0.2);
 }
-
-/* TOOLBAR */
 .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
 .inp {
   background: var(--s2); border: 1px solid var(--border);
@@ -659,8 +678,6 @@ td.nm { color: var(--text); font-weight: 600; }
 .inp::placeholder { color: var(--muted); }
 .inp:focus { border-color: rgba(0,212,170,0.4); }
 select.inp { cursor: pointer; color: var(--dim); }
-
-/* TOUCHPOINTS */
 .attend-btn {
   background: rgba(0,212,170,0.1);
   border: 1px solid rgba(0,212,170,0.2);
@@ -670,14 +687,10 @@ select.inp { cursor: pointer; color: var(--dim); }
   transition: all 150ms; white-space: nowrap;
 }
 .attend-btn:hover { background: rgba(0,212,170,0.2); }
-
-/* UTILS */
 .loading { display: flex; align-items: center; justify-content: center; padding: 32px; color: var(--muted); font-size: 12px; gap: 8px; }
 .spin { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty { text-align: center; padding: 32px; color: var(--muted); font-size: 12px; }
-
-/* TOAST */
 #toast {
   position: fixed; bottom: 20px; right: 20px;
   background: var(--s3); border: 1px solid rgba(0,212,170,0.3);
@@ -724,7 +737,6 @@ select.inp { cursor: pointer; color: var(--dim); }
 
 <!-- APP -->
 <div id="app">
-  <!-- TOPBAR -->
   <div id="topbar">
     <span class="top-title" id="topTitle">Bandeja</span>
     <span class="top-meta" id="refTime"></span>
@@ -734,13 +746,10 @@ select.inp { cursor: pointer; color: var(--dim); }
     </button>
   </div>
 
-  <!-- CONTENT -->
   <div id="content">
 
-    <!-- ── CONVERSACIONES (split inbox) ──────────────────────────────────── -->
+    <!-- CONVERSACIONES -->
     <div id="v-conversaciones" class="view active">
-
-      <!-- LEFT: list -->
       <div id="inbox-left">
         <div id="inbox-search-bar">
           <div id="inbox-search-wrap">
@@ -756,7 +765,6 @@ select.inp { cursor: pointer; color: var(--dim); }
         </div>
       </div>
 
-      <!-- CENTER: chat -->
       <div id="inbox-center">
         <div class="chat-empty" id="chat-empty">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -767,14 +775,11 @@ select.inp { cursor: pointer; color: var(--dim); }
           <div class="chat-body" id="chat-body"></div>
           <div id="compose-bar">
             <textarea id="compose-input" placeholder="Escribe un mensaje como Carlos…" rows="1" oninput="autoResize(this)" onkeydown="composeKeydown(event)"></textarea>
-            <button id="compose-send" onclick="enviarMensajeDirecto()">
-              Enviar como Carlos
-            </button>
+            <button id="compose-send" onclick="enviarMensajeDirecto()">Enviar como Carlos</button>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: detail -->
       <div id="inbox-right">
         <div id="right-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:8px">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -784,12 +789,9 @@ select.inp { cursor: pointer; color: var(--dim); }
       </div>
     </div>
 
-    <!-- ── DASHBOARD ──────────────────────────────────────────────────────── -->
+    <!-- DASHBOARD -->
     <div id="v-dashboard" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
-      <div class="ph">
-        <h1>Dashboard</h1>
-        <p>Resumen operativo · Carlos AI Agent</p>
-      </div>
+      <div class="ph"><h1>Dashboard</h1><p>Resumen operativo · Carlos AI Agent</p></div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-label">Total Clientes</div><div class="kpi-val" id="k-total">—</div></div>
         <div class="kpi"><div class="kpi-label">Activos</div><div class="kpi-val" id="k-activos">—</div></div>
@@ -809,7 +811,7 @@ select.inp { cursor: pointer; color: var(--dim); }
       </div>
     </div>
 
-    <!-- ── CLIENTES ───────────────────────────────────────────────────────── -->
+    <!-- CLIENTES -->
     <div id="v-clientes" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
       <div class="ph"><h1>Clientes</h1><p id="cli-sub">Cargando…</p></div>
       <div class="card">
@@ -833,7 +835,7 @@ select.inp { cursor: pointer; color: var(--dim); }
       </div>
     </div>
 
-    <!-- ── TOUCHPOINTS ────────────────────────────────────────────────────── -->
+    <!-- TOUCHPOINTS -->
     <div id="v-touchpoints" class="view" style="flex-direction:column;overflow-y:auto;padding:22px;gap:16px">
       <div class="ph"><h1>Touchpoints</h1><p id="tp-sub">Cargando…</p></div>
       <div class="card">
@@ -844,8 +846,8 @@ select.inp { cursor: pointer; color: var(--dim); }
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <div id="toast"></div>
 
@@ -884,6 +886,28 @@ let curView = 'conversaciones';
 let refreshTimer;
 let inboxSearch = '';
 let _curCmd = '';
+
+// ── NUEVA: IDs ocultos en recientes (persiste en sessionStorage) ──────────────
+let hiddenFromRecientes = new Set(
+  JSON.parse(sessionStorage.getItem('cf_hidden') || '[]')
+);
+function saveHidden() {
+  sessionStorage.setItem('cf_hidden', JSON.stringify([...hiddenFromRecientes]));
+}
+function dismissFromRecientes(convId, e) {
+  e.stopPropagation();
+  hiddenFromRecientes.add(convId);
+  saveHidden();
+  // Si era el seleccionado, limpiar panel central
+  if (selectedConvId === convId) {
+    selectedConvId = null;
+    document.getElementById('chat-empty').style.display = '';
+    document.getElementById('chat-panel').style.display = 'none';
+    document.getElementById('right-placeholder').style.display = '';
+    document.getElementById('right-detail').style.display = 'none';
+  }
+  renderInboxList();
+}
 
 // ── API ───────────────────────────────────────────────────────────────────────
 async function api(table, qs = '') {
@@ -943,7 +967,6 @@ function setRefTime() {
   document.getElementById('refTime').textContent = 'Act. '+t.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
 }
 
-// wait color based on hours
 function waitColor(iso) {
   const h = agoSec(iso) / 3600;
   if (h > 24) return 'wait-hot';
@@ -956,6 +979,22 @@ function waitLabel(iso) {
   if (s < 3600) return Math.floor(s/60)+'m';
   if (s < 86400) return Math.floor(s/3600)+'h';
   return Math.floor(s/86400)+'d';
+}
+
+// ── NUEVA: detectar si la última actividad incluye documento recibido ──────────
+// Revisamos los touchpoints T2_DOCUMENTO_RECIBIDO para saber si hay doc reciente
+let telefonosConDoc = new Set();
+async function cargarTelefonosConDoc() {
+  try {
+    // Touchpoints de documento recibido en las últimas 48h
+    const cutoff = new Date(Date.now() - 48*60*60*1000).toISOString();
+    const tps = await api('carlos_touchpoints',
+      `?tipo=eq.T2_DOCUMENTO_RECIBIDO&estado=eq.pendiente&created_at=gte.${cutoff}&select=datos`
+    );
+    telefonosConDoc = new Set(tps.map(t => t.datos?.telefono).filter(Boolean));
+  } catch(e) {
+    telefonosConDoc = new Set();
+  }
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────────────
@@ -1000,10 +1039,10 @@ function setConvTab(tabId) {
 }
 
 function renderFolderTabs(convs) {
-  // count per folder
   const counts = {};
   CARPETAS.forEach(c => counts[c.id] = 0);
-  counts['recientes'] = convs.length; // recientes = todas
+  // recientes = todas menos las ocultas
+  counts['recientes'] = convs.filter(cv => !hiddenFromRecientes.has(cv.id)).length;
   convs.forEach(cv => {
     const f = cv.carpeta || 'activas';
     if (counts[f] !== undefined) counts[f]++;
@@ -1025,8 +1064,10 @@ function renderInboxList() {
 
   let items;
   if (convTab === 'recientes') {
-    // todas las conversaciones ordenadas por última interacción — igual que WhatsApp
-    items = [...allConvs].sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
+    // Excluir los ocultos
+    items = allConvs
+      .filter(cv => !hiddenFromRecientes.has(cv.id))
+      .sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
   } else {
     items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
   }
@@ -1040,7 +1081,6 @@ function renderInboxList() {
     });
   }
 
-  // sort: recientes = pure time order; others = etapa then time
   if (convTab !== 'recientes') {
     items.sort((a,b) => {
       const oa = etapaOrden[a.etapa_actual||''] ?? 8;
@@ -1063,8 +1103,24 @@ function renderInboxList() {
     const wl = waitLabel(cv.updated_at);
     const stageColor = cv.etapa_actual ? `background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)` : '';
     const isSelected = cv.id === selectedConvId;
+
+    // ── INDICADOR DOCUMENTO ──
+    const tieneDoc = telefonosConDoc.has(cv.telefono);
+    const docIndicator = tieneDoc ? `
+      <span class="doc-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        DOC
+      </span>` : '';
+
+    // ── BOTÓN X (solo en recientes) ──
+    const dismissBtn = convTab === 'recientes' ? `
+      <button class="inbox-dismiss" onclick="dismissFromRecientes('${cv.id}', event)" title="Quitar de recientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>` : '';
+
     return `
       <div class="inbox-item ${isSelected?'selected':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
+        ${dismissBtn}
         <div class="inbox-item-top">
           <div class="inbox-name">${esc(nm)}</div>
           <div class="inbox-time">${wl}</div>
@@ -1072,6 +1128,7 @@ function renderInboxList() {
         <div class="inbox-preview">${esc(cv.historial_resumen||'Sin resumen')}</div>
         <div class="inbox-meta">
           ${cv.etapa_actual ? `<span class="stage-chip" style="${stageColor}">${esc(cv.etapa_actual)}</span>` : ''}
+          ${docIndicator}
           <div class="wait-indicator">
             <div class="wait-dot ${wc}"></div>
             <span style="color:var(--muted)">${cv.reachout_count||0} contactos</span>
@@ -1091,12 +1148,14 @@ async function loadInbox() {
     allConvs = convs;
     allCli = clis;
 
+    // Cargar teléfonos con documento pendiente
+    await cargarTelefonosConDoc();
+
     renderFolderTabs(convs);
     renderInboxList();
     updateTPBadge(tps.length);
     setRefTime();
 
-    // if selected still exists, refresh right panel
     if (selectedConvId) {
       const cv = allConvs.find(c=>c.id===selectedConvId);
       if (cv && selectedCliId) refreshRight(cv, selectedCliId);
@@ -1108,7 +1167,6 @@ async function selectConv(convId, cliId) {
   selectedConvId = convId;
   selectedCliId = cliId || null;
 
-  // update selection highlight
   document.querySelectorAll('.inbox-item').forEach(el => {
     el.classList.toggle('selected', el.dataset.convId === convId);
   });
@@ -1116,12 +1174,10 @@ async function selectConv(convId, cliId) {
   const cv = allConvs.find(c=>c.id===convId);
   const cli = allCli.find(c=>c.id===cliId)||null;
 
-  // show chat panel
   document.getElementById('chat-empty').style.display = 'none';
   const cp = document.getElementById('chat-panel');
   cp.style.display = 'flex';
 
-  // header
   const nm = cli ? nameOf(cli) : (cv?.telefono||'—');
   const ini = cli ? initials(cli) : '?';
   document.getElementById('chat-header').innerHTML = `
@@ -1134,7 +1190,6 @@ async function selectConv(convId, cliId) {
       ${cliId ? `<button class="btn btn-ghost" style="font-size:10px" onclick="openDetalleView('${cliId}')">Ver perfil</button>` : ''}
     </div>`;
 
-  // load messages
   const body = document.getElementById('chat-body');
   body.innerHTML = `<div class="loading"><div class="spin"></div></div>`;
   try {
@@ -1157,7 +1212,6 @@ async function selectConv(convId, cliId) {
     body.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Error cargando mensajes</div>`;
   }
 
-  // right panel
   renderRight(cv, cli);
 }
 
@@ -1171,7 +1225,6 @@ function renderRight(cv, cli) {
   const si = cli ? STAGES.indexOf(cli.etapa||'') : -1;
 
   el.innerHTML = `
-    <!-- Stage progress -->
     <div class="detail-section">
       <div class="section-title">Progreso</div>
       <div class="stage-track">
@@ -1182,7 +1235,6 @@ function renderRight(cv, cli) {
       </div>
     </div>
 
-    <!-- Client data -->
     ${cli ? `
     <div class="detail-section">
       <div class="section-title">Datos del Cliente</div>
@@ -1203,7 +1255,6 @@ function renderRight(cv, cli) {
       ${cli.notas ? `<div style="margin-top:8px;font-size:11px;color:var(--dim);line-height:1.5;padding:6px 8px;background:var(--s2);border-radius:5px;border:1px solid var(--border)">${esc(cli.notas)}</div>` : ''}
     </div>` : ''}
 
-    <!-- Mover carpeta -->
     <div class="detail-section">
       <div class="section-title">Mover a carpeta</div>
       <div class="folder-btn-grid">
@@ -1214,7 +1265,6 @@ function renderRight(cv, cli) {
       </div>
     </div>
 
-    <!-- Commands -->
     ${cli ? `
     <div class="detail-section">
       <div class="section-title">Comandos Asesor</div>
@@ -1245,12 +1295,10 @@ async function moverConvRight(convId, carpeta) {
   const ok = await patch('carlos_conversaciones', `id=eq.${convId}`, {carpeta});
   if (ok) {
     toast('✓ Movida a: '+carpeta.replace(/_/g,' '));
-    // update local state
     const cv = allConvs.find(c=>c.id===convId);
     if (cv) cv.carpeta = carpeta;
     renderFolderTabs(allConvs);
     renderInboxList();
-    // refresh right panel to update active button
     if (cv) {
       const cli = allCli.find(c=>c.telefono===cv.telefono)||null;
       renderRight(cv, cli);
@@ -1260,7 +1308,6 @@ async function moverConvRight(convId, carpeta) {
   }
 }
 
-// commands
 const CMD_TMPL = {
   MONTO:   t => `MONTO:${t}:[cantidad]`,
   MSG:     t => `MSG:${t}:[mensaje]`,
@@ -1408,7 +1455,6 @@ function renderCliTable(rows) {
 
 function goToConvByTel(tel) {
   showView('conversaciones');
-  // find conv for this tel and open it
   setTimeout(()=>{
     const cv = allConvs.find(c=>c.telefono===tel);
     const cli = allCli.find(c=>c.telefono===tel);
@@ -1474,9 +1520,8 @@ if (stored !== PASS) {
   }
 }
 
-
-// ── COMPOSE — ENVIAR MENSAJE DIRECTO COMO CARLOS ─────────────────────────────
-const WA_TOKEN   = "EAAdBXFMQxxIBRRlSRcmMZCfpTLstsHXZAMsxVBeN9yks7IwkptTjgO7BiQJp5KU6Uq4DIa5ZC62MziCyBfI7tuKC14QURbKGZCQfaQcru9oQHgvjz7UT3cZCEip1oce4ihD96UaE7vsW1LOYPlgnYvW20fSirGAMn6ZCMds38u0ClSbbWoZALRqDcDZAjG2x2sZCCZAwZDZD";
+// ── COMPOSE ───────────────────────────────────────────────────────────────────
+const WA_TOKEN    = "EAAdBXFMQxxIBRRlSRcmMZCfpTLstsHXZAMsxVBeN9yks7IwkptTjgO7BiQJp5KU6Uq4DIa5ZC62MziCyBfI7tuKC14QURbKGZCQfaQcru9oQHgvjz7UT3cZCEip1oce4ihD96UaE7vsW1LOYPlgnYvW20fSirGAMn6ZCMds38u0ClSbbWoZALRqDcDZAjG2x2sZCCZAwZDZD";
 const WA_PHONE_ID = "1076223582238773";
 const ASESOR_NUMBER = "5215515657012";
 
@@ -1506,7 +1551,6 @@ async function enviarMensajeDirecto() {
   btn.disabled = true;
   btn.textContent = "Enviando…";
 
-  // Construir comando MSG para Carlos
   const comando = `MSG:${tel}:${texto}`;
 
   try {
@@ -1528,7 +1572,6 @@ async function enviarMensajeDirecto() {
       toast("✓ Mensaje enviado como Carlos");
       input.value = "";
       input.style.height = "auto";
-      // Agregar burbuja visual inmediata en el chat
       const body = document.getElementById("chat-body");
       const div  = document.createElement("div");
       div.className = "msg-row out";
@@ -1546,6 +1589,7 @@ async function enviarMensajeDirecto() {
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar como Carlos`;
   }
 }
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadInbox();
 startRefresh();
