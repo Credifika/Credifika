@@ -271,6 +271,34 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   flex-shrink: 0;
 }
 .inbox-item:hover .inbox-dismiss { opacity: 1; }
+
+/* ── BOTÓN ESTRELLA FAVORITO ── */
+.inbox-star {
+  position: absolute;
+  top: 8px; right: 30px;
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms, color 150ms;
+  z-index: 10;
+  flex-shrink: 0;
+  padding: 0;
+}
+.inbox-item:hover .inbox-star { opacity: 1; }
+.inbox-star.starred {
+  opacity: 1 !important;
+  color: var(--warn);
+}
+.inbox-star:hover { color: var(--warn); opacity: 1 !important; }
+.inbox-star svg { width: 11px; height: 11px; pointer-events: none; }
+.inbox-item.favorito { border-left-color: var(--warn); }
+.inbox-item.favorito.selected { border-left-color: var(--warn); }
+
 .inbox-dismiss:hover {
   background: rgba(255,77,109,0.15);
   border-color: rgba(255,77,109,0.3);
@@ -283,7 +311,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   justify-content: space-between;
   margin-bottom: 3px;
   gap: 8px;
-  padding-right: 22px;
+  padding-right: 50px; /* espacio para estrella + X */
 }
 .inbox-name {
   font-weight: 600; font-size: 12px;
@@ -1020,6 +1048,27 @@ function dismissFromRecientes(convId, e) {
   renderInboxList();
 }
 
+
+// ── FAVORITOS EN RECIENTES (localStorage) ─────────────────────────────────────
+let favoritosRecientes = new Set(
+  JSON.parse(localStorage.getItem('cf_favs') || '[]')
+);
+function saveFavs() {
+  localStorage.setItem('cf_favs', JSON.stringify([...favoritosRecientes]));
+}
+function toggleFavorito(convId, e) {
+  e.stopPropagation();
+  if (favoritosRecientes.has(convId)) {
+    favoritosRecientes.delete(convId);
+    toast('Quitado de favoritos');
+  } else {
+    favoritosRecientes.add(convId);
+    toast('★ Marcado como favorito');
+  }
+  saveFavs();
+  renderInboxList();
+}
+
 // ── MOBILE NAV ────────────────────────────────────────────────────────────────
 function isMobile() { return window.innerWidth <= 768; }
 
@@ -1188,9 +1237,14 @@ function renderInboxList() {
 
   let items;
   if (convTab === 'recientes') {
-    items = allConvs
-      .filter(cv => !hiddenFromRecientes.has(cv.id))
-      .sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
+    items = allConvs.filter(cv => !hiddenFromRecientes.has(cv.id));
+    // Favoritos primero, luego por updated_at
+    items.sort((a, b) => {
+      const aFav = favoritosRecientes.has(a.id) ? 0 : 1;
+      const bFav = favoritosRecientes.has(b.id) ? 0 : 1;
+      if (aFav !== bFav) return aFav - bFav;
+      return new Date(b.updated_at) - new Date(a.updated_at);
+    });
   } else {
     items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
   }
@@ -1234,13 +1288,21 @@ function renderInboxList() {
         DOC
       </span>` : '';
 
+    const isFav = favoritosRecientes.has(cv.id);
+
     const dismissBtn = convTab === 'recientes' ? `
       <button class="inbox-dismiss" onclick="dismissFromRecientes('${cv.id}', event)" title="Quitar de recientes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>` : '';
 
+    const starBtn = convTab === 'recientes' ? `
+      <button class="inbox-star ${isFav?'starred':''}" onclick="toggleFavorito('${cv.id}', event)" title="${isFav?'Quitar favorito':'Marcar como favorito'}">
+        <svg viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </button>` : '';
+
     return `
-      <div class="inbox-item ${isSelected?'selected':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
+      <div class="inbox-item ${isSelected?'selected':''} ${isFav?'favorito':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
+        ${starBtn}
         ${dismissBtn}
         <div class="inbox-item-top">
           <div class="inbox-name">${esc(nm)}</div>
