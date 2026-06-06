@@ -254,7 +254,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   border-left-color: var(--accent);
 }
 
-/* ── BOTÓN X — aparece solo en hover del item ── */
+/* ── BOTÓN X ── */
 .inbox-dismiss {
   position: absolute;
   top: 8px; right: 8px;
@@ -283,7 +283,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   justify-content: space-between;
   margin-bottom: 3px;
   gap: 8px;
-  padding-right: 22px; /* espacio para el X */
+  padding-right: 22px;
 }
 .inbox-name {
   font-weight: 600; font-size: 12px;
@@ -701,6 +701,112 @@ select.inp { cursor: pointer; color: var(--dim); }
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 #toast.show { opacity: 1; }
+
+/* ── MOBILE RESPONSIVE ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --lw: 100vw; --rw: 100vw; }
+
+  body { flex-direction: column; overflow: hidden; }
+
+  #sidebar {
+    width: 100%;
+    height: 50px;
+    flex-direction: row;
+    padding: 0 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    gap: 0;
+    justify-content: space-between;
+    order: 2;
+  }
+  .s-logo { margin-bottom: 0; margin-right: 4px; width: 28px; height: 28px; font-size: 13px; }
+  .s-nav { flex-direction: row; padding: 0; gap: 0; flex: 1; justify-content: center; }
+  .s-item { width: 44px; height: 40px; }
+  .s-tooltip { display: none; }
+  .s-foot { margin-top: 0; padding: 0; }
+
+  #app { height: calc(100% - 50px); overflow: hidden; order: 1; }
+
+  #topbar { padding: 0 12px; gap: 8px; height: 44px; }
+  .top-title { font-size: 13px; }
+  .top-meta { display: none; }
+
+  /* ── INBOX 3-pane → 1 pane a la vez ── */
+  #v-conversaciones { position: relative; overflow: hidden; }
+
+  #inbox-left {
+    width: 100%;
+    position: absolute; top: 0; left: 0; bottom: 0;
+    z-index: 10;
+    transition: transform 250ms cubic-bezier(0.4,0,0.2,1);
+  }
+  #inbox-center {
+    width: 100%;
+    position: absolute; top: 0; left: 0; bottom: 0;
+    z-index: 5;
+    transform: translateX(100%);
+    transition: transform 250ms cubic-bezier(0.4,0,0.2,1);
+  }
+  #inbox-right {
+    width: 100%;
+    position: absolute; top: 0; left: 0; bottom: 0;
+    z-index: 5;
+    transform: translateX(100%);
+    transition: transform 250ms cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+  }
+
+  /* Estado: chat visible */
+  body.mobile-chat #inbox-left   { transform: translateX(-100%); }
+  body.mobile-chat #inbox-center { transform: translateX(0); z-index: 10; }
+  body.mobile-chat #inbox-right  { transform: translateX(100%); }
+
+  /* Estado: detalle visible */
+  body.mobile-detail #inbox-left   { transform: translateX(-100%); }
+  body.mobile-detail #inbox-center { transform: translateX(-100%); }
+  body.mobile-detail #inbox-right  { transform: translateX(0); z-index: 10; }
+
+  /* Botones de navegación móvil */
+  #mobile-back-chat {
+    display: flex !important;
+    align-items: center; gap: 5px;
+    background: none; border: none;
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; padding: 0; flex-shrink: 0;
+  }
+  #mobile-back-detail {
+    display: flex !important;
+    align-items: center; gap: 5px;
+    background: none; border: none;
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  /* Dismiss visible en touch */
+  .inbox-dismiss { opacity: 0.6; }
+
+  /* KPI en 2 columnas */
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
+
+  /* Dashboard padding */
+  #v-dashboard, #v-clientes, #v-touchpoints { padding: 14px; }
+
+  /* Toolbar apilado */
+  .toolbar { flex-wrap: wrap; }
+  .toolbar .inp { flex: 1; min-width: 120px; }
+}
+
+@media (min-width: 769px) {
+  #mobile-back-chat   { display: none !important; }
+  #mobile-back-detail { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -781,6 +887,11 @@ select.inp { cursor: pointer; color: var(--dim); }
       </div>
 
       <div id="inbox-right">
+        <!-- Botón atrás móvil — detail → chat -->
+        <button id="mobile-back-detail" onclick="mobileShowChat()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Volver al chat
+        </button>
         <div id="right-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:8px">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <p style="font-size:11px">Datos del cliente</p>
@@ -887,7 +998,7 @@ let refreshTimer;
 let inboxSearch = '';
 let _curCmd = '';
 
-// ── NUEVA: IDs ocultos en recientes (persiste en sessionStorage) ──────────────
+// ── IDs ocultos en recientes ──────────────────────────────────────────────────
 let hiddenFromRecientes = new Set(
   JSON.parse(sessionStorage.getItem('cf_hidden') || '[]')
 );
@@ -898,15 +1009,30 @@ function dismissFromRecientes(convId, e) {
   e.stopPropagation();
   hiddenFromRecientes.add(convId);
   saveHidden();
-  // Si era el seleccionado, limpiar panel central
   if (selectedConvId === convId) {
     selectedConvId = null;
     document.getElementById('chat-empty').style.display = '';
     document.getElementById('chat-panel').style.display = 'none';
     document.getElementById('right-placeholder').style.display = '';
     document.getElementById('right-detail').style.display = 'none';
+    if (isMobile()) mobileShowList();
   }
   renderInboxList();
+}
+
+// ── MOBILE NAV ────────────────────────────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 768; }
+
+function mobileShowChat() {
+  document.body.classList.remove('mobile-detail');
+  document.body.classList.add('mobile-chat');
+}
+function mobileShowDetail() {
+  document.body.classList.remove('mobile-chat');
+  document.body.classList.add('mobile-detail');
+}
+function mobileShowList() {
+  document.body.classList.remove('mobile-chat', 'mobile-detail');
 }
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -981,12 +1107,9 @@ function waitLabel(iso) {
   return Math.floor(s/86400)+'d';
 }
 
-// ── NUEVA: detectar si la última actividad incluye documento recibido ──────────
-// Revisamos los touchpoints T2_DOCUMENTO_RECIBIDO para saber si hay doc reciente
 let telefonosConDoc = new Set();
 async function cargarTelefonosConDoc() {
   try {
-    // Touchpoints de documento recibido en las últimas 48h
     const cutoff = new Date(Date.now() - 48*60*60*1000).toISOString();
     const tps = await api('carlos_touchpoints',
       `?tipo=eq.T2_DOCUMENTO_RECIBIDO&estado=eq.pendiente&created_at=gte.${cutoff}&select=datos`
@@ -1012,6 +1135,8 @@ function showView(v) {
   if (nEl) nEl.classList.add('active');
   document.getElementById('topTitle').textContent = VIEW_TITLE[v] || v;
   curView = v;
+  // Al cambiar de vista en móvil, resetear estado de panes
+  if (isMobile()) mobileShowList();
   if (v==='dashboard') loadDash();
   else if (v==='clientes') loadCli();
   else if (v==='touchpoints') loadTP();
@@ -1041,7 +1166,6 @@ function setConvTab(tabId) {
 function renderFolderTabs(convs) {
   const counts = {};
   CARPETAS.forEach(c => counts[c.id] = 0);
-  // recientes = todas menos las ocultas
   counts['recientes'] = convs.filter(cv => !hiddenFromRecientes.has(cv.id)).length;
   convs.forEach(cv => {
     const f = cv.carpeta || 'activas';
@@ -1064,7 +1188,6 @@ function renderInboxList() {
 
   let items;
   if (convTab === 'recientes') {
-    // Excluir los ocultos
     items = allConvs
       .filter(cv => !hiddenFromRecientes.has(cv.id))
       .sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
@@ -1104,7 +1227,6 @@ function renderInboxList() {
     const stageColor = cv.etapa_actual ? `background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)` : '';
     const isSelected = cv.id === selectedConvId;
 
-    // ── INDICADOR DOCUMENTO ──
     const tieneDoc = telefonosConDoc.has(cv.telefono);
     const docIndicator = tieneDoc ? `
       <span class="doc-badge">
@@ -1112,7 +1234,6 @@ function renderInboxList() {
         DOC
       </span>` : '';
 
-    // ── BOTÓN X (solo en recientes) ──
     const dismissBtn = convTab === 'recientes' ? `
       <button class="inbox-dismiss" onclick="dismissFromRecientes('${cv.id}', event)" title="Quitar de recientes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1148,7 +1269,6 @@ async function loadInbox() {
     allConvs = convs;
     allCli = clis;
 
-    // Cargar teléfonos con documento pendiente
     await cargarTelefonosConDoc();
 
     renderFolderTabs(convs);
@@ -1180,14 +1300,19 @@ async function selectConv(convId, cliId) {
 
   const nm = cli ? nameOf(cli) : (cv?.telefono||'—');
   const ini = cli ? initials(cli) : '?';
+
   document.getElementById('chat-header').innerHTML = `
+    <button id="mobile-back-chat" onclick="mobileShowList()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Bandeja
+    </button>
     <div class="chat-avatar">${esc(ini)}</div>
     <div class="chat-header-info">
       <div class="chat-header-name">${esc(nm)}</div>
       <div class="chat-header-sub">${esc(cv?.telefono||'—')} · ${bE(cv?.etapa_actual)} ${badge(cli?.estado||'')}</div>
     </div>
     <div class="chat-header-right">
-      ${cliId ? `<button class="btn btn-ghost" style="font-size:10px" onclick="openDetalleView('${cliId}')">Ver perfil</button>` : ''}
+      ${cliId ? `<button class="btn btn-ghost" style="font-size:10px" onclick="openDetailMobile('${cliId}')">Ver perfil</button>` : ''}
     </div>`;
 
   const body = document.getElementById('chat-body');
@@ -1213,6 +1338,15 @@ async function selectConv(convId, cliId) {
   }
 
   renderRight(cv, cli);
+
+  // En móvil → mostrar pane de chat
+  if (isMobile()) mobileShowChat();
+}
+
+function openDetailMobile(cliId) {
+  if (isMobile()) {
+    mobileShowDetail();
+  }
 }
 
 function renderRight(cv, cli) {
