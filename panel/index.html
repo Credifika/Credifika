@@ -298,6 +298,8 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
 .inbox-star svg { width: 11px; height: 11px; pointer-events: none; }
 .inbox-item.favorito { border-left-color: var(--warn); }
 .inbox-item.favorito.selected { border-left-color: var(--warn); }
+.inbox-item.oculto-recientes { opacity: 0.55; }
+.inbox-item.oculto-recientes .inbox-name::after { content: ' · oculto'; color: var(--muted); font-size: 10px; font-weight: 400; }
 
 .inbox-dismiss:hover {
   background: rgba(255,77,109,0.15);
@@ -1013,6 +1015,7 @@ const CARPETAS = [
   {id:'credito_vigente',label:'Crédito vigente'},
   {id:'menos_4_meses',  label:'Menos 4 meses'},
   {id:'archivadas',     label:'Archivadas'},
+  {id:'todas',          label:'Todas'},
 ];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -1026,17 +1029,17 @@ let refreshTimer;
 let inboxSearch = '';
 let _curCmd = '';
 
-// ── IDs ocultos en recientes ──────────────────────────────────────────────────
-let hiddenFromRecientes = new Set(
-  JSON.parse(sessionStorage.getItem('cf_hidden') || '[]')
-);
-function saveHidden() {
-  sessionStorage.setItem('cf_hidden', JSON.stringify([...hiddenFromRecientes]));
-}
-function dismissFromRecientes(convId, e) {
+// ── IDs ocultos en recientes (Supabase) ─────────────────────────────────────
+let hiddenFromRecientes = new Set();
+
+async function dismissFromRecientes(convId, e) {
   e.stopPropagation();
   hiddenFromRecientes.add(convId);
-  saveHidden();
+  // Persistir en Supabase
+  await patch('carlos_conversaciones', `id=eq.${convId}`, {oculto_recientes: true});
+  // Actualizar en memoria
+  const cv = allConvs.find(c => c.id === convId);
+  if (cv) cv.oculto_recientes = true;
   if (selectedConvId === convId) {
     selectedConvId = null;
     document.getElementById('chat-empty').style.display = '';
@@ -1046,6 +1049,16 @@ function dismissFromRecientes(convId, e) {
     if (isMobile()) mobileShowList();
   }
   renderInboxList();
+}
+
+async function restaurarARecientes(convId) {
+  hiddenFromRecientes.delete(convId);
+  await patch('carlos_conversaciones', `id=eq.${convId}`, {oculto_recientes: false});
+  const cv = allConvs.find(c => c.id === convId);
+  if (cv) cv.oculto_recientes = false;
+  renderFolderTabs(allConvs);
+  renderInboxList();
+  toast('✓ Restaurado a Recientes');
 }
 
 
@@ -1216,6 +1229,7 @@ function renderFolderTabs(convs) {
   const counts = {};
   CARPETAS.forEach(c => counts[c.id] = 0);
   counts['recientes'] = convs.filter(cv => !hiddenFromRecientes.has(cv.id)).length;
+  counts['todas'] = convs.length;
   convs.forEach(cv => {
     const f = cv.carpeta || 'activas';
     if (counts[f] !== undefined) counts[f]++;
@@ -1245,6 +1259,8 @@ function renderInboxList() {
       if (aFav !== bFav) return aFav - bFav;
       return new Date(b.updated_at) - new Date(a.updated_at);
     });
+  } else if (convTab === 'todas') {
+    items = [...allConvs].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
   } else {
     items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
   }
@@ -1290,9 +1306,15 @@ function renderInboxList() {
 
     const isFav = favoritosRecientes.has(cv.id);
 
+    const isOculto = hiddenFromRecientes.has(cv.id);
     const dismissBtn = convTab === 'recientes' ? `
       <button class="inbox-dismiss" onclick="dismissFromRecientes('${cv.id}', event)" title="Quitar de recientes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>` : '';
+
+    const restaurarBtn = convTab === 'todas' && isOculto ? `
+      <button class="inbox-dismiss" onclick="restaurarARecientes('${cv.id}')" title="Restaurar a Recientes" style="background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.2);color:var(--accent);opacity:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
       </button>` : '';
 
     const starBtn = convTab === 'recientes' ? `
@@ -1301,9 +1323,10 @@ function renderInboxList() {
       </button>` : '';
 
     return `
-      <div class="inbox-item ${isSelected?'selected':''} ${isFav?'favorito':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
+      <div class="inbox-item ${isSelected?'selected':''} ${isFav?'favorito':''} ${convTab==='todas'&&isOculto?'oculto-recientes':''}" onclick="selectConv('${cv.id}','${cli.id||''}')" data-conv-id="${cv.id}">
         ${starBtn}
         ${dismissBtn}
+        ${restaurarBtn}
         <div class="inbox-item-top">
           <div class="inbox-name">${esc(nm)}</div>
           <div class="inbox-time">${wl}</div>
@@ -1330,6 +1353,11 @@ async function loadInbox() {
     ]);
     allConvs = convs;
     allCli = clis;
+
+    // Cargar hidden desde Supabase
+    hiddenFromRecientes = new Set(
+      convs.filter(cv => cv.oculto_recientes).map(cv => cv.id)
+    );
 
     await cargarTelefonosConDoc();
 
