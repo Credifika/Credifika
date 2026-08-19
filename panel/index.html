@@ -1212,9 +1212,60 @@ document.querySelectorAll('.s-item[data-v]').forEach(el => {
 });
 
 // ── INBOX ─────────────────────────────────────────────────────────────────────
+let buscandoRemoto = false;
+let timerBusqueda = null;
+
 function filterInbox() {
   inboxSearch = (document.getElementById('inbox-search')?.value||'').toLowerCase();
   renderInboxList();
+  // Búsqueda remota con debounce: si lo cargado no alcanza, se consulta Supabase.
+  // Sin esto, cualquier cliente fuera del lote cargado era INVISIBLE aunque
+  // existiera en la base (caso Héctor: 1,733 conversaciones, se cargaban 500).
+  clearTimeout(timerBusqueda);
+  const q = inboxSearch.trim();
+  if (q.length >= 3) timerBusqueda = setTimeout(() => buscarRemoto(q), 400);
+}
+
+async function buscarRemoto(q) {
+  if (buscandoRemoto) return;
+  // ¿Ya hay resultados suficientes en memoria? entonces no molestar al servidor
+  const cliMapQ = {};
+  allCli.forEach(c => { cliMapQ[c.telefono] = c; });
+  const yaHay = allConvs.some(cv => {
+    const cli = cliMapQ[cv.telefono]||{};
+    return (nameOf(cli)||'').toLowerCase().includes(q) || (cv.telefono||'').toLowerCase().includes(q);
+  });
+  if (yaHay) return;
+
+  buscandoRemoto = true;
+  const el = document.getElementById('inbox-list');
+  if (el) el.innerHTML = `<div class="empty">Buscando en todo el historial…</div>`;
+  try {
+    const enc = encodeURIComponent('%' + q + '%');
+    const [convsR, clisR] = await Promise.all([
+      api('carlos_conversaciones', `?select=*&or=(telefono.ilike.${enc},nombre.ilike.${enc})&limit=100`),
+      api('clientes', `?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&or=(telefono.ilike.${enc},nombre.ilike.${enc},apellido_paterno.ilike.${enc})&limit=100`)
+    ]);
+    // Fusionar sin duplicar
+    const idsConv = new Set(allConvs.map(c => c.id));
+    convsR.forEach(c => { if (!idsConv.has(c.id)) allConvs.push(c); });
+    const idsCli = new Set(allCli.map(c => c.id));
+    clisR.forEach(c => { if (!idsCli.has(c.id)) allCli.push(c); });
+    // Traer también las conversaciones de los clientes que casaron por nombre
+    const telsFaltantes = clisR.map(c => c.telefono).filter(t => !allConvs.some(cv => cv.telefono === t));
+    if (telsFaltantes.length) {
+      const lista = encodeURIComponent('(' + telsFaltantes.slice(0,50).join(',') + ')');
+      try {
+        const extra = await api('carlos_conversaciones', `?select=*&telefono=in.${lista}&limit=100`);
+        extra.forEach(c => { if (!idsConv.has(c.id)) allConvs.push(c); });
+      } catch(e) {}
+    }
+  } catch(e) {
+    toast('Error buscando: ' + e.message);
+  } finally {
+    buscandoRemoto = false;
+    renderInboxList();
+  }
 }
 
 function setConvTab(tabId) {
@@ -1285,7 +1336,9 @@ function renderInboxList() {
 
   const el = document.getElementById('inbox-list');
   if (!items.length) {
-    el.innerHTML = `<div class="empty">Sin conversaciones</div>`;
+    el.innerHTML = inboxSearch
+      ? `<div class="empty">Sin resultados para "${esc(inboxSearch)}"${inboxSearch.trim().length < 3 ? '<br><span style="font-size:11px;opacity:.6">Escribe al menos 3 caracteres para buscar en todo el historial</span>' : ''}</div>`
+      : `<div class="empty">Sin conversaciones</div>`;
     return;
   }
 
@@ -1347,8 +1400,8 @@ function renderInboxList() {
 async function loadInbox() {
   try {
     const [convs, clis, tps] = await Promise.all([
-      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=500'),
-      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&order=created_at.desc'),
+      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=5000'),
+      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&order=created_at.desc&limit=5000'),
       api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
     ]);
     allConvs = convs;
