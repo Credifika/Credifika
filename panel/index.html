@@ -9,26 +9,28 @@
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────────────────────── */
 :root {
-  --bg:       #080C10;
-  --s1:       #0E1420;
-  --s2:       #141C2C;
-  --s3:       #1A2438;
-  --border:   rgba(255,255,255,0.07);
-  --border2:  rgba(255,255,255,0.12);
-  --text:     #EDF0F4;
-  --muted:    rgba(237,240,244,0.38);
-  --dim:      rgba(237,240,244,0.65);
-  --accent:   #00D4AA;
-  --accent2:  #0099FF;
-  --warn:     #F5A623;
-  --danger:   #FF4D6D;
-  --success:  #00D4AA;
+  /* TEMA CLARO — mismos nombres de token, así el resto del CSS no cambia.
+     Los acentos se oscurecieron para tener contraste suficiente sobre blanco. */
+  --bg:       #FFFFFF;
+  --s1:       #F7F8FA;
+  --s2:       #FFFFFF;
+  --s3:       #EEF1F5;
+  --border:   rgba(10,22,40,0.09);
+  --border2:  rgba(10,22,40,0.16);
+  --text:     #0A1628;
+  --muted:    rgba(10,22,40,0.45);
+  --dim:      rgba(10,22,40,0.68);
+  --accent:   #00857A;
+  --accent2:  #0069CC;
+  --warn:     #B26A00;
+  --danger:   #D62B4E;
+  --success:  #00857A;
   --sw:       56px;
   --lw:       300px;
   --rw:       300px;
-  --e1: #4A5568; --e2: #2B6CB0; --e3: #2C7A7B;
-  --e4: #D69E2E; --e5: #744210; --e6: #C05621;
-  --e7: #2D3748; --e8: #22543D;
+  --e1: #64748B; --e2: #2B6CB0; --e3: #2C7A7B;
+  --e4: #B7791F; --e5: #9C6644; --e6: #C05621;
+  --e7: #475569; --e8: #276749;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -36,8 +38,8 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;display:flex}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
-::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+::-webkit-scrollbar-thumb{background:rgba(10,22,40,0.18);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(10,22,40,0.30)}
 button,select,input{font-family:'Instrument Sans',sans-serif}
 
 /* ── SIDEBAR ────────────────────────────────────────────────────────────────── */
@@ -175,6 +177,25 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   background: var(--s1);
   overflow: hidden;
 }
+#etapa-chips {
+  display: flex; gap: 5px; padding: 8px 12px 0;
+  overflow-x: auto; flex-shrink: 0;
+}
+#etapa-chips::-webkit-scrollbar { height: 0; }
+.etapa-chip {
+  font-size: 11px; font-weight: 600; padding: 3px 9px;
+  border-radius: 999px; cursor: pointer; white-space: nowrap;
+  background: var(--s3); color: var(--dim);
+  border: 1px solid transparent; transition: all 120ms;
+  display: flex; align-items: center; gap: 4px;
+}
+.etapa-chip:hover { border-color: var(--border2); color: var(--text); }
+.etapa-chip.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.etapa-chip-count {
+  font-size: 10px; opacity: .75; font-family: 'JetBrains Mono', monospace;
+}
 #inbox-search-bar {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
@@ -225,7 +246,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   color: var(--accent);
 }
 .folder-count {
-  background: rgba(255,255,255,0.1);
+  background: rgba(10,22,40,0.18);
   border-radius: 10px;
   padding: 1px 5px;
   font-size: 10px;
@@ -260,8 +281,8 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   top: 8px; right: 8px;
   width: 18px; height: 18px;
   border-radius: 4px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(10,22,40,0.06);
+  border: 1px solid rgba(10,22,40,0.18);
   color: var(--muted);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
@@ -467,7 +488,7 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   display: flex; justify-content: space-between;
   align-items: flex-start;
   padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(10,22,40,0.04);
   gap: 8px;
 }
 .info-row:last-child { border-bottom: none; }
@@ -682,15 +703,15 @@ thead th {
   color: var(--muted); border-bottom: 1px solid var(--border);
   white-space: nowrap; font-family: 'Syne', sans-serif;
 }
-tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 120ms; cursor: pointer; }
-tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody tr { border-bottom: 1px solid rgba(10,22,40,0.04); transition: background 120ms; cursor: pointer; }
+tbody tr:hover { background: rgba(10,22,40,0.03); }
 tbody td { padding: 8px 10px; color: var(--dim); }
 td.nm { color: var(--text); font-weight: 600; }
 .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; font-family:'JetBrains Mono',monospace; }
 .b-activo    { background: rgba(0,212,170,0.12); color: var(--accent); }
 .b-aprobado  { background: rgba(0,153,255,0.12); color: var(--accent2); }
 .b-rechazado { background: rgba(255,77,109,0.12); color: var(--danger); }
-.b-inactivo  { background: rgba(255,255,255,0.08); color: var(--muted); }
+.b-inactivo  { background: rgba(10,22,40,0.07); color: var(--muted); }
 .b-pendiente { background: rgba(245,166,35,0.12); color: var(--warn); }
 .b-atendido  { background: rgba(0,212,170,0.12); color: var(--accent); }
 .b-e {
@@ -728,7 +749,7 @@ select.inp { cursor: pointer; color: var(--dim); }
   border-radius: 8px; font-size: 12px;
   z-index: 9999; opacity: 0; transition: opacity 200ms;
   pointer-events: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(10,22,40,0.10);
 }
 #toast.show { opacity: 1; }
 
@@ -887,6 +908,7 @@ select.inp { cursor: pointer; color: var(--dim); }
     <!-- CONVERSACIONES -->
     <div id="v-conversaciones" class="view active">
       <div id="inbox-left">
+        <div id="etapa-chips"></div>
         <div id="inbox-search-bar">
           <div id="inbox-search-wrap">
             <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -999,6 +1021,9 @@ const KEY = 'sb_publishable_CkUpXFu6_o5hnViE2nt5zg_VC3nntss';
 
 const STAGES = ['E1','E2','E3','E4','E5','E6','E7','E8'];
 const SNAMES = {E1:'Contacto',E2:'Calificado',E3:'Docs',E4:'NSS',E5:'Validación',E6:'Aprobación',E7:'Firma',E8:'Liquidado'};
+
+const ETAPAS_FILTRO = ['E1','E2','E3','E4','E5','E6','E7','E8'];
+let etapaFiltro = '';   // '' = todas
 
 const CARPETAS = [
   {id:'recientes',      label:'Recientes'},
@@ -1292,6 +1317,31 @@ function renderFolderTabs(convs) {
       ${counts[c.id] > 0 ? `<span class="folder-count">${counts[c.id]}</span>` : ''}
     </div>
   `).join('');
+  renderEtapaChips(convs);
+}
+
+// Chips de etapa: eje SECUNDARIO que se cruza con la carpeta activa.
+// "Activas + E5" = clientes trabajables en esa etapa. No compite con las carpetas.
+function renderEtapaChips(convs) {
+  const cont = document.getElementById('etapa-chips');
+  if (!cont) return;
+  const base = convTab === 'recientes'
+    ? convs.filter(cv => !hiddenFromRecientes.has(cv.id))
+    : (convTab === 'todas' ? convs : convs.filter(cv => (cv.carpeta||'activas') === convTab));
+  const cnt = {};
+  base.forEach(cv => { const e = cv.etapa_actual || ''; if (e) cnt[e] = (cnt[e]||0)+1; });
+  cont.innerHTML =
+    `<div class="etapa-chip ${etapaFiltro===''?'active':''}" onclick="setEtapaFiltro('')">Todas</div>` +
+    ETAPAS_FILTRO.map(e => `
+      <div class="etapa-chip ${etapaFiltro===e?'active':''}" onclick="setEtapaFiltro('${e}')">
+        ${e}${cnt[e] ? `<span class="etapa-chip-count">${cnt[e]}</span>` : ''}
+      </div>`).join('');
+}
+
+function setEtapaFiltro(e) {
+  etapaFiltro = (etapaFiltro === e) ? '' : e;
+  renderEtapaChips(allConvs);
+  renderInboxList();
 }
 
 const etapaOrden = {'E8':0,'E7':1,'E6':2,'E5':3,'E4':4,'E3':5,'E2':6,'E1':7,'':8};
@@ -1315,6 +1365,8 @@ function renderInboxList() {
   } else {
     items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
   }
+
+  if (etapaFiltro) items = items.filter(cv => (cv.etapa_actual||'') === etapaFiltro);
 
   if (inboxSearch) {
     items = items.filter(cv => {
