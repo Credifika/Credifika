@@ -1304,7 +1304,7 @@ function setConvTab(tabId) {
 function renderFolderTabs(convs) {
   const counts = {};
   CARPETAS.forEach(c => counts[c.id] = 0);
-  counts['recientes'] = convs.filter(cv => !hiddenFromRecientes.has(cv.id)).length;
+  counts['recientes'] = convs.filter(visibleEnRecientes).length;
   counts['todas'] = convs.length;
   convs.forEach(cv => {
     const f = cv.carpeta || 'activas';
@@ -1322,11 +1322,24 @@ function renderFolderTabs(convs) {
 
 // Chips de etapa: eje SECUNDARIO que se cruza con la carpeta activa.
 // "Activas + E5" = clientes trabajables en esa etapa. No compite con las carpetas.
+// "Recientes" = bandeja de trabajo real: excluye lo archivado y lo descartado.
+// Sin esto, Carlos podía archivar todo el día y la bandeja seguía igual de
+// saturada — los ~175 leads/día que no precalifican tapaban a los que sí valen.
+// Las conversaciones siguen accesibles en su carpeta y por búsqueda.
+const OCULTAS_DE_RECIENTES = new Set([
+  'archivadas','fuera_zona','sin_patron','credito_vigente','no_contesta'
+]);
+function visibleEnRecientes(cv) {
+  return !hiddenFromRecientes.has(cv.id)
+      && !cv.archivado
+      && !OCULTAS_DE_RECIENTES.has(cv.carpeta || 'activas');
+}
+
 function renderEtapaChips(convs) {
   const cont = document.getElementById('etapa-chips');
   if (!cont) return;
   const base = convTab === 'recientes'
-    ? convs.filter(cv => !hiddenFromRecientes.has(cv.id))
+    ? convs.filter(visibleEnRecientes)
     : (convTab === 'todas' ? convs : convs.filter(cv => (cv.carpeta||'activas') === convTab));
   const cnt = {};
   base.forEach(cv => { const e = cv.etapa_actual || ''; if (e) cnt[e] = (cnt[e]||0)+1; });
@@ -1352,7 +1365,7 @@ function renderInboxList() {
 
   let items;
   if (convTab === 'recientes') {
-    items = allConvs.filter(cv => !hiddenFromRecientes.has(cv.id));
+    items = allConvs.filter(visibleEnRecientes);
     // Favoritos primero, luego por updated_at
     items.sort((a, b) => {
       const aFav = favoritosRecientes.has(a.id) ? 0 : 1;
