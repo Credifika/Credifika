@@ -177,6 +177,28 @@ button,select,input{font-family:'Instrument Sans',sans-serif}
   background: var(--s1);
   overflow: hidden;
 }
+/* ── SELECTOR DE AGENTE (Carlos / Sofía) ──────────────────────────────
+   Eje PRIMARIO de la bandeja: filtra por quién atiende al cliente antes
+   que cualquier otra cosa. Los dos agentes tienen guiones y productos
+   distintos; verlos mezclados hace imposible leer cómo va cada uno. */
+#agente-switch {
+  display: flex; gap: 4px; padding: 10px 12px 0;
+  flex-shrink: 0;
+}
+.agente-btn {
+  flex: 1; font-size: 12px; font-weight: 700; padding: 6px 10px;
+  border-radius: 8px; cursor: pointer; white-space: nowrap; text-align: center;
+  background: var(--s3); color: var(--dim);
+  border: 1px solid transparent; transition: all 120ms;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.agente-btn:hover { border-color: var(--border2); color: var(--text); }
+.agente-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.agente-btn.active.carlos { background: #0A1628; border-color: #0A1628; }
+.agente-btn.active.sofia  { background: #00B4D8; border-color: #00B4D8; }
+.agente-btn-count {
+  font-size: 10px; opacity: .8; font-family: 'JetBrains Mono', monospace;
+}
 #etapa-chips {
   display: flex; gap: 5px; padding: 8px 12px 0;
   overflow-x: auto; flex-shrink: 0;
@@ -908,6 +930,7 @@ select.inp { cursor: pointer; color: var(--dim); }
     <!-- CONVERSACIONES -->
     <div id="v-conversaciones" class="view active">
       <div id="inbox-left">
+        <div id="agente-switch"></div>
         <div id="etapa-chips"></div>
         <div id="inbox-search-bar">
           <div id="inbox-search-wrap">
@@ -1025,6 +1048,34 @@ const SNAMES = {E1:'Contacto',E2:'Calificado',E3:'Docs',E4:'NSS',E5:'Validación
 const ETAPAS_FILTRO = ['E1','E2','E3','E4','E5','E6','E7','E8'];
 let etapaFiltro = '';   // '' = todas
 
+// ── FILTRO POR AGENTE ────────────────────────────────────────────────
+// La fuente de verdad es `clientes.agente` — la misma columna que usa el
+// Guardrail #9 en agent.js. NO se usa `carlos_conversaciones.agente` porque
+// ese campo no se escribe al crear la conversación: viene null en todo el
+// histórico y sería indistinguible entre un cliente de Carlos y uno de Sofía.
+const AGENTES = [
+  {id:'',       label:'Todos',  cls:''},
+  {id:'carlos', label:'Carlos', cls:'carlos'},
+  {id:'sofia',  label:'Sofía',  cls:'sofia'},
+];
+let agenteFiltro = '';  // '' = todos
+
+// Resuelve el agente de una conversación vía su cliente. Sin registro o sin
+// columna → Carlos, que es como operó el sistema hasta que existió Sofía.
+function agenteDeConv(cv, cliMap) {
+  const cli = cliMap[cv.telefono];
+  return (cli && cli.agente) ? cli.agente : 'carlos';
+}
+
+// Choke point único: todo lo que pinta la bandeja parte de aquí, así el
+// contador de carpetas y la lista nunca se contradicen.
+function convsVisibles() {
+  if (!agenteFiltro) return allConvs;
+  const cliMap = {};
+  allCli.forEach(c => { cliMap[c.telefono] = c; });
+  return allConvs.filter(cv => agenteDeConv(cv, cliMap) === agenteFiltro);
+}
+
 const CARPETAS = [
   {id:'recientes',      label:'Recientes'},
   {id:'activas',        label:'Activas'},
@@ -1081,7 +1132,7 @@ async function restaurarARecientes(convId) {
   await patch('carlos_conversaciones', `id=eq.${convId}`, {oculto_recientes: false});
   const cv = allConvs.find(c => c.id === convId);
   if (cv) cv.oculto_recientes = false;
-  renderFolderTabs(allConvs);
+  renderFolderTabs(convsVisibles());
   renderInboxList();
   toast('✓ Restaurado a Recientes');
 }
@@ -1269,7 +1320,7 @@ async function buscarRemoto(q) {
     const enc = encodeURIComponent('%' + q + '%');
     const [convsR, clisR] = await Promise.all([
       api('carlos_conversaciones', `?select=*&or=(telefono.ilike.${enc},nombre.ilike.${enc})&limit=100`),
-      api('clientes', `?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&or=(telefono.ilike.${enc},nombre.ilike.${enc},apellido_paterno.ilike.${enc})&limit=100`)
+      api('clientes', `?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,agente,derivado_a,created_at,updated_at&or=(telefono.ilike.${enc},nombre.ilike.${enc},apellido_paterno.ilike.${enc})&limit=100`)
     ]);
     // Fusionar sin duplicar
     const idsConv = new Set(allConvs.map(c => c.id));
@@ -1289,8 +1340,39 @@ async function buscarRemoto(q) {
     toast('Error buscando: ' + e.message);
   } finally {
     buscandoRemoto = false;
+    renderAgenteSwitch();
     renderInboxList();
   }
+}
+
+function renderAgenteSwitch() {
+  const cliMap = {};
+  allCli.forEach(c => { cliMap[c.telefono] = c; });
+  const counts = { '': allConvs.length, carlos: 0, sofia: 0 };
+  allConvs.forEach(cv => {
+    const a = agenteDeConv(cv, cliMap);
+    if (counts[a] !== undefined) counts[a]++;
+  });
+  const el = document.getElementById('agente-switch');
+  if (!el) return;
+  el.innerHTML = AGENTES.map(a => `
+    <div class="agente-btn ${a.cls} ${a.id===agenteFiltro?'active':''}" onclick="setAgenteFiltro('${a.id}')">
+      ${esc(a.label)}
+      <span class="agente-btn-count">${counts[a.id]||0}</span>
+    </div>
+  `).join('');
+}
+
+function setAgenteFiltro(v) {
+  agenteFiltro = v;
+  // Al cambiar de agente se vuelve a Recientes: las carpetas del agente
+  // anterior pueden estar vacías para el nuevo y quedarías viendo una lista
+  // en blanco sin saber por qué.
+  convTab = 'recientes';
+  etapaFiltro = '';
+  renderAgenteSwitch();
+  renderFolderTabs(convsVisibles());
+  renderInboxList();
 }
 
 function setConvTab(tabId) {
@@ -1363,9 +1445,13 @@ function renderInboxList() {
   const cliMap = {};
   allCli.forEach(c => { cliMap[c.telefono] = c; });
 
+  // Filtro de agente PRIMERO: es el eje primario. Carpeta, etapa y búsqueda
+  // se cruzan después, siempre dentro del agente seleccionado.
+  const base = convsVisibles();
+
   let items;
   if (convTab === 'recientes') {
-    items = allConvs.filter(visibleEnRecientes);
+    items = base.filter(visibleEnRecientes);
     // Favoritos primero, luego por updated_at
     items.sort((a, b) => {
       const aFav = favoritosRecientes.has(a.id) ? 0 : 1;
@@ -1374,9 +1460,9 @@ function renderInboxList() {
       return new Date(b.updated_at) - new Date(a.updated_at);
     });
   } else if (convTab === 'todas') {
-    items = [...allConvs].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    items = [...base].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
   } else {
-    items = allConvs.filter(cv => (cv.carpeta||'activas') === convTab);
+    items = base.filter(cv => (cv.carpeta||'activas') === convTab);
   }
 
   if (etapaFiltro) items = items.filter(cv => (cv.etapa_actual||'') === etapaFiltro);
@@ -1466,7 +1552,7 @@ async function loadInbox() {
   try {
     const [convs, clis, tps] = await Promise.all([
       api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=5000'),
-      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,created_at,updated_at&order=created_at.desc&limit=5000'),
+      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,agente,derivado_a,created_at,updated_at&order=created_at.desc&limit=5000'),
       api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
     ]);
     allConvs = convs;
@@ -1479,7 +1565,8 @@ async function loadInbox() {
 
     await cargarTelefonosConDoc();
 
-    renderFolderTabs(convs);
+    renderAgenteSwitch();
+    renderFolderTabs(convsVisibles());
     renderInboxList();
     updateTPBadge(tps.length);
     setRefTime();
@@ -1639,7 +1726,7 @@ async function moverConvRight(convId, carpeta) {
     toast('✓ Movida a: '+carpeta.replace(/_/g,' '));
     const cv = allConvs.find(c=>c.id===convId);
     if (cv) cv.carpeta = carpeta;
-    renderFolderTabs(allConvs);
+    renderFolderTabs(convsVisibles());
     renderInboxList();
     if (cv) {
       const cli = allCli.find(c=>c.telefono===cv.telefono)||null;
