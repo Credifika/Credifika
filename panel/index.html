@@ -1182,6 +1182,28 @@ async function api(table, qs = '') {
   return r.json();
 }
 
+// ── PAGINACIÓN ───────────────────────────────────────────────────────
+// Supabase REST corta en 1000 filas por respuesta y `limit=5000` NO lo supera:
+// devuelve 1000 y no avisa. Con ~1750 conversaciones eso significaba que 750
+// simplemente no existían para el panel — aparecían al buscarlas por teléfono
+// pero nunca en Recientes, porque la lista se cortaba antes de llegar a ellas.
+// Esta función pide por páginas hasta traerlo todo.
+const PAGINA = 1000;
+async function apiTodo(table, qs = '') {
+  const filas = [];
+  let offset = 0;
+  for (;;) {
+    const sep = qs.includes('?') ? '&' : '?';
+    const lote = await api(table, `${qs}${sep}limit=${PAGINA}&offset=${offset}`);
+    if (!Array.isArray(lote) || lote.length === 0) break;
+    filas.push(...lote);
+    if (lote.length < PAGINA) break;   // última página
+    offset += PAGINA;
+    if (offset > 50000) break;          // tope de seguridad: nunca bucle infinito
+  }
+  return filas;
+}
+
 async function patch(table, filter, body) {
   const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, {
     method: 'PATCH',
@@ -1551,9 +1573,9 @@ function renderInboxList() {
 async function loadInbox() {
   try {
     const [convs, clis, tps] = await Promise.all([
-      api('carlos_conversaciones','?select=*&order=updated_at.desc&limit=5000'),
-      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,agente,derivado_a,created_at,updated_at&order=created_at.desc&limit=5000'),
-      api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
+      apiTodo('carlos_conversaciones','?select=*&order=updated_at.desc'),
+      apiTodo('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado,zona,nss,contrasena_portal,monto_estimado,monto_aprobado,curp,notas,origen,agente,derivado_a,created_at,updated_at&order=created_at.desc'),
+      apiTodo('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
     ]);
     allConvs = convs;
     allCli = clis;
@@ -1776,8 +1798,8 @@ function copyCmd() {
 async function loadDash() {
   try {
     const [clis, tps] = await Promise.all([
-      api('clientes','?select=id,estado,etapa,created_at,telefono,nombre,apellido_paterno,apellido_materno,origen,zona&order=created_at.desc'),
-      api('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
+      apiTodo('clientes','?select=id,estado,etapa,created_at,telefono,nombre,apellido_paterno,apellido_materno,origen,zona&order=created_at.desc'),
+      apiTodo('carlos_touchpoints','?select=id,estado&estado=eq.pendiente')
     ]);
     allCli = clis;
     setText('k-total', clis.length);
@@ -1848,7 +1870,7 @@ function renderDashTable(clis) {
 // ── CLIENTES ──────────────────────────────────────────────────────────────────
 async function loadCli() {
   try {
-    allCli = await api('clientes','?select=*&order=created_at.desc');
+    allCli = await apiTodo('clientes','?select=*&order=created_at.desc');
     document.getElementById('cli-sub').textContent = `${allCli.length} clientes en total`;
     filterCli();
     setRefTime();
@@ -1895,8 +1917,8 @@ function goToConvByTel(tel) {
 async function loadTP() {
   try {
     const [tps, clis] = await Promise.all([
-      api('carlos_touchpoints','?select=*&order=created_at.desc'),
-      api('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado')
+      apiTodo('carlos_touchpoints','?select=*&order=created_at.desc'),
+      apiTodo('clientes','?select=id,telefono,nombre,apellido_paterno,apellido_materno,etapa,estado')
     ]);
     const pend = tps.filter(t=>t.estado==='pendiente');
     document.getElementById('tp-sub').textContent=`${pend.length} pendientes · ${tps.length} total`;
